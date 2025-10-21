@@ -18,8 +18,33 @@ import {
   Heart,
   AlertTriangle
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const Profile = () => {
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao sair",
+        description: error.message
+      });
+    } else {
+      toast({
+        title: "Logout realizado",
+        description: "Até logo!"
+      });
+      navigate("/auth");
+    }
+  };
+
   const patientData = {
     name: "Maria Silva Santos",
     birthDate: "15/03/1985",
@@ -64,7 +89,7 @@ export const Profile = () => {
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label>Nome Completo</Label>
-                <Input value={patientData.name} readOnly />
+                <Input value={user?.user_metadata?.full_name || patientData.name} readOnly />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -85,7 +110,7 @@ export const Profile = () => {
 
               <div className="space-y-2">
                 <Label>E-mail</Label>
-                <Input value={patientData.email} />
+                <Input value={user?.email || patientData.email} readOnly />
               </div>
 
               <div className="space-y-2">
@@ -268,7 +293,11 @@ export const Profile = () => {
             <Button variant="outline" className="w-full justify-start">
               Configurar Autenticação de 2 Fatores
             </Button>
-            <Button variant="destructive" className="w-full justify-start">
+            <Button 
+              variant="destructive" 
+              className="w-full justify-start"
+              onClick={handleLogout}
+            >
               Sair da Conta
             </Button>
           </CardContent>

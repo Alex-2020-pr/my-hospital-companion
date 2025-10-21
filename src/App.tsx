@@ -9,6 +9,8 @@ import { Exams } from "./pages/Exams";
 import { Documents } from "./pages/Documents";
 import { Communication } from "./pages/Communication";
 import { Profile } from "./pages/Profile";
+import { Auth } from "./pages/Auth";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,12 +22,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/consultas" element={<Appointments />} />
-          <Route path="/exames" element={<Exams />} />
-          <Route path="/documentos" element={<Documents />} />
-          <Route path="/contato" element={<Communication />} />
-          <Route path="/perfil" element={<Profile />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/consultas" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
+          <Route path="/exames" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
+          <Route path="/documentos" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
+          <Route path="/contato" element={<ProtectedRoute><Communication /></ProtectedRoute>} />
+          <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
