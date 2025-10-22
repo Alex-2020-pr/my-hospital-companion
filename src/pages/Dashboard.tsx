@@ -14,9 +14,32 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/medical-hero.jpg";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 
 export const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.full_name) {
+        setUserName(data.full_name.split(' ')[0]);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const upcomingAppointments = [
     {
@@ -61,8 +84,8 @@ export const Dashboard = () => {
             <img src={heroImage} alt="Medical background" className="w-full h-full object-cover" />
           </div>
           <div className="relative z-10">
-            <h1 className="text-2xl font-bold mb-2">Olá, Maria!</h1>
-            <p className="opacity-90">Bem-vinda ao seu portal de saúde</p>
+            <h1 className="text-2xl font-bold mb-2">Olá, {userName || 'Usuário'}!</h1>
+            <p className="opacity-90">Bem-vindo ao seu portal de saúde</p>
           </div>
         </div>
 
