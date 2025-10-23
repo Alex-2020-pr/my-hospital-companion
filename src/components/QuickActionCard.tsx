@@ -19,7 +19,7 @@ export const QuickActionCard = ({
 }: QuickActionCardProps) => {
   const variantStyles = {
     default: "hover:bg-primary/5 border-primary/20",
-    accent: "hover:bg-accent/5 border-accent/20 text-accent-foreground",
+    accent: "hover:bg-accent/5 border-accent/20",
     warning: "hover:bg-destructive/5 border-destructive/20 text-destructive"
   };
 
