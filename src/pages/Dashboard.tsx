@@ -26,16 +26,32 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!user) return;
+      if (!user) {
+        console.log('Dashboard: user não está disponível ainda');
+        return;
+      }
       
-      const { data } = await supabase
+      console.log('Dashboard: Buscando perfil para user.id:', user.id);
+      
+      const { data, error } = await supabase
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
         .maybeSingle();
       
+      console.log('Dashboard: Resultado da query:', { data, error });
+      
+      if (error) {
+        console.error('Dashboard: Erro ao buscar perfil:', error);
+        return;
+      }
+      
       if (data?.full_name) {
-        setUserName(data.full_name.split(' ')[0]);
+        const firstName = data.full_name.split(' ')[0];
+        console.log('Dashboard: Nome do usuário encontrado:', firstName);
+        setUserName(firstName);
+      } else {
+        console.log('Dashboard: full_name não encontrado nos dados');
       }
     };
 
