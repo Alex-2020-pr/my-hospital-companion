@@ -63,17 +63,46 @@ export const VitalSigns = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validação dos limites médicos
+    const systolic = formData.blood_pressure_systolic ? parseInt(formData.blood_pressure_systolic) : null;
+    const diastolic = formData.blood_pressure_diastolic ? parseInt(formData.blood_pressure_diastolic) : null;
+    const heartRate = formData.heart_rate ? parseInt(formData.heart_rate) : null;
+    const glucose = formData.glucose ? parseFloat(formData.glucose) : null;
+    const weight = formData.weight ? parseFloat(formData.weight) : null;
+
+    if (systolic && (systolic < 70 || systolic > 250)) {
+      toast.error("Pressão sistólica deve estar entre 70 e 250 mmHg");
+      return;
+    }
+    if (diastolic && (diastolic < 40 || diastolic > 150)) {
+      toast.error("Pressão diastólica deve estar entre 40 e 150 mmHg");
+      return;
+    }
+    if (heartRate && (heartRate < 40 || heartRate > 200)) {
+      toast.error("Frequência cardíaca deve estar entre 40 e 200 bpm");
+      return;
+    }
+    if (glucose && (glucose < 40 || glucose > 600)) {
+      toast.error("Glicemia deve estar entre 40 e 600 mg/dL");
+      return;
+    }
+    if (weight && (weight < 20 || weight > 300)) {
+      toast.error("Peso deve estar entre 20 e 300 kg");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase
       .from('vital_signs' as any)
       .insert({
         user_id: user?.id,
-        blood_pressure_systolic: formData.blood_pressure_systolic ? parseInt(formData.blood_pressure_systolic) : null,
-        blood_pressure_diastolic: formData.blood_pressure_diastolic ? parseInt(formData.blood_pressure_diastolic) : null,
-        heart_rate: formData.heart_rate ? parseInt(formData.heart_rate) : null,
-        glucose: formData.glucose ? parseFloat(formData.glucose) : null,
-        weight: formData.weight ? parseFloat(formData.weight) : null,
+        blood_pressure_systolic: systolic,
+        blood_pressure_diastolic: diastolic,
+        heart_rate: heartRate,
+        glucose: glucose,
+        weight: weight,
       });
 
     setLoading(false);
@@ -132,54 +161,64 @@ export const VitalSigns = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="systolic">Pressão Sistólica</Label>
+                    <Label htmlFor="systolic">Pressão Sistólica (70-250 mmHg)</Label>
                     <Input
                       id="systolic"
                       type="number"
                       placeholder="119"
+                      min="70"
+                      max="250"
                       value={formData.blood_pressure_systolic}
                       onChange={(e) => setFormData({ ...formData, blood_pressure_systolic: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="diastolic">Pressão Diastólica</Label>
+                    <Label htmlFor="diastolic">Pressão Diastólica (40-150 mmHg)</Label>
                     <Input
                       id="diastolic"
                       type="number"
                       placeholder="78"
+                      min="40"
+                      max="150"
                       value={formData.blood_pressure_diastolic}
                       onChange={(e) => setFormData({ ...formData, blood_pressure_diastolic: e.target.value })}
                     />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="heart_rate">Frequência Cardíaca (bpm)</Label>
+                  <Label htmlFor="heart_rate">Frequência Cardíaca (40-200 bpm)</Label>
                   <Input
                     id="heart_rate"
                     type="number"
                     placeholder="71"
+                    min="40"
+                    max="200"
                     value={formData.heart_rate}
                     onChange={(e) => setFormData({ ...formData, heart_rate: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="glucose">Glicemia (mg/dL)</Label>
+                  <Label htmlFor="glucose">Glicemia (40-600 mg/dL)</Label>
                   <Input
                     id="glucose"
                     type="number"
                     step="0.1"
                     placeholder="97"
+                    min="40"
+                    max="600"
                     value={formData.glucose}
                     onChange={(e) => setFormData({ ...formData, glucose: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Label htmlFor="weight">Peso (20-300 kg)</Label>
                   <Input
                     id="weight"
                     type="number"
                     step="0.1"
                     placeholder="74.5"
+                    min="20"
+                    max="300"
                     value={formData.weight}
                     onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                   />
@@ -321,6 +360,64 @@ export const VitalSigns = () => {
                       stroke="hsl(var(--accent))" 
                       strokeWidth={2}
                       name="BPM"
+                      dot={{ fill: 'hsl(var(--accent))' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-4">Glicemia</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="glicemia" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={2}
+                      name="Glicemia (mg/dL)"
+                      dot={{ fill: 'hsl(var(--primary))' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-4">Peso</h3>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))', 
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="peso" 
+                      stroke="hsl(var(--accent))" 
+                      strokeWidth={2}
+                      name="Peso (kg)"
                       dot={{ fill: 'hsl(var(--accent))' }}
                     />
                   </LineChart>
