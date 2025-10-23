@@ -27,15 +27,16 @@ export const AdminSetup = () => {
 
   const checkIfSetupNeeded = async () => {
     try {
-      // Verifica se já existe algum super admin
-      const { count, error } = await supabase
-        .from('user_roles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'super_admin');
+      // Verifica na tabela system_config se o primeiro admin já foi criado
+      const { data, error } = await supabase
+        .from('system_config')
+        .select('first_admin_created')
+        .eq('id', 1)
+        .single();
 
       if (error) throw error;
 
-      if (count && count > 0) {
+      if (data?.first_admin_created) {
         toast({
           title: "Setup já realizado",
           description: "Já existe um administrador no sistema. Faça login normalmente.",

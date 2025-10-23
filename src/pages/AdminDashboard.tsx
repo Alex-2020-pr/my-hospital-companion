@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -84,6 +85,17 @@ export const AdminDashboard = () => {
   return (
     <Layout title="Dashboard Administrativo">
       <div className="p-4 space-y-6">
+        <div className="flex gap-4 mb-6">
+          <Button onClick={() => window.location.href = '/admin/organizations'} variant="outline">
+            <Building2 className="mr-2 h-4 w-4" />
+            Gerenciar Organizações
+          </Button>
+          <Button onClick={() => window.location.href = '/admin/partners'} variant="outline">
+            <Activity className="mr-2 h-4 w-4" />
+            Gerenciar Parceiros
+          </Button>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
