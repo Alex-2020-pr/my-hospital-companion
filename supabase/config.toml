@@ -1,1 +1,13 @@
 project_id = "jfrpzfzofhijgycpdfcj"
+
+[functions.erp-sync-medications]
+verify_jwt = false
+
+[functions.erp-sync-appointments]
+verify_jwt = false
+
+[functions.erp-sync-exams]
+verify_jwt = false
+
+[functions.erp-sync-documents]
+verify_jwt = false

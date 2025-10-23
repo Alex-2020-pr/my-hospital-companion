@@ -173,6 +173,36 @@ export type Database = {
           },
         ]
       }
+      integration_partners: {
+        Row: {
+          api_key: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medication_schedules: {
         Row: {
           created_at: string
@@ -293,6 +323,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_consents: {
+        Row: {
+          consent_date: string | null
+          consent_given: boolean
+          consent_text: string
+          created_at: string
+          id: string
+          partner_id: string
+          revoked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_text: string
+          created_at?: string
+          id?: string
+          partner_id: string
+          revoked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consent_date?: string | null
+          consent_given?: boolean
+          consent_text?: string
+          created_at?: string
+          id?: string
+          partner_id?: string
+          revoked_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_consents_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "integration_partners"
             referencedColumns: ["id"]
           },
         ]
