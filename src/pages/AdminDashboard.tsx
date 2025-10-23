@@ -71,10 +71,15 @@ export const AdminDashboard = () => {
     }
   }, [isSuperAdmin]);
 
-  if (roleLoading) {
+  if (roleLoading || loading) {
     return (
-      <Layout title="Dashboard">
-        <div className="p-4">Carregando...</div>
+      <Layout title="Dashboard Administrativo">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Carregando informações...</p>
+          </div>
+        </div>
       </Layout>
     );
   }
