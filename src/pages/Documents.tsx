@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Download, Search, FileText, Receipt, Shield, Pill } from "lucide-react";
 import { useState } from "react";
+import { DocumentUploadDialog } from "@/components/DocumentUploadDialog";
 import { DocumentUpload } from "@/components/DocumentUpload";
 
 export const Documents = () => {
@@ -224,6 +225,19 @@ export const Documents = () => {
                 </p>
               </div>
               <DocumentUpload />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Botão para anexar documento */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-4">
+            <div className="text-center space-y-3">
+              <h3 className="font-medium text-primary">Anexar Documento Pessoal</h3>
+              <p className="text-sm text-muted-foreground">
+                Anexe receitas de consultas externas ou outros documentos médicos
+              </p>
+              <DocumentUploadDialog />
             </div>
           </CardContent>
         </Card>
