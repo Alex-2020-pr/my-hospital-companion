@@ -5,9 +5,8 @@ import { cn } from "@/lib/utils";
 const navigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/' },
   { id: 'appointments', label: 'Consultas', icon: Calendar, path: '/consultas' },
-  { id: 'medications', label: 'Medicamentos', icon: Pill, path: '/medicamentos' },
-  { id: 'telemedicine', label: 'Telemedicina', icon: Video, path: '/telemedicina' },
-  { id: 'integrations', label: 'Integrações', icon: Shield, path: '/integracoes' },
+  { id: 'exams', label: 'Exames', icon: Stethoscope, path: '/exames' },
+  { id: 'documents', label: 'Documentos', icon: FileText, path: '/documentos' },
   { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
 ];
 

@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { 
   User, 
   Shield,
-  Edit
+  Edit,
+  Link as LinkIcon
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -210,6 +211,28 @@ export const Profile = () => {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Integrações */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-base">
+              <LinkIcon className="h-5 w-5 mr-2 text-primary" />
+              Integrações
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground mb-3">
+              Gerencie suas autorizações para compartilhamento de dados de saúde
+            </p>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/integracoes')}
+            >
+              Gerenciar Integrações LGPD
+            </Button>
           </CardContent>
         </Card>
 
