@@ -10,7 +10,8 @@ import {
   Clock, 
   AlertCircle,
   CheckCircle,
-  Bell
+  Bell,
+  Activity
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/medical-hero.jpg";
@@ -31,7 +32,7 @@ export const Dashboard = () => {
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (data?.full_name) {
         setUserName(data.full_name.split(' ')[0]);
@@ -107,16 +108,16 @@ export const Dashboard = () => {
               variant="accent"
             />
             <QuickActionCard
+              title="Sinais Vitais"
+              description="Monitore sua saúde"
+              icon={Activity}
+              onClick={() => navigate('/sinais-vitais')}
+            />
+            <QuickActionCard
               title="Documentos"
               description="Receitas e atestados"
               icon={FileText}
               onClick={() => navigate('/documentos')}
-            />
-            <QuickActionCard
-              title="Falar Conosco"
-              description="Suporte e dúvidas"
-              icon={MessageCircle}
-              onClick={() => navigate('/contato')}
             />
           </div>
         </div>
