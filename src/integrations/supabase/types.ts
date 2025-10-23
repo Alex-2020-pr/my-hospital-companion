@@ -460,6 +460,24 @@ export type Database = {
           },
         ]
       }
+      system_config: {
+        Row: {
+          created_at: string | null
+          first_admin_created: boolean | null
+          id: number
+        }
+        Insert: {
+          created_at?: string | null
+          first_admin_created?: boolean | null
+          id?: number
+        }
+        Update: {
+          created_at?: string | null
+          first_admin_created?: boolean | null
+          id?: number
+        }
+        Relationships: []
+      }
       telemedicine_appointments: {
         Row: {
           appointment_date: string
@@ -624,7 +642,6 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
-      super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "super_admin" | "hospital_admin" | "patient"
