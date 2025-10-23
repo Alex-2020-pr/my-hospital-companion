@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Download, Search, FileText, Receipt, Shield, Pill } from "lucide-react";
 import { useState } from "react";
+import { DocumentUpload } from "@/components/DocumentUpload";
 
 export const Documents = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -211,6 +212,21 @@ export const Documents = () => {
             </p>
           </div>
         )}
+
+        {/* Upload de Documentos */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-4">
+            <div className="space-y-3">
+              <div className="text-center space-y-1">
+                <h3 className="font-medium text-primary">Anexar Documento</h3>
+                <p className="text-sm text-muted-foreground">
+                  Envie receitas, laudos ou exames externos
+                </p>
+              </div>
+              <DocumentUpload />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Botão para solicitar segunda via */}
         <Card className="border-primary/20 bg-primary/5">
