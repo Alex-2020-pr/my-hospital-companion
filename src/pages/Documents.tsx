@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Download, Search, FileText, Receipt, Shield, Pill } from "lucide-react";
+import { Download, Search, FileText, Receipt, Shield, Pill, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DocumentUploadDialog } from "@/components/DocumentUploadDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,6 +114,28 @@ export const Documents = () => {
     }
   };
 
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este documento?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast.success('Documento excluído com sucesso');
+      fetchDocuments();
+    } catch (error) {
+      console.error('Erro ao excluir documento:', error);
+      toast.error('Erro ao excluir documento');
+    }
+  };
+
   const filteredDocuments = documents.filter(doc =>
     doc.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -184,7 +206,7 @@ export const Documents = () => {
                     </div>
                   )}
 
-                  <div className="flex space-x-2 pt-2">
+                  <div className="flex gap-2 pt-2">
                     {document.file_url && (
                       <>
                         <Button 
@@ -212,6 +234,13 @@ export const Documents = () => {
                         </Button>
                       </>
                     )}
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDeleteDocument(document.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
 
                   {document.type === 'receita' && document.status === 'válida' && (

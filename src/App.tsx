@@ -16,6 +16,8 @@ import IntegrationConsents from "./pages/IntegrationConsents";
 import { Auth } from "./pages/Auth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import { ApiDocs } from "./pages/ApiDocs";
+import { TokenGenerator } from "./pages/TokenGenerator";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ const App = () => (
           <Route path="/medicamentos" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
           <Route path="/telemedicina" element={<ProtectedRoute><Telemedicine /></ProtectedRoute>} />
           <Route path="/integracoes" element={<ProtectedRoute><IntegrationConsents /></ProtectedRoute>} />
+          <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
+          <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
