@@ -43,6 +43,8 @@ export const VitalSigns = () => {
   const fetchVitalSigns = async () => {
     if (!user) return;
     
+    console.log('[VitalSigns] Fetching vital signs for user:', user.id);
+    
     const { data, error } = await supabase
       .from('vital_signs' as any)
       .select('*')
@@ -50,10 +52,12 @@ export const VitalSigns = () => {
       .order('measurement_date', { ascending: false });
     
     if (error) {
+      console.error('[VitalSigns] Error fetching vital signs:', error);
       toast.error("Erro ao carregar sinais vitais");
       return;
     }
     
+    console.log('[VitalSigns] Fetched vital signs:', data);
     setVitalSigns((data as unknown as VitalSign[]) || []);
   };
 
@@ -94,7 +98,9 @@ export const VitalSigns = () => {
 
     setLoading(true);
 
-    const { error } = await supabase
+    console.log('[VitalSigns] Inserting new vital sign for user:', user?.id);
+
+    const { data, error } = await supabase
       .from('vital_signs' as any)
       .insert({
         user_id: user?.id,
@@ -103,14 +109,19 @@ export const VitalSigns = () => {
         heart_rate: heartRate,
         glucose: glucose,
         weight: weight,
-      });
+      })
+      .select()
+      .single();
 
     setLoading(false);
 
     if (error) {
+      console.error('[VitalSigns] Error saving vital sign:', error);
       toast.error("Erro ao salvar medição");
       return;
     }
+
+    console.log('[VitalSigns] Successfully saved vital sign:', data);
 
     toast.success("Medição salva com sucesso!");
     setIsDialogOpen(false);
@@ -121,7 +132,9 @@ export const VitalSigns = () => {
       glucose: "",
       weight: ""
     });
-    fetchVitalSigns();
+    
+    // Atualizar a lista de sinais vitais com o novo dado
+    await fetchVitalSigns();
   };
 
   const latestVitalSign = vitalSigns[0];
