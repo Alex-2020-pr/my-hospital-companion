@@ -4,58 +4,56 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Download, Search, FileText, Receipt, Shield, Pill } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DocumentUploadDialog } from "@/components/DocumentUploadDialog";
-import { DocumentUpload } from "@/components/DocumentUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export const Documents = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-  const documents = [
-    {
-      id: 1,
-      name: "Receita Médica - Hipertensão",
-      type: "receita",
-      doctor: "Dr. João Silva",
-      date: "12/01/2024",
-      validUntil: "12/04/2024",
-      status: "válida"
-    },
-    {
-      id: 2,
-      name: "Atestado Médico",
-      type: "atestado",
-      doctor: "Dra. Ana Costa",
-      date: "08/01/2024",
-      days: "3 dias",
-      status: "válido"
-    },
-    {
-      id: 3,
-      name: "Laudo Cardiológico",
-      type: "laudo",
-      doctor: "Dr. Carlos Mendes",
-      date: "05/01/2024",
-      status: "disponível"
-    },
-    {
-      id: 4,
-      name: "Relatório de Consulta",
-      type: "relatorio",
-      doctor: "Dr. João Silva",
-      date: "03/01/2024",
-      status: "disponível"
-    },
-    {
-      id: 5,
-      name: "Receita Médica - Antibiótico",
-      type: "receita",
-      doctor: "Dra. Ana Costa",
-      date: "28/12/2023",
-      validUntil: "28/03/2024",
-      status: "expirada"
+  const fetchDocuments = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transformar os dados do Supabase para o formato esperado
+      const formattedDocs = data?.map(doc => ({
+        id: doc.id,
+        name: doc.title,
+        type: doc.type,
+        doctor: doc.description || 'Documento anexado pelo paciente',
+        date: new Date(doc.document_date).toLocaleDateString('pt-BR'),
+        uploadDate: new Date(doc.created_at).toLocaleDateString('pt-BR'),
+        status: doc.status,
+        file_url: doc.file_url,
+        file_size: doc.file_size
+      })) || [];
+
+      setDocuments(formattedDocs);
+    } catch (error) {
+      console.error('Erro ao buscar documentos:', error);
+      toast.error('Erro ao carregar documentos');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [user]);
 
   const getDocumentIcon = (type: string) => {
     switch (type) {
@@ -117,8 +115,8 @@ export const Documents = () => {
   };
 
   const filteredDocuments = documents.filter(doc =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.doctor?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     getDocumentTypeName(doc.type).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -166,7 +164,10 @@ export const Documents = () => {
                 <CardContent className="space-y-3">
                   <div className="text-sm text-muted-foreground">
                     <p><strong>Médico:</strong> {document.doctor}</p>
-                    <p><strong>Data:</strong> {document.date}</p>
+                    <p><strong>Data do Documento:</strong> {document.date}</p>
+                    {document.uploadDate && (
+                      <p><strong>Data de Envio:</strong> {document.uploadDate}</p>
+                    )}
                     {document.validUntil && (
                       <p><strong>Válida até:</strong> {document.validUntil}</p>
                     )}
@@ -184,14 +185,33 @@ export const Documents = () => {
                   )}
 
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Visualizar
-                    </Button>
-                    <Button variant="default" size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
+                    {document.file_url && (
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => window.open(document.file_url, '_blank')}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Visualizar
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = document.file_url;
+                            link.download = document.name;
+                            link.click();
+                          }}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </>
+                    )}
                   </div>
 
                   {document.type === 'receita' && document.status === 'válida' && (
@@ -205,7 +225,13 @@ export const Documents = () => {
           })}
         </div>
 
-        {filteredDocuments.length === 0 && (
+        {loading && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Carregando documentos...</p>
+          </div>
+        )}
+
+        {!loading && filteredDocuments.length === 0 && (
           <div className="text-center py-8">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
@@ -214,30 +240,15 @@ export const Documents = () => {
           </div>
         )}
 
-        {/* Upload de Documentos */}
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="pt-4">
-            <div className="space-y-3">
-              <div className="text-center space-y-1">
-                <h3 className="font-medium text-primary">Anexar Documento</h3>
-                <p className="text-sm text-muted-foreground">
-                  Envie receitas, laudos ou exames externos
-                </p>
-              </div>
-              <DocumentUpload />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Botão para anexar documento */}
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="pt-4">
             <div className="text-center space-y-3">
-              <h3 className="font-medium text-primary">Anexar Documento Pessoal</h3>
+              <h3 className="font-medium text-primary">Anexar Documento</h3>
               <p className="text-sm text-muted-foreground">
-                Anexe receitas de consultas externas ou outros documentos médicos
+                Anexe receitas de consultas externas ou outros documentos médicos (até 2MB)
               </p>
-              <DocumentUploadDialog />
+              <DocumentUploadDialog onUploadSuccess={fetchDocuments} />
             </div>
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ import { Upload, Camera, FileText, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import imageCompression from 'browser-image-compression';
 
 export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -19,12 +20,6 @@ export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: ()
   const handleFileUpload = async (file: File) => {
     if (!user) {
       toast.error("Você precisa estar logado para anexar documentos");
-      return;
-    }
-
-    // Validar tamanho do arquivo (1MB = 1048576 bytes)
-    if (file.size > 1048576) {
-      toast.error("O arquivo deve ter no máximo 1MB");
       return;
     }
 
@@ -43,13 +38,37 @@ export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: ()
     setUploading(true);
 
     try {
+      let fileToUpload = file;
+      
+      // Comprimir imagem se for maior que 2MB (2097152 bytes)
+      if (file.type.startsWith('image/') && file.size > 2097152) {
+        toast.info("Comprimindo imagem...");
+        const options = {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        
+        try {
+          fileToUpload = await imageCompression(file, options);
+          toast.success("Imagem comprimida com sucesso!");
+        } catch (compressionError) {
+          console.error('Erro ao comprimir imagem:', compressionError);
+          toast.error("Não foi possível comprimir a imagem. Tente com um arquivo menor.");
+          return;
+        }
+      } else if (file.size > 2097152) {
+        toast.error("O arquivo PDF deve ter no máximo 2MB");
+        return;
+      }
+
       // Upload do arquivo para o Storage
-      const fileExt = file.name.split('.').pop();
+      const fileExt = fileToUpload.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('patient-documents')
-        .upload(fileName, file);
+        .upload(fileName, fileToUpload);
 
       if (uploadError) throw uploadError;
 
@@ -65,10 +84,10 @@ export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: ()
           user_id: user.id,
           title: title.trim(),
           description: 'Documento anexado pelo paciente',
-          type: file.type === 'application/pdf' ? 'laudo' : 'receita',
+          type: fileToUpload.type === 'application/pdf' ? 'laudo' : 'receita',
           document_date: new Date().toISOString().split('T')[0],
           file_url: publicUrl,
-          file_size: file.size,
+          file_size: fileToUpload.size,
           status: 'available'
         });
 
@@ -172,7 +191,7 @@ export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: ()
           <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
             <p className="font-medium mb-1">Informações importantes:</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Tamanho máximo: 1MB</li>
+              <li>Tamanho máximo: 2MB (imagens maiores serão comprimidas)</li>
               <li>Formatos aceitos: JPG, PNG, PDF</li>
               <li>A câmera captura apenas imagens</li>
             </ul>
