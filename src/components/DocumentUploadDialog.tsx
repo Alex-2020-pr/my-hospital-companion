@@ -35,6 +35,21 @@ export const DocumentUploadDialog = ({ onUploadSuccess }: { onUploadSuccess?: ()
       return;
     }
 
+    // Check storage limit
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('storage_used_bytes, storage_limit_bytes')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      const newSize = profile.storage_used_bytes + file.size;
+      if (newSize > profile.storage_limit_bytes) {
+        toast.error('Limite de armazenamento excedido. Entre em contato para aumentar seu espaço.');
+        return;
+      }
+    }
+
     setUploading(true);
 
     try {

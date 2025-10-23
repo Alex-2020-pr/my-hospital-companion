@@ -18,6 +18,10 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { ApiDocs } from "./pages/ApiDocs";
 import { TokenGenerator } from "./pages/TokenGenerator";
+import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminOrganizations } from "./pages/AdminOrganizations";
+import { AdminPartners } from "./pages/AdminPartners";
+import { HospitalPanel } from "./pages/HospitalPanel";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +45,10 @@ const App = () => (
           <Route path="/integracoes" element={<ProtectedRoute><IntegrationConsents /></ProtectedRoute>} />
           <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
           <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />
+          <Route path="/admin/partners" element={<ProtectedRoute><AdminPartners /></ProtectedRoute>} />
+          <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

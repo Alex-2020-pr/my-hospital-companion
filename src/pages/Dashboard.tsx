@@ -1,5 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { QuickActionCard } from "@/components/QuickActionCard";
+import { StorageAlert } from "@/components/StorageAlert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -97,6 +98,8 @@ export const Dashboard = () => {
   return (
     <Layout>
       <div className="p-4 space-y-6">
+        <StorageAlert />
+        
         {/* Header com saudação */}
         <div className="relative bg-primary text-primary-foreground rounded-lg p-6 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
