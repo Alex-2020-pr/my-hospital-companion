@@ -70,6 +70,7 @@ export const Profile = () => {
         full_name: editedProfile.full_name,
         phone: editedProfile.phone,
         birth_date: editedProfile.birth_date,
+        cpf: editedProfile.cpf,
       })
       .eq('id', user.id);
 
@@ -156,7 +157,11 @@ export const Profile = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>CPF</Label>
-                  <Input value={profile?.cpf || ''} readOnly />
+                  <Input 
+                    value={isEditing ? (editedProfile?.cpf || '') : (profile?.cpf || '')} 
+                    readOnly={!isEditing}
+                    onChange={(e) => handleInputChange('cpf', e.target.value)}
+                  />
                 </div>
               </div>
 
