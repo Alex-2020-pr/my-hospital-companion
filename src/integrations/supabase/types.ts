@@ -624,6 +624,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "super_admin" | "hospital_admin" | "patient"
