@@ -22,6 +22,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminOrganizations } from "./pages/AdminOrganizations";
 import { AdminPartners } from "./pages/AdminPartners";
 import { HospitalPanel } from "./pages/HospitalPanel";
+import { AdminSetup } from "./pages/AdminSetup";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin/setup" element={<AdminSetup />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/consultas" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
           <Route path="/exames" element={<ProtectedRoute><Exams /></ProtectedRoute>} />

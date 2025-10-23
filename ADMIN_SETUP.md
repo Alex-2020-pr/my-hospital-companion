@@ -1,9 +1,29 @@
 # Como Configurar o Primeiro Usuário Admin
 
-## Passo 1: Crie sua conta
+## Método Simples (Recomendado)
+
+### Acesse a página de Setup Inicial
+1. Acesse a URL: `/admin/setup`
+2. Preencha o formulário com seus dados:
+   - Nome completo
+   - Email
+   - Senha (mínimo 6 caracteres)
+   - Confirme a senha
+3. Clique em "Criar Conta de Administrador"
+4. Após a criação, faça login em `/auth` com as credenciais criadas
+
+**Importante**: Esta página só funciona para criar o PRIMEIRO administrador. Depois que o primeiro super admin for criado, a página não permitirá mais cadastros e você deverá fazer login normalmente.
+
+---
+
+## Método Manual (Alternativo)
+
+Caso prefira criar manualmente pelo banco de dados:
+
+### Passo 1: Crie sua conta
 Acesse `/auth` e crie uma conta normalmente no aplicativo.
 
-## Passo 2: Adicione a role de Super Admin
+### Passo 2: Adicione a role de Super Admin
 Depois de criar sua conta, você precisa adicionar a role de super admin no banco de dados.
 
 ### Opção 1: Via Backend Lovable Cloud
