@@ -82,41 +82,65 @@ export const AdminSetup = () => {
     setSubmitting(true);
 
     try {
-      // Cria a conta
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      // Primeiro tenta fazer login com as credenciais fornecidas
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName
-          }
-        }
+        password: formData.password
       });
 
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error('Usuário não foi criado');
+      let userId: string;
+
+      if (signInError) {
+        // Se o login falhar, tenta criar uma nova conta
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.fullName
+            }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error('Usuário não foi criado');
+        
+        userId = authData.user.id;
+      } else {
+        // Se o login foi bem sucedido, usa o ID do usuário existente
+        userId = signInData.user.id;
+      }
 
       // Adiciona a role de super_admin
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
-          user_id: authData.user.id,
+          user_id: userId,
           role: 'super_admin'
         });
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        // Se já existe a role, ignora o erro
+        if (!roleError.message.includes('duplicate') && !roleError.message.includes('unique')) {
+          throw roleError;
+        }
+      }
 
       toast({
         title: "Sucesso!",
-        description: "Conta de administrador criada com sucesso. Faça login para continuar.",
+        description: "Conta de administrador configurada com sucesso!",
       });
 
-      navigate('/auth');
+      // Aguarda um pouco e redireciona para a página admin
+      setTimeout(() => {
+        navigate('/admin');
+      }, 1500);
+      
     } catch (error: any) {
       console.error('Error during setup:', error);
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível criar a conta de administrador.",
+        description: error.message || "Não foi possível configurar a conta de administrador.",
         variant: "destructive"
       });
     } finally {
