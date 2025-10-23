@@ -1,13 +1,13 @@
-import { Home, Calendar, FileText, MessageCircle, User, Stethoscope } from "lucide-react";
+import { Home, Calendar, FileText, MessageCircle, User, Stethoscope, Pill, Video } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/' },
   { id: 'appointments', label: 'Consultas', icon: Calendar, path: '/consultas' },
+  { id: 'medications', label: 'Medicamentos', icon: Pill, path: '/medicamentos' },
+  { id: 'telemedicine', label: 'Telemedicina', icon: Video, path: '/telemedicina' },
   { id: 'exams', label: 'Exames', icon: Stethoscope, path: '/exames' },
-  { id: 'documents', label: 'Documentos', icon: FileText, path: '/documentos' },
-  { id: 'communication', label: 'Contato', icon: MessageCircle, path: '/contato' },
   { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
 ];
 

@@ -10,6 +10,8 @@ import { Documents } from "./pages/Documents";
 import { Communication } from "./pages/Communication";
 import { Profile } from "./pages/Profile";
 import { VitalSigns } from "./pages/VitalSigns";
+import { Medications } from "./pages/Medications";
+import { Telemedicine } from "./pages/Telemedicine";
 import { Auth } from "./pages/Auth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/contato" element={<ProtectedRoute><Communication /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/sinais-vitais" element={<ProtectedRoute><VitalSigns /></ProtectedRoute>} />
+          <Route path="/medicamentos" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
+          <Route path="/telemedicina" element={<ProtectedRoute><Telemedicine /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

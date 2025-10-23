@@ -11,7 +11,9 @@ import {
   AlertCircle,
   CheckCircle,
   Bell,
-  Activity
+  Activity,
+  Pill,
+  Video
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/medical-hero.jpg";
@@ -117,17 +119,29 @@ export const Dashboard = () => {
               onClick={() => navigate('/consultas')}
             />
             <QuickActionCard
-              title="Ver Exames"
-              description="Resultados disponíveis"
-              icon={Stethoscope}
-              onClick={() => navigate('/exames')}
+              title="Telemedicina"
+              description="Consulta online"
+              icon={Video}
+              onClick={() => navigate('/telemedicina')}
               variant="accent"
+            />
+            <QuickActionCard
+              title="Medicamentos"
+              description="Gerencie seus remédios"
+              icon={Pill}
+              onClick={() => navigate('/medicamentos')}
             />
             <QuickActionCard
               title="Sinais Vitais"
               description="Monitore sua saúde"
               icon={Activity}
               onClick={() => navigate('/sinais-vitais')}
+            />
+            <QuickActionCard
+              title="Ver Exames"
+              description="Resultados disponíveis"
+              icon={Stethoscope}
+              onClick={() => navigate('/exames')}
             />
             <QuickActionCard
               title="Documentos"
