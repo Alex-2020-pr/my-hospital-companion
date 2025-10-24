@@ -406,6 +406,7 @@ export type Database = {
       organizations: {
         Row: {
           address: string | null
+          cnpj: string | null
           contact_email: string | null
           contact_phone: string | null
           created_at: string
@@ -414,9 +415,11 @@ export type Database = {
           name: string
           type: string
           updated_at: string
+          website: string | null
         }
         Insert: {
           address?: string | null
+          cnpj?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -425,9 +428,11 @@ export type Database = {
           name: string
           type: string
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address?: string | null
+          cnpj?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
@@ -436,6 +441,7 @@ export type Database = {
           name?: string
           type?: string
           updated_at?: string
+          website?: string | null
         }
         Relationships: []
       }
