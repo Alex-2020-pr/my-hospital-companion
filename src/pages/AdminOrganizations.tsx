@@ -185,15 +185,18 @@ export const AdminOrganizations = () => {
     setDialogOpen(true);
   };
 
+  // Aguarda o carregamento das roles antes de qualquer verificação
   if (roleLoading) {
     return (
       <Layout title="Organizações">
-        <div className="p-4">Carregando...</div>
+        <div className="p-4">Carregando permissões...</div>
       </Layout>
     );
   }
 
-  if (!isSuperAdmin) {
+  // Só redireciona se não for super admin E já terminou de carregar
+  if (!roleLoading && !isSuperAdmin) {
+    console.log('AdminOrganizations: redirecionando - não é super admin');
     return <Navigate to="/" replace />;
   }
 
