@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Send, Mail } from "lucide-react";
+import { Users, Send, Mail, MessageSquare } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
@@ -22,6 +22,7 @@ interface Patient {
 }
 
 export const HospitalPanel = () => {
+  const navigate = useNavigate();
   const { isHospitalAdmin, roles, loading: roleLoading } = useUserRole();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,60 +131,87 @@ export const HospitalPanel = () => {
   return (
     <Layout title="Painel do Hospital">
       <div className="p-4 space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ações Rápidas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button
+                onClick={() => navigate('/hospital/messaging')}
+                variant="outline"
+                className="h-auto py-6 flex-col gap-2"
+              >
+                <MessageSquare className="h-8 w-8" />
+                <div className="text-center">
+                  <p className="font-semibold">Mensagens aos Pacientes</p>
+                  <p className="text-xs text-muted-foreground">Enviar alertas e comunicados</p>
+                </div>
+              </Button>
+              <Button
+                onClick={() => setMessageDialogOpen(true)}
+                variant="outline"
+                className="h-auto py-6 flex-col gap-2"
+              >
+                <Send className="h-8 w-8" />
+                <div className="text-center">
+                  <p className="font-semibold">Mensagem Individual</p>
+                  <p className="text-xs text-muted-foreground">Enviar para pacientes específicos</p>
+                </div>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold">Meus Pacientes</h2>
             <p className="text-muted-foreground">{patients.length} pacientes cadastrados</p>
           </div>
-          <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Send className="h-4 w-4 mr-2" />
-                Enviar Mensagem
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Enviar Mensagem aos Pacientes</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Pacientes Selecionados: {selectedPatients.length}</Label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2"
-                    onClick={selectAllPatients}
-                  >
-                    {selectedPatients.length === patients.length ? 'Desselecionar Todos' : 'Selecionar Todos'}
-                  </Button>
-                </div>
-                <div>
-                  <Label htmlFor="subject">Assunto</Label>
-                  <Input
-                    id="subject"
-                    value={messageData.subject}
-                    onChange={(e) => setMessageData({ ...messageData, subject: e.target.value })}
-                    placeholder="Ex: Campanha de Vacinação"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="message">Mensagem</Label>
-                  <Textarea
-                    id="message"
-                    value={messageData.message}
-                    onChange={(e) => setMessageData({ ...messageData, message: e.target.value })}
-                    placeholder="Digite sua mensagem..."
-                    rows={5}
-                  />
-                </div>
-                <Button onClick={handleSendMessage} className="w-full">
-                  Enviar para {selectedPatients.length} paciente(s)
+        </div>
+
+        <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Enviar Mensagem aos Pacientes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Pacientes Selecionados: {selectedPatients.length}</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-2"
+                  onClick={selectAllPatients}
+                >
+                  {selectedPatients.length === patients.length ? 'Desselecionar Todos' : 'Selecionar Todos'}
                 </Button>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div>
+                <Label htmlFor="subject">Assunto</Label>
+                <Input
+                  id="subject"
+                  value={messageData.subject}
+                  onChange={(e) => setMessageData({ ...messageData, subject: e.target.value })}
+                  placeholder="Ex: Campanha de Vacinação"
+                />
+              </div>
+              <div>
+                <Label htmlFor="message">Mensagem</Label>
+                <Textarea
+                  id="message"
+                  value={messageData.message}
+                  onChange={(e) => setMessageData({ ...messageData, message: e.target.value })}
+                  placeholder="Digite sua mensagem..."
+                  rows={5}
+                />
+              </div>
+              <Button onClick={handleSendMessage} className="w-full">
+                Enviar para {selectedPatients.length} paciente(s)
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {loading ? (
           <p>Carregando...</p>

@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Building2, Activity, FileText, HardDrive } from "lucide-react";
+import { Users, Building2, Activity, FileText, HardDrive, Shield } from "lucide-react";
 
 interface DashboardStats {
   totalUsers: number;
@@ -113,15 +113,30 @@ export const AdminDashboard = () => {
   return (
     <Layout title="Dashboard Administrativo">
       <div className="p-4 space-y-6">
-        <div className="flex gap-4 mb-6">
-          <Button onClick={() => navigate('/admin/organizations')} variant="outline">
-            <Building2 className="mr-2 h-4 w-4" />
-            Gerenciar Organizações
-          </Button>
-          <Button onClick={() => navigate('/admin/partners')} variant="outline">
-            <Activity className="mr-2 h-4 w-4" />
-            Gerenciar Parceiros
-          </Button>
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4">Gerenciamento</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <Button onClick={() => navigate('/admin/users')} variant="outline" className="h-auto py-4 flex-col">
+              <Shield className="h-6 w-6 mb-2" />
+              <span className="text-sm">Usuários</span>
+            </Button>
+            <Button onClick={() => navigate('/admin/organizations')} variant="outline" className="h-auto py-4 flex-col">
+              <Building2 className="h-6 w-6 mb-2" />
+              <span className="text-sm">Organizações</span>
+            </Button>
+            <Button onClick={() => navigate('/admin/partners')} variant="outline" className="h-auto py-4 flex-col">
+              <Activity className="h-6 w-6 mb-2" />
+              <span className="text-sm">Parceiros</span>
+            </Button>
+            <Button onClick={() => navigate('/api-docs')} variant="outline" className="h-auto py-4 flex-col">
+              <FileText className="h-6 w-6 mb-2" />
+              <span className="text-sm">API Docs</span>
+            </Button>
+            <Button onClick={() => navigate('/token-generator')} variant="outline" className="h-auto py-4 flex-col">
+              <FileText className="h-6 w-6 mb-2" />
+              <span className="text-sm">Tokens</span>
+            </Button>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

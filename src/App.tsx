@@ -21,7 +21,9 @@ import { TokenGenerator } from "./pages/TokenGenerator";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { AdminOrganizations } from "./pages/AdminOrganizations";
 import { AdminPartners } from "./pages/AdminPartners";
+import { AdminUsers } from "./pages/AdminUsers";
 import { HospitalPanel } from "./pages/HospitalPanel";
+import { HospitalMessaging } from "./pages/HospitalMessaging";
 import { AdminSetup } from "./pages/AdminSetup";
 
 const queryClient = new QueryClient();
@@ -48,9 +50,11 @@ const App = () => (
           <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
           <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />
           <Route path="/admin/partners" element={<ProtectedRoute><AdminPartners /></ProtectedRoute>} />
           <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
+          <Route path="/hospital/messaging" element={<ProtectedRoute><HospitalMessaging /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
