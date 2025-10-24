@@ -152,7 +152,7 @@ export const Appointments = () => {
                   <CardContent className="space-y-3">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {format(parseISO(appointment.appointment_date), "dd/MM/yyyy")}
+                      {appointment.appointment_date.split('-').reverse().join('/')}
                       <Clock className="h-4 w-4 ml-4 mr-2" />
                       {appointment.appointment_time.slice(0, 5)}
                     </div>
@@ -224,7 +224,7 @@ export const Appointments = () => {
                     
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {format(parseISO(appointment.appointment_date), "dd/MM/yyyy")}
+                      {appointment.appointment_date.split('-').reverse().join('/')}
                       <Clock className="h-4 w-4 ml-4 mr-2" />
                       {appointment.appointment_time.slice(0, 5)}
                     </div>
