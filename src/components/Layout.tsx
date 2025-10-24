@@ -1,10 +1,18 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Shield } from "lucide-react";
+import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface LayoutProps {
   children: ReactNode;
@@ -40,6 +48,44 @@ export const Layout = ({ children, title }: LayoutProps) => {
                 >
                   <Shield className="h-5 w-5" />
                 </Button>
+              )}
+              {isSuperAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-primary-foreground hover:bg-primary-foreground/10"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/admin/users')}>
+                      <Users className="mr-2 h-4 w-4" />
+                      <span>Usuários</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
+                      <Building2 className="mr-2 h-4 w-4" />
+                      <span>Organizações</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
+                      <Handshake className="mr-2 h-4 w-4" />
+                      <span>Parceiros</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/api-docs')}>
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>API Docs</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/token-generator')}>
+                      <Key className="mr-2 h-4 w-4" />
+                      <span>Gerar Tokens</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
