@@ -3,259 +3,429 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Key, Copy, CheckCircle, AlertCircle, Info } from "lucide-react";
-import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Key, Copy, CheckCircle, AlertCircle, Info, Plus, Trash2, XCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
+
+interface Organization {
+  id: string;
+  name: string;
+  type: string;
+}
+
+interface ApiToken {
+  id: string;
+  organization_id: string;
+  token: string;
+  name: string;
+  is_active: boolean;
+  expires_at: string | null;
+  last_used_at: string | null;
+  created_at: string;
+  revoked_at: string | null;
+  revoke_reason: string | null;
+  organizations: { name: string };
+}
 
 export const TokenGenerator = () => {
-  const [token, setToken] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [generating, setGenerating] = useState(false);
   const { user } = useAuth();
+  const { isSuperAdmin } = useUserRole();
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [tokens, setTokens] = useState<ApiToken[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<string>("");
+  const [tokenName, setTokenName] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<ApiToken | null>(null);
+  const [revokeReason, setRevokeReason] = useState("");
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      fetchOrganizations();
+      fetchTokens();
+    }
+  }, [isSuperAdmin]);
+
+  const fetchOrganizations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, type')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+      setOrganizations(data || []);
+    } catch (error) {
+      console.error('Error fetching organizations:', error);
+      toast.error('Erro ao carregar organizações');
+    }
+  };
+
+  const fetchTokens = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('organization_api_tokens')
+        .select('*, organizations(name)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTokens(data || []);
+    } catch (error) {
+      console.error('Error fetching tokens:', error);
+      toast.error('Erro ao carregar tokens');
+    }
+  };
 
   const generateToken = async () => {
-    if (!user) {
-      toast.error("Você precisa estar autenticado");
+    if (!selectedOrg || !tokenName.trim()) {
+      toast.error("Selecione uma organização e informe um nome");
       return;
     }
 
     setGenerating(true);
     try {
-      // Obter a sessão atual do usuário
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) throw error;
-      
-      if (session?.access_token) {
-        setToken(session.access_token);
-        toast.success("Token JWT gerado com sucesso!");
-      } else {
-        toast.error("Não foi possível obter o token");
-      }
+      // Generate token using database function
+      const { data: tokenData, error: tokenError } = await supabase
+        .rpc('generate_api_token');
+
+      if (tokenError) throw tokenError;
+
+      // Insert token into database
+      const { error: insertError } = await supabase
+        .from('organization_api_tokens')
+        .insert({
+          organization_id: selectedOrg,
+          token: tokenData,
+          name: tokenName,
+          created_by: user?.id
+        });
+
+      if (insertError) throw insertError;
+
+      toast.success("Token gerado com sucesso!");
+      setDialogOpen(false);
+      setTokenName("");
+      setSelectedOrg("");
+      fetchTokens();
     } catch (error) {
-      console.error('Erro ao gerar token:', error);
+      console.error('Error generating token:', error);
       toast.error("Erro ao gerar token");
     } finally {
       setGenerating(false);
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(token);
-    setCopied(true);
-    toast.success("Token copiado!");
-    setTimeout(() => setCopied(false), 2000);
+  const revokeToken = async () => {
+    if (!selectedToken || !revokeReason.trim()) {
+      toast.error("Informe o motivo da revogação");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('organization_api_tokens')
+        .update({
+          is_active: false,
+          revoked_at: new Date().toISOString(),
+          revoked_by: user?.id,
+          revoke_reason: revokeReason
+        })
+        .eq('id', selectedToken.id);
+
+      if (error) throw error;
+
+      toast.success("Token revogado com sucesso!");
+      setRevokeDialogOpen(false);
+      setSelectedToken(null);
+      setRevokeReason("");
+      fetchTokens();
+    } catch (error) {
+      console.error('Error revoking token:', error);
+      toast.error("Erro ao revogar token");
+    }
   };
 
-  const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmcnB6ZnpvZmhpamd5Y3BkZmNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwNzE4NDgsImV4cCI6MjA3NjY0Nzg0OH0.d91T0yASnL4g5KMxsxZu7B78-5kgyEMp_KQyQ1f6iAs";
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Token copiado!");
+  };
+
+  const getStatusBadge = (token: ApiToken) => {
+    if (!token.is_active) {
+      return <Badge variant="destructive">Revogado</Badge>;
+    }
+    if (token.expires_at && new Date(token.expires_at) < new Date()) {
+      return <Badge variant="secondary">Expirado</Badge>;
+    }
+    return <Badge variant="default" className="bg-green-600">Ativo</Badge>;
+  };
+
+  if (!isSuperAdmin) {
+    return (
+      <Layout title="Gerador de Tokens">
+        <div className="p-4">
+          <Card>
+            <CardContent className="pt-6">
+              <p className="text-center text-muted-foreground">
+                Você não tem permissão para acessar esta página.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
-    <Layout title="Gerador de Tokens">
+    <Layout title="Gerador de Tokens de API">
       <div className="p-4 space-y-6">
         {/* Header */}
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary rounded-lg">
-                <Key className="h-6 w-6 text-primary-foreground" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary rounded-lg">
+                  <Key className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <CardTitle>Tokens de API por Organização</CardTitle>
+                  <CardDescription>
+                    Gere e gerencie tokens de acesso para hospitais e clínicas
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle>Gerador de Tokens de Teste</CardTitle>
-                <CardDescription>
-                  Gere tokens JWT para testar as APIs de integração
-                </CardDescription>
-              </div>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Gerar Novo Token
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Gerar Token de API</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="organization">Organização *</Label>
+                      <Select value={selectedOrg} onValueChange={setSelectedOrg}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a organização" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name} ({org.type === 'hospital' ? 'Hospital' : 'Clínica'})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="tokenName">Nome do Token *</Label>
+                      <Input
+                        id="tokenName"
+                        placeholder="Ex: Produção, Teste, Desenvolvimento"
+                        value={tokenName}
+                        onChange={(e) => setTokenName(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Nome descritivo para identificar o token
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={generateToken} 
+                      disabled={generating || !selectedOrg || !tokenName.trim()}
+                      className="w-full"
+                    >
+                      {generating ? "Gerando..." : "Gerar Token"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Informações Importantes */}
+        {/* Informações */}
         <Card className="border-blue-200 bg-blue-50/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-blue-700">
               <Info className="h-5 w-5" />
-              Tipos de Tokens
+              Como Usar os Tokens
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h4 className="font-medium mb-2">1. Token JWT (Usuário Autenticado)</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Use este token para testar requisições autenticadas como se fosse o usuário logado.
-              </p>
-              <Badge variant="outline">Gerado abaixo</Badge>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">2. API Key (Integração ERP)</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Para integração com sistemas externos, você precisa de uma API Key cadastrada na tabela <code>integration_partners</code>.
-              </p>
-              <Badge variant="outline">Via Header X-API-Key</Badge>
-            </div>
-            <div>
-              <h4 className="font-medium mb-2">3. Anon Key (Requisições Públicas)</h4>
-              <p className="text-sm text-muted-foreground mb-2">
-                Chave pública para requisições não autenticadas.
-              </p>
-              <Badge variant="outline">Disponível abaixo</Badge>
+          <CardContent className="space-y-3">
+            <p className="text-sm">
+              Os tokens de API devem ser enviados no header <code className="bg-white px-1 py-0.5 rounded">X-API-Key</code> nas requisições às APIs de integração.
+            </p>
+            <div className="bg-white p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Exemplo de uso:</p>
+              <pre className="text-xs overflow-x-auto bg-muted p-2 rounded">
+{`curl -X POST https://jfrpzfzofhijgycpdfcj.supabase.co/functions/v1/erp-sync-appointments \\
+  -H "X-API-Key: org_seu_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{"user_cpf": "12345678900", "appointments": [...]}'`}
+              </pre>
             </div>
           </CardContent>
         </Card>
 
-        {/* Gerador de Token JWT */}
+        {/* Lista de Tokens */}
         <Card>
           <CardHeader>
-            <CardTitle>Token JWT (Usuário)</CardTitle>
+            <CardTitle>Tokens Cadastrados</CardTitle>
             <CardDescription>
-              Gere um token JWT baseado na sua sessão atual
+              Gerencie os tokens de acesso das organizações
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <Button 
-              onClick={generateToken} 
-              disabled={generating}
-              className="w-full"
-            >
-              {generating ? "Gerando..." : "Gerar Token JWT"}
-            </Button>
+          <CardContent>
+            {tokens.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum token cadastrado ainda
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {tokens.map((token) => (
+                  <Card key={token.id} className={!token.is_active ? 'opacity-60' : ''}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{token.name}</h4>
+                            {getStatusBadge(token)}
+                          </div>
+                          
+                          <div className="text-sm space-y-1">
+                            <p>
+                              <strong>Organização:</strong>{' '}
+                              {(token.organizations as any)?.name}
+                            </p>
+                            <p>
+                              <strong>Criado em:</strong>{' '}
+                              {new Date(token.created_at).toLocaleDateString('pt-BR')}
+                            </p>
+                            {token.last_used_at && (
+                              <p>
+                                <strong>Último uso:</strong>{' '}
+                                {new Date(token.last_used_at).toLocaleString('pt-BR')}
+                              </p>
+                            )}
+                            {token.revoked_at && (
+                              <>
+                                <p>
+                                  <strong>Revogado em:</strong>{' '}
+                                  {new Date(token.revoked_at).toLocaleString('pt-BR')}
+                                </p>
+                                {token.revoke_reason && (
+                                  <p>
+                                    <strong>Motivo:</strong>{' '}
+                                    <span className="text-destructive">{token.revoke_reason}</span>
+                                  </p>
+                                )}
+                              </>
+                            )}
+                          </div>
 
-            {token && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="text-sm font-medium">Token gerado com sucesso!</span>
-                </div>
+                          {token.is_active && (
+                            <div className="flex items-center gap-2">
+                              <Input
+                                value={token.token}
+                                readOnly
+                                className="font-mono text-xs flex-1"
+                              />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => copyToClipboard(token.token)}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
 
-                <div className="space-y-2">
-                  <Label>Seu Token JWT:</Label>
-                  <div className="relative">
-                    <Input
-                      value={token}
-                      readOnly
-                      className="font-mono text-xs pr-10"
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute right-1 top-1 h-7 w-7 p-0"
-                      onClick={copyToClipboard}
-                    >
-                      {copied ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="bg-muted p-4 rounded-lg space-y-2">
-                  <p className="text-sm font-medium">Como usar:</p>
-                  <pre className="text-xs overflow-x-auto">
-{`curl -X GET <URL> \\
-  -H "Authorization: Bearer ${token.substring(0, 30)}..."`}
-                  </pre>
-                </div>
-
-                <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
-                  <div className="text-sm text-yellow-800">
-                    <p className="font-medium">⚠️ Atenção:</p>
-                    <p>Este token expira após 1 hora. Gere um novo quando necessário.</p>
-                  </div>
-                </div>
+                        {token.is_active && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              setSelectedToken(token);
+                              setRevokeDialogOpen(true);
+                            }}
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Revogar
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Anon Key */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Anon Key (Chave Pública)</CardTitle>
-            <CardDescription>
-              Chave pública para requisições não autenticadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Anon Key:</Label>
-              <div className="relative">
-                <Input
-                  value={anonKey}
-                  readOnly
-                  className="font-mono text-xs pr-10"
+        {/* Dialog de Revogação */}
+        <Dialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-5 w-5" />
+                Revogar Token
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm">
+                Tem certeza que deseja revogar o token <strong>{selectedToken?.name}</strong>?
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Esta ação não pode ser desfeita. O token deixará de funcionar imediatamente.
+              </p>
+              <div>
+                <Label htmlFor="revokeReason">Motivo da Revogação *</Label>
+                <Textarea
+                  id="revokeReason"
+                  placeholder="Ex: Inadimplência, Solicitação do cliente, Segurança comprometida"
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                  rows={3}
                 />
+              </div>
+              <div className="flex gap-2">
                 <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute right-1 top-1 h-7 w-7 p-0"
+                  variant="outline"
                   onClick={() => {
-                    navigator.clipboard.writeText(anonKey);
-                    toast.success("Anon Key copiada!");
+                    setRevokeDialogOpen(false);
+                    setSelectedToken(null);
+                    setRevokeReason("");
                   }}
+                  className="flex-1"
                 >
-                  <Copy className="h-4 w-4" />
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={revokeToken}
+                  disabled={!revokeReason.trim()}
+                  className="flex-1"
+                >
+                  Revogar Token
                 </Button>
               </div>
             </div>
-
-            <div className="bg-muted p-4 rounded-lg space-y-2">
-              <p className="text-sm font-medium">Como usar:</p>
-              <pre className="text-xs overflow-x-auto">
-{`curl -X POST <URL> \\
-  -H "apikey: ${anonKey.substring(0, 30)}..." \\
-  -H "Content-Type: application/json"`}
-              </pre>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* API Key para ERP */}
-        <Card className="border-orange-200 bg-orange-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-orange-700">
-              <AlertCircle className="h-5 w-5" />
-              API Key para Integração ERP
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm">
-              Para integrar com sistemas ERP externos, você precisa cadastrar um parceiro na tabela <code className="bg-white px-1 py-0.5 rounded">integration_partners</code> com uma API Key específica.
-            </p>
-            <div className="bg-white p-3 rounded-lg">
-              <p className="text-sm font-medium mb-2">Exemplo de inserção:</p>
-              <pre className="text-xs overflow-x-auto bg-muted p-2 rounded">
-{`INSERT INTO integration_partners 
-(name, description, api_key, is_active)
-VALUES 
-('Hospital XYZ', 'Sistema ERP', 
- 'sua-api-key-segura-aqui', true);`}
-              </pre>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Essa API Key deve ser enviada no header <code className="bg-white px-1 py-0.5 rounded">X-API-Key</code> nas requisições.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* URL Base */}
-        <Card>
-          <CardHeader>
-            <CardTitle>URL Base das APIs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label>Base URL:</Label>
-              <code className="block bg-muted p-3 rounded-lg text-sm break-all">
-                https://jfrpzfzofhijgycpdfcj.supabase.co/functions/v1
-              </code>
-            </div>
-          </CardContent>
-        </Card>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

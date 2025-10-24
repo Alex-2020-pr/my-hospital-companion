@@ -356,6 +356,59 @@ export type Database = {
           },
         ]
       }
+      organization_api_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_api_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_messages: {
         Row: {
           created_at: string
@@ -713,6 +766,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_api_token: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -723,6 +777,15 @@ export type Database = {
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      validate_org_api_token: {
+        Args: { _token: string }
+        Returns: {
+          is_valid: boolean
+          organization_id: string
+          organization_name: string
+          token_id: string
+        }[]
       }
     }
     Enums: {
