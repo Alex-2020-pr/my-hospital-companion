@@ -10,12 +10,17 @@ interface UserRoleData {
 }
 
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState<UserRoleData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRoles = async () => {
+      // Aguarda o auth terminar de carregar antes de continuar
+      if (authLoading) {
+        return;
+      }
+      
       if (!user) {
         console.log('useUserRole: sem usuário, setando loading false');
         setRoles([]);
@@ -49,7 +54,7 @@ export const useUserRole = () => {
     };
 
     fetchRoles();
-  }, [user]);
+  }, [user, authLoading]);
 
   const hasRole = (role: UserRole) => roles.some(r => r.role === role);
   const isSuperAdmin = hasRole('super_admin');
