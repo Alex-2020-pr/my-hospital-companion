@@ -82,45 +82,87 @@ serve(async (req) => {
       );
     }
 
-    // Inserir consultas com timezone de Brasília
-    const appointmentsToInsert = appointments.map((apt: any) => {
-      // Garantir que a data seja interpretada no timezone de Brasília (UTC-3)
-      // Recebemos a data no formato YYYY-MM-DD e precisamos garantir que seja salva sem conversão
+    // Processar consultas evitando duplicatas
+    const results = [];
+    let insertedCount = 0;
+    let updatedCount = 0;
+    let skippedCount = 0;
+
+    for (const apt of appointments) {
       const dateStr = apt.appointment_date;
       
-      return {
+      // Verificar se já existe uma consulta com os mesmos dados
+      const { data: existingApt, error: checkError } = await supabase
+        .from('appointments')
+        .select('id, status')
+        .eq('user_id', profile.id)
+        .eq('doctor_name', apt.doctor_name)
+        .eq('appointment_date', dateStr)
+        .eq('appointment_time', apt.appointment_time)
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error checking existing appointment:', checkError);
+        continue;
+      }
+
+      const appointmentData = {
         user_id: profile.id,
         doctor_name: apt.doctor_name,
         specialty: apt.specialty || null,
-        appointment_date: dateStr, // Salvar como string sem conversão
+        appointment_date: dateStr,
         appointment_time: apt.appointment_time,
         type: apt.type || 'Consulta',
         location: apt.location || null,
         notes: apt.notes || null,
         status: apt.status || 'scheduled',
       };
-    });
 
-    const { data: insertedApts, error: insertError } = await supabase
-      .from('appointments')
-      .insert(appointmentsToInsert)
-      .select();
+      if (existingApt) {
+        // Atualizar consulta existente
+        const { data: updated, error: updateError } = await supabase
+          .from('appointments')
+          .update(appointmentData)
+          .eq('id', existingApt.id)
+          .select()
+          .single();
 
-    if (insertError) {
-      console.error('Insert error:', insertError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao inserir consultas', details: insertError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+        if (updateError) {
+          console.error('Update error:', updateError);
+          continue;
+        }
+        
+        results.push(updated);
+        updatedCount++;
+      } else {
+        // Inserir nova consulta
+        const { data: inserted, error: insertError } = await supabase
+          .from('appointments')
+          .insert(appointmentData)
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          continue;
+        }
+        
+        results.push(inserted);
+        insertedCount++;
+      }
     }
 
-    console.log(`Successfully synced ${insertedApts.length} appointments for patient ${patient_cpf} from partner ${partner.name}`);
+    const totalProcessed = insertedCount + updatedCount;
+    console.log(`Successfully synced ${totalProcessed} appointments (${insertedCount} inserted, ${updatedCount} updated) for patient ${patient_cpf} from partner ${partner.name}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${insertedApts.length} consultas sincronizadas com sucesso`,
-        appointments: insertedApts
+        message: `${totalProcessed} consultas sincronizadas (${insertedCount} novas, ${updatedCount} atualizadas)`,
+        inserted: insertedCount,
+        updated: updatedCount,
+        total: totalProcessed,
+        appointments: results
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
