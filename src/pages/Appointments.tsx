@@ -53,17 +53,18 @@ export const Appointments = () => {
       return;
     }
 
+    // Obter data atual no formato YYYY-MM-DD sem conversão de timezone
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     const scheduled = (data || []).filter(apt => {
-      const aptDate = new Date(apt.appointment_date);
-      return aptDate >= today && (apt.status === 'scheduled' || apt.status === 'confirmed');
+      // Comparar strings de data diretamente para evitar problemas de timezone
+      return apt.appointment_date >= todayStr && (apt.status === 'scheduled' || apt.status === 'confirmed');
     });
 
     const history = (data || []).filter(apt => {
-      const aptDate = new Date(apt.appointment_date);
-      return aptDate < today || apt.status === 'completed' || apt.status === 'cancelled';
+      // Comparar strings de data diretamente para evitar problemas de timezone
+      return apt.appointment_date < todayStr || apt.status === 'completed' || apt.status === 'cancelled';
     });
 
     setScheduledAppointments(scheduled as Appointment[]);
@@ -74,12 +75,16 @@ export const Appointments = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmado':
+      case 'confirmed':
         return 'default';
       case 'agendado':
+      case 'scheduled':
         return 'secondary';
       case 'realizada':
+      case 'completed':
         return 'outline';
       case 'cancelada':
+      case 'cancelled':
         return 'destructive';
       default:
         return 'secondary';
@@ -89,15 +94,21 @@ export const Appointments = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'confirmado':
+      case 'confirmed':
         return 'Confirmado';
       case 'agendado':
+      case 'scheduled':
         return 'Agendado';
       case 'realizada':
-        return 'Realizada';
+      case 'completed':
+        return 'Concluído';
       case 'cancelada':
-        return 'Cancelada';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'pending':
+        return 'Pendente';
       default:
-        return status;
+        return status.charAt(0).toUpperCase() + status.slice(1);
     }
   };
 

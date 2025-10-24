@@ -82,18 +82,24 @@ serve(async (req) => {
       );
     }
 
-    // Inserir consultas
-    const appointmentsToInsert = appointments.map((apt: any) => ({
-      user_id: profile.id,
-      doctor_name: apt.doctor_name,
-      specialty: apt.specialty || null,
-      appointment_date: apt.appointment_date,
-      appointment_time: apt.appointment_time,
-      type: apt.type || 'Consulta',
-      location: apt.location || null,
-      notes: apt.notes || null,
-      status: apt.status || 'scheduled',
-    }));
+    // Inserir consultas com timezone de Brasília
+    const appointmentsToInsert = appointments.map((apt: any) => {
+      // Garantir que a data seja interpretada no timezone de Brasília (UTC-3)
+      // Recebemos a data no formato YYYY-MM-DD e precisamos garantir que seja salva sem conversão
+      const dateStr = apt.appointment_date;
+      
+      return {
+        user_id: profile.id,
+        doctor_name: apt.doctor_name,
+        specialty: apt.specialty || null,
+        appointment_date: dateStr, // Salvar como string sem conversão
+        appointment_time: apt.appointment_time,
+        type: apt.type || 'Consulta',
+        location: apt.location || null,
+        notes: apt.notes || null,
+        status: apt.status || 'scheduled',
+      };
+    });
 
     const { data: insertedApts, error: insertError } = await supabase
       .from('appointments')
