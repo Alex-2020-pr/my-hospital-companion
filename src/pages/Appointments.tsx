@@ -8,7 +8,7 @@ import { Calendar, Clock, MapPin, Plus, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Appointment {
@@ -152,7 +152,7 @@ export const Appointments = () => {
                   <CardContent className="space-y-3">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {format(new Date(appointment.appointment_date), "dd/MM/yyyy")}
+                      {format(parseISO(appointment.appointment_date), "dd/MM/yyyy")}
                       <Clock className="h-4 w-4 ml-4 mr-2" />
                       {appointment.appointment_time.slice(0, 5)}
                     </div>
@@ -224,7 +224,7 @@ export const Appointments = () => {
                     
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-2" />
-                      {format(new Date(appointment.appointment_date), "dd/MM/yyyy")}
+                      {format(parseISO(appointment.appointment_date), "dd/MM/yyyy")}
                       <Clock className="h-4 w-4 ml-4 mr-2" />
                       {appointment.appointment_time.slice(0, 5)}
                     </div>
