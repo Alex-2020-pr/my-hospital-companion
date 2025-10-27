@@ -8,10 +8,20 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Send, Mail, MessageSquare, BarChart3, HardDrive, Building2, Phone } from "lucide-react";
+import { Users, Send, Mail, MessageSquare, BarChart3, HardDrive, Building2, Phone, MessageCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Patient {
   id: string;
@@ -47,6 +57,7 @@ export const HospitalPanel = () => {
     activePatients: 0
   });
   const [organizationData, setOrganizationData] = useState<any>(null);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
 
   const organizationId = roles.find(r => r.role === 'hospital_admin')?.organizationId;
 
@@ -150,6 +161,17 @@ export const HospitalPanel = () => {
     } else {
       setSelectedPatients(patients.map(p => p.id));
     }
+  };
+
+  const handleContactAM2 = (method: 'system' | 'whatsapp') => {
+    if (method === 'whatsapp') {
+      const phone = '5545999901902'; // (45) 99990-1902
+      const message = encodeURIComponent('Olá AM2 Soluções! Gostaria de falar sobre o sistema de saúde.');
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    } else {
+      navigate('/contato');
+    }
+    setContactDialogOpen(false);
   };
 
   if (roleLoading) {
@@ -442,29 +464,33 @@ export const HospitalPanel = () => {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Empresa</p>
-                  <p className="text-lg font-semibold">AM2 - Soluções em Saúde Digital</p>
+                  <p className="text-lg font-semibold">AM2 Soluções em Saúde</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Telefone</p>
-                  <p className="text-lg">(11) 1234-5678</p>
+                  <p className="text-lg">(45) 99990-1902</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Email</p>
-                  <p className="text-lg">suporte@am2.com.br</p>
+                  <p className="text-lg">comercial@am2solucoes.com.br</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Website</p>
                   <a 
-                    href="https://www.am2.com.br" 
+                    href="https://www.am2solucoes.com.br" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-lg text-primary hover:underline"
                   >
-                    www.am2.com.br
+                    www.am2solucoes.com.br
                   </a>
                 </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Localização</p>
+                  <p className="text-lg">Cascavel - PR</p>
+                </div>
                 <Button 
-                  onClick={() => navigate('/contato')} 
+                  onClick={() => setContactDialogOpen(true)} 
                   className="w-full"
                   variant="outline"
                 >
@@ -475,6 +501,35 @@ export const HospitalPanel = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Contact AM2 Dialog */}
+        <AlertDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Como deseja entrar em contato?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Escolha o método preferido para enviar sua mensagem para a AM2 Soluções.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleContactAM2('system')}
+                className="w-full sm:w-auto"
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Enviar pelo Sistema
+              </Button>
+              <Button
+                onClick={() => handleContactAM2('whatsapp')}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Enviar pelo WhatsApp
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
