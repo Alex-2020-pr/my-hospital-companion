@@ -93,44 +93,46 @@ export const Layout = ({ children, title }: LayoutProps) => {
         </header>
       )}
       
-      <main className="pb-20 min-h-screen">
+      <main className="pb-32 min-h-screen">
         {children}
       </main>
       
-      <footer className="fixed bottom-16 left-0 right-0 bg-background/80 backdrop-blur-sm border-t py-2">
+      {/* Footer discreto acima da navegação */}
+      <div className="fixed bottom-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-t py-2.5 z-10">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-2">
             <a 
               href="https://www.am2solucoes.com.br" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="hover:opacity-80 transition-opacity"
+              className="opacity-60 hover:opacity-100 transition-opacity order-2 sm:order-1"
             >
               <img 
                 src={am2Logo} 
                 alt="AM2 Soluções" 
-                className="h-8"
+                className="h-6"
               />
             </a>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground/70 order-1 sm:order-2">
               <a 
                 href="tel:+5545999801802" 
                 className="flex items-center gap-1 hover:text-primary transition-colors"
               >
                 <Phone className="h-3 w-3" />
-                (45) 99980-1802
+                <span className="hidden xs:inline">(45) 99980-1802</span>
               </a>
+              <span className="hidden sm:inline text-muted-foreground/40">•</span>
               <a 
                 href="mailto:comercial@am2saude.com.br" 
                 className="flex items-center gap-1 hover:text-primary transition-colors"
               >
                 <Mail className="h-3 w-3" />
-                comercial@am2saude.com.br
+                <span className="hidden sm:inline">comercial@am2saude.com.br</span>
               </a>
             </div>
           </div>
         </div>
-      </footer>
+      </div>
       
       <BottomNavigation />
     </div>

@@ -132,7 +132,8 @@ export const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
+        <Card className="w-full">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-primary/10 p-3 rounded-full">
@@ -268,39 +269,42 @@ export const Auth = () => {
         </CardContent>
       </Card>
       
-      <footer className="mt-8 text-center">
+      {/* Footer discreto e responsivo */}
+      <div className="text-center space-y-3">
         <a 
           href="https://www.am2solucoes.com.br" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="inline-block hover:opacity-80 transition-opacity"
+          className="inline-block opacity-60 hover:opacity-100 transition-opacity"
         >
           <img 
             src={am2Logo} 
             alt="AM2 Soluções" 
-            className="h-12 mx-auto mb-2"
+            className="h-8 mx-auto"
           />
         </a>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground/80">
           <a 
             href="tel:+5545999801802" 
-            className="flex items-center gap-2 hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 hover:text-primary transition-colors"
           >
-            <Phone className="h-4 w-4" />
-            (45) 99980-1802
+            <Phone className="h-3 w-3" />
+            <span>(45) 99980-1802</span>
           </a>
+          <span className="hidden sm:inline text-muted-foreground/40">•</span>
           <a 
             href="mailto:comercial@am2saude.com.br" 
-            className="flex items-center gap-2 hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 hover:text-primary transition-colors"
           >
-            <Mail className="h-4 w-4" />
-            comercial@am2saude.com.br
+            <Mail className="h-3 w-3" />
+            <span>comercial@am2saude.com.br</span>
           </a>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-muted-foreground/60">
           Desenvolvido por AM2 Soluções
         </p>
-      </footer>
+      </div>
+      </div>
     </div>
   );
 };
