@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Activity, Heart, Droplet, Weight, Plus } from "lucide-react";
+import { Activity, Heart, Droplet, Weight, Plus, Edit, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -13,6 +13,16 @@ import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface VitalSign {
   id: string;
@@ -32,6 +42,8 @@ export const VitalSigns = () => {
   const [vitalSigns, setVitalSigns] = useState<VitalSign[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     blood_pressure_systolic: "",
     blood_pressure_diastolic: "",
@@ -98,33 +110,53 @@ export const VitalSigns = () => {
 
     setLoading(true);
 
-    console.log('[VitalSigns] Inserting new vital sign for user:', user?.id);
+    if (editingId) {
+      // Atualizar registro existente
+      const { error } = await supabase
+        .from('vital_signs' as any)
+        .update({
+          blood_pressure_systolic: systolic,
+          blood_pressure_diastolic: diastolic,
+          heart_rate: heartRate,
+          glucose: glucose,
+          weight: weight,
+        })
+        .eq('id', editingId);
 
-    const { data, error } = await supabase
-      .from('vital_signs' as any)
-      .insert({
-        user_id: user?.id,
-        blood_pressure_systolic: systolic,
-        blood_pressure_diastolic: diastolic,
-        heart_rate: heartRate,
-        glucose: glucose,
-        weight: weight,
-      })
-      .select()
-      .single();
+      if (error) {
+        console.error('[VitalSigns] Error updating vital sign:', error);
+        toast.error("Erro ao atualizar medição");
+        setLoading(false);
+        return;
+      }
 
-    setLoading(false);
+      toast.success("Medição atualizada com sucesso!");
+    } else {
+      // Inserir novo registro
+      const { error } = await supabase
+        .from('vital_signs' as any)
+        .insert({
+          user_id: user?.id,
+          blood_pressure_systolic: systolic,
+          blood_pressure_diastolic: diastolic,
+          heart_rate: heartRate,
+          glucose: glucose,
+          weight: weight,
+        });
 
-    if (error) {
-      console.error('[VitalSigns] Error saving vital sign:', error);
-      toast.error("Erro ao salvar medição");
-      return;
+      if (error) {
+        console.error('[VitalSigns] Error saving vital sign:', error);
+        toast.error("Erro ao salvar medição");
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Medição salva com sucesso!");
     }
 
-    console.log('[VitalSigns] Successfully saved vital sign:', data);
-
-    toast.success("Medição salva com sucesso!");
+    setLoading(false);
     setIsDialogOpen(false);
+    setEditingId(null);
     setFormData({
       blood_pressure_systolic: "",
       blood_pressure_diastolic: "",
@@ -133,8 +165,52 @@ export const VitalSigns = () => {
       weight: ""
     });
     
-    // Atualizar a lista de sinais vitais com o novo dado
     await fetchVitalSigns();
+  };
+
+  const handleEdit = (vitalSign: VitalSign) => {
+    setEditingId(vitalSign.id);
+    setFormData({
+      blood_pressure_systolic: vitalSign.blood_pressure_systolic?.toString() || "",
+      blood_pressure_diastolic: vitalSign.blood_pressure_diastolic?.toString() || "",
+      heart_rate: vitalSign.heart_rate?.toString() || "",
+      glucose: vitalSign.glucose?.toString() || "",
+      weight: vitalSign.weight?.toString() || ""
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+
+    const { error } = await supabase
+      .from('vital_signs' as any)
+      .delete()
+      .eq('id', deleteId);
+
+    if (error) {
+      console.error('[VitalSigns] Error deleting vital sign:', error);
+      toast.error("Erro ao excluir medição");
+      return;
+    }
+
+    toast.success("Medição excluída com sucesso!");
+    setDeleteId(null);
+    await fetchVitalSigns();
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setEditingId(null);
+      setFormData({
+        blood_pressure_systolic: "",
+        blood_pressure_diastolic: "",
+        heart_rate: "",
+        glucose: "",
+        weight: ""
+      });
+    }
   };
 
   const latestVitalSign = vitalSigns[0];
@@ -160,7 +236,7 @@ export const VitalSigns = () => {
             <h1 className="text-2xl font-bold">Sinais Vitais</h1>
             <p className="text-sm text-muted-foreground">Monitore sua saúde em tempo real</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary-dark">
                 <Plus className="h-4 w-4 mr-2" />
@@ -169,7 +245,7 @@ export const VitalSigns = () => {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Nova Medição</DialogTitle>
+                <DialogTitle>{editingId ? "Editar Medição" : "Nova Medição"}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -440,6 +516,57 @@ export const VitalSigns = () => {
           </>
         )}
 
+        {/* Histórico de Medições */}
+        {vitalSigns.length > 0 && (
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-4">Histórico de Medições</h3>
+              <div className="space-y-3">
+                {vitalSigns.map((vs) => (
+                  <div
+                    key={vs.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/5 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium">
+                          {format(new Date(vs.measurement_date), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        {vs.blood_pressure_systolic && vs.blood_pressure_diastolic && (
+                          <span>PA: {vs.blood_pressure_systolic}/{vs.blood_pressure_diastolic} mmHg</span>
+                        )}
+                        {vs.heart_rate && <span>FC: {vs.heart_rate} bpm</span>}
+                        {vs.glucose && <span>Gli: {vs.glucose} mg/dL</span>}
+                        {vs.weight && <span>Peso: {vs.weight} kg</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(vs)}
+                        className="h-8 w-8"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(vs.id)}
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {vitalSigns.length === 0 && (
           <Card>
             <CardContent className="p-8 text-center">
@@ -452,6 +579,23 @@ export const VitalSigns = () => {
           </Card>
         )}
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta medição? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };

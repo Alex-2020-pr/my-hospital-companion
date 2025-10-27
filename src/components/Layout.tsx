@@ -49,7 +49,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
                   <Shield className="h-5 w-5" />
                 </Button>
               )}
-              {isSuperAdmin && (
+              {(isSuperAdmin || isHospitalAdmin) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -63,27 +63,40 @@ export const Layout = ({ children, title }: LayoutProps) => {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/admin/users')}>
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Usuários</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
-                      <Building2 className="mr-2 h-4 w-4" />
-                      <span>Organizações</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
-                      <Handshake className="mr-2 h-4 w-4" />
-                      <span>Parceiros</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/api-docs')}>
-                      <FileText className="mr-2 h-4 w-4" />
-                      <span>API Docs</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/token-generator')}>
-                      <Key className="mr-2 h-4 w-4" />
-                      <span>Gerar Tokens</span>
-                    </DropdownMenuItem>
+                    {isHospitalAdmin && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/hospital')}>
+                          <Building2 className="mr-2 h-4 w-4" />
+                          <span>Hospital</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {isSuperAdmin && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate('/admin/users')}>
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Usuários</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
+                          <Building2 className="mr-2 h-4 w-4" />
+                          <span>Organizações</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
+                          <Handshake className="mr-2 h-4 w-4" />
+                          <span>Parceiros</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/api-docs')}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          <span>API Docs</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/token-generator')}>
+                          <Key className="mr-2 h-4 w-4" />
+                          <span>Gerar Tokens</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

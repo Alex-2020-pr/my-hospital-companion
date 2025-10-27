@@ -422,19 +422,20 @@ export const Profile = () => {
                 </a>
                 <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                   <a 
-                    href="tel:+5545999801802" 
+                    href="tel:+5545999901902" 
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
                     <Phone className="h-3 w-3" />
-                    (45) 99980-1802
+                    (45) 99990-1902
                   </a>
                   <a 
-                    href="mailto:comercial@am2saude.com.br" 
+                    href="mailto:comercial@am2solucoes.com.br" 
                     className="flex items-center gap-1 hover:text-primary transition-colors"
                   >
                     <Mail className="h-3 w-3" />
-                    comercial@am2saude.com.br
+                    comercial@am2solucoes.com.br
                   </a>
+                  <span className="text-xs">Cascavel - PR</span>
                 </div>
               </div>
             </div>
