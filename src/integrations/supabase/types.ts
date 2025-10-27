@@ -20,8 +20,10 @@ export type Database = {
           appointment_time: string
           created_at: string
           doctor_name: string
+          hospital_contact: Json | null
           id: string
           location: string | null
+          mode: string
           notes: string | null
           specialty: string | null
           status: string
@@ -34,8 +36,10 @@ export type Database = {
           appointment_time: string
           created_at?: string
           doctor_name: string
+          hospital_contact?: Json | null
           id?: string
           location?: string | null
+          mode?: string
           notes?: string | null
           specialty?: string | null
           status?: string
@@ -48,8 +52,10 @@ export type Database = {
           appointment_time?: string
           created_at?: string
           doctor_name?: string
+          hospital_contact?: Json | null
           id?: string
           location?: string | null
+          mode?: string
           notes?: string | null
           specialty?: string | null
           status?: string
