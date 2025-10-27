@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key } from "lucide-react";
+import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Mail, Phone } from "lucide-react";
+import am2Logo from "@/assets/am2-logo.jpg";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
@@ -95,6 +96,41 @@ export const Layout = ({ children, title }: LayoutProps) => {
       <main className="pb-20 min-h-screen">
         {children}
       </main>
+      
+      <footer className="fixed bottom-16 left-0 right-0 bg-background/80 backdrop-blur-sm border-t py-2">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <a 
+              href="https://www.am2solucoes.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity"
+            >
+              <img 
+                src={am2Logo} 
+                alt="AM2 Soluções" 
+                className="h-8"
+              />
+            </a>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <a 
+                href="tel:+5545999801802" 
+                className="flex items-center gap-1 hover:text-primary transition-colors"
+              >
+                <Phone className="h-3 w-3" />
+                (45) 99980-1802
+              </a>
+              <a 
+                href="mailto:comercial@am2saude.com.br" 
+                className="flex items-center gap-1 hover:text-primary transition-colors"
+              >
+                <Mail className="h-3 w-3" />
+                comercial@am2saude.com.br
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
       
       <BottomNavigation />
     </div>

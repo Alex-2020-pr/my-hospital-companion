@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, Mail, Phone } from "lucide-react";
+import am2Logo from "@/assets/am2-logo.jpg";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -266,6 +267,40 @@ export const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+      
+      <footer className="mt-8 text-center">
+        <a 
+          href="https://www.am2solucoes.com.br" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-block hover:opacity-80 transition-opacity"
+        >
+          <img 
+            src={am2Logo} 
+            alt="AM2 Soluções" 
+            className="h-12 mx-auto mb-2"
+          />
+        </a>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
+          <a 
+            href="tel:+5545999801802" 
+            className="flex items-center gap-2 hover:text-primary transition-colors"
+          >
+            <Phone className="h-4 w-4" />
+            (45) 99980-1802
+          </a>
+          <a 
+            href="mailto:comercial@am2saude.com.br" 
+            className="flex items-center gap-2 hover:text-primary transition-colors"
+          >
+            <Mail className="h-4 w-4" />
+            comercial@am2saude.com.br
+          </a>
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Desenvolvido por AM2 Soluções
+        </p>
+      </footer>
     </div>
   );
 };
