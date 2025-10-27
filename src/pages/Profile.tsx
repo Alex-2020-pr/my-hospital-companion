@@ -3,11 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { 
   User, 
   Shield,
   Edit,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Bell
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -72,6 +74,7 @@ export const Profile = () => {
         phone: editedProfile.phone,
         birth_date: editedProfile.birth_date,
         cpf: editedProfile.cpf,
+        notification_preferences: editedProfile.notification_preferences,
       })
       .eq('id', user.id);
 
@@ -90,6 +93,31 @@ export const Profile = () => {
       });
     }
     setSaving(false);
+  };
+
+  const handleNotificationToggle = (key: string, value: boolean) => {
+    if (!isEditing) {
+      handleEdit();
+    }
+    const updatedPreferences = {
+      ...(editedProfile?.notification_preferences || profile?.notification_preferences || {}),
+      [key]: value
+    };
+    setEditedProfile({ 
+      ...(editedProfile || profile), 
+      notification_preferences: updatedPreferences 
+    });
+    
+    // Auto-save notification preferences
+    supabase
+      .from('profiles')
+      .update({ notification_preferences: updatedPreferences })
+      .eq('id', user?.id)
+      .then(({ error }) => {
+        if (!error) {
+          setProfile({ ...profile, notification_preferences: updatedPreferences });
+        }
+      });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -210,6 +238,89 @@ export const Profile = () => {
                   </Button>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Alertas e Lembretes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-base">
+              <Bell className="h-5 w-5 mr-2 text-primary" />
+              Alertas e Lembretes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground mb-3">
+              Configure quais alertas e lembretes você deseja receber
+            </p>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Horários de Medicação</Label>
+                  <p className="text-xs text-muted-foreground">Lembretes para tomar seus medicamentos</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.medication_reminders ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('medication_reminders', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Sinais Vitais</Label>
+                  <p className="text-xs text-muted-foreground">Lembrete para registrar sinais vitais</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.vital_signs ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('vital_signs', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Consultas Agendadas</Label>
+                  <p className="text-xs text-muted-foreground">Lembretes de consultas próximas</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.scheduled_appointments ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('scheduled_appointments', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Exames Agendados</Label>
+                  <p className="text-xs text-muted-foreground">Lembretes de exames próximos</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.scheduled_exams ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('scheduled_exams', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Preparo de Exames</Label>
+                  <p className="text-xs text-muted-foreground">Instruções de preparo para exames</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.exam_preparation ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('exam_preparation', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Atividade Física</Label>
+                  <p className="text-xs text-muted-foreground">Lembretes para praticar exercícios</p>
+                </div>
+                <Switch
+                  checked={profile?.notification_preferences?.physical_activity ?? true}
+                  onCheckedChange={(checked) => handleNotificationToggle('physical_activity', checked)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
