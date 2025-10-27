@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Pill, Clock, Search, Plus, AlertCircle } from "lucide-react";
+import { Pill, Clock, Search, Plus, AlertCircle, Edit2, Trash2, X } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
@@ -38,6 +38,7 @@ export const Medications = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editingMedication, setEditingMedication] = useState<Medication | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -106,45 +107,92 @@ export const Medications = () => {
 
     setLoading(true);
 
-    const { data: medication, error: medError } = await supabase
-      .from('medications' as any)
-      .insert({
-        user_id: user.id,
-        name: formData.name,
-        dosage: formData.dosage,
-        frequency: formData.frequency,
-        instructions: formData.instructions || null,
-        start_date: formData.start_date,
-        is_active: true
-      })
-      .select()
-      .single();
+    if (editingMedication) {
+      // Update existing medication
+      const { error: medError } = await supabase
+        .from('medications' as any)
+        .update({
+          name: formData.name,
+          dosage: formData.dosage,
+          frequency: formData.frequency,
+          instructions: formData.instructions || null,
+          start_date: formData.start_date,
+        })
+        .eq('id', editingMedication.id);
 
-    if (medError) {
-      toast.error("Erro ao adicionar medicamento");
-      setLoading(false);
-      return;
+      if (medError) {
+        toast.error("Erro ao atualizar medicamento");
+        setLoading(false);
+        return;
+      }
+
+      // Delete old schedules
+      await supabase
+        .from('medication_schedules' as any)
+        .delete()
+        .eq('medication_id', editingMedication.id);
+
+      // Add new schedules
+      const scheduleInserts = formData.schedules.map(time => ({
+        medication_id: editingMedication.id,
+        time: time
+      }));
+
+      const { error: schedError } = await supabase
+        .from('medication_schedules' as any)
+        .insert(scheduleInserts);
+
+      if (schedError) {
+        toast.error("Erro ao atualizar horários");
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Medicamento atualizado com sucesso!");
+    } else {
+      // Add new medication
+      const { data: medication, error: medError } = await supabase
+        .from('medications' as any)
+        .insert({
+          user_id: user.id,
+          name: formData.name,
+          dosage: formData.dosage,
+          frequency: formData.frequency,
+          instructions: formData.instructions || null,
+          start_date: formData.start_date,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (medError) {
+        toast.error("Erro ao adicionar medicamento");
+        setLoading(false);
+        return;
+      }
+
+      // Add schedules
+      const scheduleInserts = formData.schedules.map(time => ({
+        medication_id: (medication as any).id,
+        time: time
+      }));
+
+      const { error: schedError } = await supabase
+        .from('medication_schedules' as any)
+        .insert(scheduleInserts);
+
+      if (schedError) {
+        toast.error("Erro ao adicionar horários");
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Medicamento adicionado com sucesso!");
     }
-
-    // Add schedules
-    const scheduleInserts = formData.schedules.map(time => ({
-      medication_id: (medication as any).id,
-      time: time
-    }));
-
-    const { error: schedError } = await supabase
-      .from('medication_schedules' as any)
-      .insert(scheduleInserts);
 
     setLoading(false);
-
-    if (schedError) {
-      toast.error("Erro ao adicionar horários");
-      return;
-    }
-
-    toast.success("Medicamento adicionado com sucesso!");
     setIsDialogOpen(false);
+    setEditingMedication(null);
     setFormData({
       name: "",
       dosage: "",
@@ -157,18 +205,59 @@ export const Medications = () => {
     fetchSchedules();
   };
 
-  const handleMarkAsTaken = async (scheduleId: string) => {
-    const { error } = await supabase
+  const handleEditMedication = async (medication: Medication) => {
+    setEditingMedication(medication);
+    
+    // Fetch schedules for this medication
+    const { data: schedules } = await supabase
       .from('medication_schedules' as any)
-      .update({ taken: true, taken_at: new Date().toISOString() })
-      .eq('id', scheduleId);
+      .select('time')
+      .eq('medication_id', medication.id);
+    
+    setFormData({
+      name: medication.name,
+      dosage: medication.dosage,
+      frequency: medication.frequency,
+      instructions: medication.instructions || "",
+      start_date: medication.start_date,
+      schedules: schedules?.map((s: any) => s.time) || ["08:00"]
+    });
+    
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteMedication = async (medicationId: string) => {
+    if (!confirm("Tem certeza que deseja excluir este medicamento?")) return;
+
+    const { error } = await supabase
+      .from('medications' as any)
+      .update({ is_active: false })
+      .eq('id', medicationId);
 
     if (error) {
-      toast.error("Erro ao marcar como tomado");
+      toast.error("Erro ao excluir medicamento");
       return;
     }
 
-    toast.success("Marcado como tomado!");
+    toast.success("Medicamento excluído com sucesso!");
+    fetchMedications();
+  };
+
+  const handleMarkAsTaken = async (scheduleId: string, taken: boolean) => {
+    const { error } = await supabase
+      .from('medication_schedules' as any)
+      .update({ 
+        taken: taken, 
+        taken_at: taken ? new Date().toISOString() : null 
+      })
+      .eq('id', scheduleId);
+
+    if (error) {
+      toast.error("Erro ao atualizar status");
+      return;
+    }
+
+    toast.success(taken ? "Marcado como tomado!" : "Desmarcado");
     fetchSchedules();
   };
 
@@ -218,7 +307,20 @@ export const Medications = () => {
             <h1 className="text-3xl font-bold">Medicamentos</h1>
             <p className="text-muted-foreground">Gerencie seus medicamentos e horários</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setEditingMedication(null);
+              setFormData({
+                name: "",
+                dosage: "",
+                frequency: "",
+                instructions: "",
+                start_date: format(new Date(), "yyyy-MM-dd"),
+                schedules: ["08:00"]
+              });
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
@@ -227,7 +329,7 @@ export const Medications = () => {
             </DialogTrigger>
             <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Novo Medicamento</DialogTitle>
+                <DialogTitle>{editingMedication ? "Editar Medicamento" : "Novo Medicamento"}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
@@ -304,7 +406,7 @@ export const Medications = () => {
                   />
                 </div>
                 <Button onClick={handleAddMedication} disabled={loading} className="w-full">
-                  {loading ? "Salvando..." : "Salvar Medicamento"}
+                  {loading ? "Salvando..." : editingMedication ? "Atualizar Medicamento" : "Salvar Medicamento"}
                 </Button>
               </div>
             </DialogContent>
@@ -349,7 +451,23 @@ export const Medications = () => {
                                 <h3 className="font-semibold text-lg">{medication.name}</h3>
                                 <p className="text-sm text-muted-foreground">{medication.dosage}</p>
                               </div>
-                              <Badge>{medication.frequency}</Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge>{medication.frequency}</Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEditMedication(medication)}
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteMedication(medication.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
                             </div>
                             {nextDose && (
                               <div className="flex items-center gap-2 text-sm">
@@ -393,15 +511,13 @@ export const Medications = () => {
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-primary">{time}</span>
-                        {!schedule.taken && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleMarkAsTaken(schedule.id)}
-                          >
-                            Marcar
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant={schedule.taken ? "ghost" : "outline"}
+                          onClick={() => handleMarkAsTaken(schedule.id, !schedule.taken)}
+                        >
+                          {schedule.taken ? <X className="h-4 w-4" /> : "Marcar"}
+                        </Button>
                       </div>
                       <p className="text-sm font-medium">{medication.name} {medication.dosage}</p>
                       {schedule.taken && (

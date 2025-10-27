@@ -1,6 +1,7 @@
 import { Layout } from "@/components/Layout";
 import { QuickActionCard } from "@/components/QuickActionCard";
 import { StorageAlert } from "@/components/StorageAlert";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -29,6 +30,7 @@ interface NotificationPreferences {
   scheduled_exams?: boolean;
   exam_preparation?: boolean;
   physical_activity?: boolean;
+  show_examples?: boolean;
 }
 
 export const Dashboard = () => {
@@ -37,6 +39,7 @@ export const Dashboard = () => {
   const [userName, setUserName] = useState<string>("");
   const [reminders, setReminders] = useState<any[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences | null>(null);
+  const [showExamples, setShowExamples] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -55,6 +58,7 @@ export const Dashboard = () => {
       
       const preferences = (profileData?.notification_preferences || {}) as NotificationPreferences;
       setNotificationPreferences(preferences);
+      setShowExamples(preferences.show_examples !== false);
       
       // Generate reminders based on preferences
       const newReminders: any[] = [];
@@ -230,14 +234,17 @@ export const Dashboard = () => {
       <div className="p-4 space-y-6">
         <StorageAlert />
         
-        {/* Header com saudação */}
+        {/* Header com saudação e notificações */}
         <div className="relative bg-primary text-primary-foreground rounded-lg p-6 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <img src={heroImage} alt="Medical background" className="w-full h-full object-cover" />
           </div>
-          <div className="relative z-10">
-            <h1 className="text-2xl font-bold mb-2">Olá, {userName || 'Usuário'}!</h1>
-            <p className="opacity-90">Bem-vindo ao seu portal de saúde</p>
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">Olá, {userName || 'Usuário'}!</h1>
+              <p className="opacity-90">Bem-vindo ao seu portal de saúde</p>
+            </div>
+            <NotificationBell />
           </div>
         </div>
 
@@ -337,7 +344,7 @@ export const Dashboard = () => {
         </Card>
 
         {/* Lembretes Importantes */}
-        {reminders.length > 0 && (
+        {(reminders.length > 0 || showExamples) && (
           <Card className="border-primary/20 bg-primary/5">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -347,6 +354,19 @@ export const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {/* Exemplo fixo em vermelho */}
+                {showExamples && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/15 border-2 border-destructive/40">
+                    <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-destructive" />
+                    <div>
+                      <p className="text-sm font-medium text-destructive">Exemplo de Lembrete</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Este é um exemplo de como seus lembretes aparecem. Configure em Perfil → Alertas e Lembretes
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 {reminders.map((reminder) => {
                   const Icon = reminder.icon;
                   return (

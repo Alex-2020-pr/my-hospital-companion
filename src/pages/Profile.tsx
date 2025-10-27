@@ -9,8 +9,12 @@ import {
   Shield,
   Edit,
   Link as LinkIcon,
-  Bell
+  Bell,
+  Code,
+  Mail,
+  Phone
 } from "lucide-react";
+import am2Logo from "@/assets/am2-logo.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -321,6 +325,19 @@ export const Profile = () => {
                   onCheckedChange={(checked) => handleNotificationToggle('physical_activity', checked)}
                 />
               </div>
+
+              <div className="border-t pt-4 mt-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium">Mostrar Exemplos</Label>
+                    <p className="text-xs text-muted-foreground">Exibir exemplos de lembretes, receitas e documentos</p>
+                  </div>
+                  <Switch
+                    checked={profile?.notification_preferences?.show_examples ?? true}
+                    onCheckedChange={(checked) => handleNotificationToggle('show_examples', checked)}
+                  />
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -369,6 +386,58 @@ export const Profile = () => {
             >
               Sair da Conta
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Dados do Desenvolvedor */}
+        <Card className="border-muted">
+          <CardHeader>
+            <CardTitle className="flex items-center text-base text-muted-foreground">
+              <Code className="h-5 w-5 mr-2" />
+              Desenvolvido por
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <a 
+                href="https://www.am2solucoes.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity"
+              >
+                <img 
+                  src={am2Logo} 
+                  alt="AM2 Soluções" 
+                  className="h-12"
+                />
+              </a>
+              <div className="flex-1 space-y-1">
+                <a 
+                  href="https://www.am2solucoes.com.br" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium hover:text-primary transition-colors block"
+                >
+                  AM2 Soluções em Saúde
+                </a>
+                <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  <a 
+                    href="tel:+5545999801802" 
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    <Phone className="h-3 w-3" />
+                    (45) 99980-1802
+                  </a>
+                  <a 
+                    href="mailto:comercial@am2saude.com.br" 
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    <Mail className="h-3 w-3" />
+                    comercial@am2saude.com.br
+                  </a>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
