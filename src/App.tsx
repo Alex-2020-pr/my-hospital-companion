@@ -25,6 +25,7 @@ import { AdminUsers } from "./pages/AdminUsers";
 import { HospitalPanel } from "./pages/HospitalPanel";
 import { HospitalMessaging } from "./pages/HospitalMessaging";
 import { AdminSetup } from "./pages/AdminSetup";
+import Changelog from "./pages/Changelog";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/integracoes" element={<ProtectedRoute><IntegrationConsents /></ProtectedRoute>} />
           <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
           <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
+          <Route path="/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />

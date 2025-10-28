@@ -2,6 +2,7 @@ import { Layout } from "@/components/Layout";
 import { QuickActionCard } from "@/components/QuickActionCard";
 import { StorageAlert } from "@/components/StorageAlert";
 import { NotificationBell } from "@/components/NotificationBell";
+import { ChangelogPreview } from "@/components/ChangelogPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -233,6 +234,8 @@ export const Dashboard = () => {
     <Layout>
       <div className="p-4 space-y-6">
         <StorageAlert />
+        
+        <ChangelogPreview />
         
         {/* Header com saudação e notificações */}
         <div className="relative bg-primary text-primary-foreground rounded-lg p-6 overflow-hidden">

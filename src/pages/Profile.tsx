@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,8 @@ import {
   Bell,
   Code,
   Mail,
-  Phone
+  Phone,
+  Sparkles
 } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
 import { useAuth } from "@/hooks/useAuth";
@@ -385,6 +386,28 @@ export const Profile = () => {
               onClick={handleLogout}
             >
               Sair da Conta
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Histórico de Versões */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-base">
+              <Sparkles className="h-5 w-5 mr-2 text-primary" />
+              Novidades e Atualizações
+            </CardTitle>
+            <CardDescription>
+              Acompanhe o histórico de melhorias da plataforma
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => navigate('/changelog')}
+              variant="outline"
+              className="w-full"
+            >
+              Ver Histórico de Versões
             </Button>
           </CardContent>
         </Card>
