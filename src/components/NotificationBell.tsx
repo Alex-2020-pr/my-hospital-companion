@@ -216,7 +216,7 @@ export const NotificationBell = () => {
                       <div className="flex-1">
                         <h5 className="font-medium text-sm">Novidades Disponíveis!</h5>
                         <p className="text-xs text-muted-foreground">
-                          {newVersionsCount} nova{newVersionsCount > 1 ? 's' : ''} atualização{newVersionsCount > 1 ? 'ões' : ''}. Clique para ver.
+                          {newVersionsCount} nova{newVersionsCount > 1 ? 's' : ''} atualiza{newVersionsCount > 1 ? 'ções' : 'ção'}. Clique para ver.
                         </p>
                       </div>
                     </div>
