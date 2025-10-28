@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Activity, Heart, Droplet, Weight, Plus, Edit, Trash2 } from "lucide-react";
+import { Activity, Heart, Droplet, Weight, Plus, Edit, Trash2, Share2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { pdf } from '@react-pdf/renderer';
+import { VitalSignsPDF } from "@/components/VitalSignsPDF";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -213,6 +215,47 @@ export const VitalSigns = () => {
     }
   };
 
+  const handleSharePDF = async () => {
+    if (vitalSigns.length === 0) {
+      toast.error("Não há dados para compartilhar");
+      return;
+    }
+
+    try {
+      toast.loading("Gerando PDF...");
+      
+      // Buscar dados do perfil do usuário
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user?.id)
+        .single();
+
+      const doc = <VitalSignsPDF 
+        vitalSigns={vitalSigns}
+        patientName={profile?.full_name || 'Paciente'}
+        patientEmail={profile?.email || ''}
+      />;
+      
+      const asPdf = pdf(doc);
+      const blob = await asPdf.toBlob();
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sinais-vitais-${format(new Date(), 'dd-MM-yyyy')}.pdf`;
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      toast.dismiss();
+      toast.success("PDF gerado com sucesso!");
+    } catch (error) {
+      console.error('[VitalSigns] Error generating PDF:', error);
+      toast.dismiss();
+      toast.error("Erro ao gerar PDF");
+    }
+  };
+
   const latestVitalSign = vitalSigns[0];
 
   const chartData = vitalSigns
@@ -236,88 +279,98 @@ export const VitalSigns = () => {
             <h1 className="text-2xl font-bold">Sinais Vitais</h1>
             <p className="text-sm text-muted-foreground">Monitore sua saúde em tempo real</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-dark">
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Medição
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{editingId ? "Editar Medição" : "Nova Medição"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="systolic">Pressão Sistólica (70-250 mmHg)</Label>
-                    <Input
-                      id="systolic"
-                      type="number"
-                      placeholder="119"
-                      min="70"
-                      max="250"
-                      value={formData.blood_pressure_systolic}
-                      onChange={(e) => setFormData({ ...formData, blood_pressure_systolic: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="diastolic">Pressão Diastólica (40-150 mmHg)</Label>
-                    <Input
-                      id="diastolic"
-                      type="number"
-                      placeholder="78"
-                      min="40"
-                      max="150"
-                      value={formData.blood_pressure_diastolic}
-                      onChange={(e) => setFormData({ ...formData, blood_pressure_diastolic: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="heart_rate">Frequência Cardíaca (40-200 bpm)</Label>
-                  <Input
-                    id="heart_rate"
-                    type="number"
-                    placeholder="71"
-                    min="40"
-                    max="200"
-                    value={formData.heart_rate}
-                    onChange={(e) => setFormData({ ...formData, heart_rate: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="glucose">Glicemia (40-600 mg/dL)</Label>
-                  <Input
-                    id="glucose"
-                    type="number"
-                    step="0.1"
-                    placeholder="97"
-                    min="40"
-                    max="600"
-                    value={formData.glucose}
-                    onChange={(e) => setFormData({ ...formData, glucose: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="weight">Peso (20-300 kg)</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.1"
-                    placeholder="74.5"
-                    min="20"
-                    max="300"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Salvando..." : "Salvar Medição"}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleSharePDF}
+              disabled={vitalSigns.length === 0}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Compartilhar PDF
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary-dark">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Medição
                 </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{editingId ? "Editar Medição" : "Nova Medição"}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="systolic">Pressão Sistólica (70-250 mmHg)</Label>
+                      <Input
+                        id="systolic"
+                        type="number"
+                        placeholder="119"
+                        min="70"
+                        max="250"
+                        value={formData.blood_pressure_systolic}
+                        onChange={(e) => setFormData({ ...formData, blood_pressure_systolic: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="diastolic">Pressão Diastólica (40-150 mmHg)</Label>
+                      <Input
+                        id="diastolic"
+                        type="number"
+                        placeholder="78"
+                        min="40"
+                        max="150"
+                        value={formData.blood_pressure_diastolic}
+                        onChange={(e) => setFormData({ ...formData, blood_pressure_diastolic: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="heart_rate">Frequência Cardíaca (40-200 bpm)</Label>
+                    <Input
+                      id="heart_rate"
+                      type="number"
+                      placeholder="71"
+                      min="40"
+                      max="200"
+                      value={formData.heart_rate}
+                      onChange={(e) => setFormData({ ...formData, heart_rate: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="glucose">Glicemia (40-600 mg/dL)</Label>
+                    <Input
+                      id="glucose"
+                      type="number"
+                      step="0.1"
+                      placeholder="97"
+                      min="40"
+                      max="600"
+                      value={formData.glucose}
+                      onChange={(e) => setFormData({ ...formData, glucose: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weight">Peso (20-300 kg)</Label>
+                    <Input
+                      id="weight"
+                      type="number"
+                      step="0.1"
+                      placeholder="74.5"
+                      min="20"
+                      max="300"
+                      value={formData.weight}
+                      onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Salvando..." : "Salvar Medição"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Cards com valores atuais */}
