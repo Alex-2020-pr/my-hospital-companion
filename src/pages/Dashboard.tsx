@@ -2,9 +2,9 @@ import { Layout } from "@/components/Layout";
 import { QuickActionCard } from "@/components/QuickActionCard";
 import { StorageAlert } from "@/components/StorageAlert";
 import { NotificationBell } from "@/components/NotificationBell";
-import { ChangelogPreview } from "@/components/ChangelogPreview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   Calendar, 
   Stethoscope, 
@@ -23,6 +23,7 @@ import heroImage from "@/assets/medical-hero.jpg";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface NotificationPreferences {
   medication_reminders?: boolean;
@@ -37,14 +38,19 @@ interface NotificationPreferences {
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [userName, setUserName] = useState<string>("");
   const [reminders, setReminders] = useState<any[]>([]);
   const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences | null>(null);
   const [showExamples, setShowExamples] = useState(true);
+  const [hasShownVersionToast, setHasShownVersionToast] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!user) return;
+      
+      // Check for new versions and show toast
+      checkNewVersions();
       
       // Fetch user profile
       const { data: profileData } = await supabase
@@ -196,6 +202,46 @@ export const Dashboard = () => {
     fetchDashboardData();
   }, [user]);
 
+  const checkNewVersions = async () => {
+    if (!user || hasShownVersionToast) return;
+
+    try {
+      const { data: versionsData } = await supabase
+        .from('app_versions')
+        .select('*')
+        .eq('is_published', true)
+        .order('release_date', { ascending: false })
+        .limit(1);
+
+      if (!versionsData || versionsData.length === 0) return;
+
+      const { data: viewedData } = await supabase
+        .from('user_version_views')
+        .select('version_id')
+        .eq('user_id', user.id)
+        .eq('version_id', versionsData[0].id);
+
+      if (!viewedData || viewedData.length === 0) {
+        toast({
+          title: "✨ Nova atualização disponível!",
+          description: `${versionsData[0].title} - Clique para ver detalhes`,
+          action: (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/changelog')}
+            >
+              Ver
+            </Button>
+          ),
+        });
+        setHasShownVersionToast(true);
+      }
+    } catch (error) {
+      console.error('Error checking versions:', error);
+    }
+  };
+
   const upcomingAppointments = [
     {
       id: 1,
@@ -234,8 +280,6 @@ export const Dashboard = () => {
     <Layout>
       <div className="p-4 space-y-6">
         <StorageAlert />
-        
-        <ChangelogPreview />
         
         {/* Header com saudação e notificações */}
         <div className="relative bg-primary text-primary-foreground rounded-lg p-6 overflow-hidden">

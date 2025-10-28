@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -23,8 +24,10 @@ interface Message {
 
 export const NotificationBell = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [newVersionsCount, setNewVersionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchMessages = async () => {
@@ -64,6 +67,22 @@ export const NotificationBell = () => {
 
       setMessages(messagesWithReadStatus);
       setUnreadCount(messagesWithReadStatus.filter(m => !m.is_read).length);
+
+      // Check for new versions
+      const { data: versionsData } = await supabase
+        .from('app_versions')
+        .select('id')
+        .eq('is_published', true);
+
+      const { data: viewedData } = await supabase
+        .from('user_version_views')
+        .select('version_id')
+        .eq('user_id', user.id);
+
+      const viewedIds = new Set(viewedData?.map(v => v.version_id) || []);
+      const unviewedCount = versionsData?.filter(v => !viewedIds.has(v.id)).length || 0;
+      
+      setNewVersionsCount(unviewedCount);
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -158,12 +177,12 @@ export const NotificationBell = () => {
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
+          {(unreadCount + newVersionsCount) > 0 && (
             <Badge
               variant="destructive"
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
             >
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {(unreadCount + newVersionsCount) > 9 ? '9+' : (unreadCount + newVersionsCount)}
             </Badge>
           )}
         </Button>
@@ -172,8 +191,8 @@ export const NotificationBell = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold">Notificações</h4>
-            {unreadCount > 0 && (
-              <Badge variant="secondary">{unreadCount} não lida(s)</Badge>
+            {(unreadCount + newVersionsCount) > 0 && (
+              <Badge variant="secondary">{unreadCount + newVersionsCount} não lida(s)</Badge>
             )}
           </div>
           <ScrollArea className="h-[400px]">
@@ -181,12 +200,28 @@ export const NotificationBell = () => {
               <p className="text-sm text-muted-foreground text-center py-4">
                 Carregando...
               </p>
-            ) : messages.length === 0 ? (
+            ) : (messages.length === 0 && newVersionsCount === 0) ? (
               <p className="text-sm text-muted-foreground text-center py-4">
                 Nenhuma notificação
               </p>
             ) : (
               <div className="space-y-2">
+                {newVersionsCount > 0 && (
+                  <div
+                    className="p-3 rounded-lg border bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors"
+                    onClick={() => navigate('/changelog')}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h5 className="font-medium text-sm">Novidades Disponíveis!</h5>
+                        <p className="text-xs text-muted-foreground">
+                          {newVersionsCount} nova{newVersionsCount > 1 ? 's' : ''} atualização{newVersionsCount > 1 ? 'ões' : ''}. Clique para ver.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
