@@ -648,6 +648,7 @@ export type Database = {
           data: Json | null
           icon: string | null
           id: string
+          is_read: boolean | null
           recipient_id: string | null
           sender_id: string
           sent_at: string
@@ -661,6 +662,7 @@ export type Database = {
           data?: Json | null
           icon?: string | null
           id?: string
+          is_read?: boolean | null
           recipient_id?: string | null
           sender_id: string
           sent_at?: string
@@ -674,6 +676,7 @@ export type Database = {
           data?: Json | null
           icon?: string | null
           id?: string
+          is_read?: boolean | null
           recipient_id?: string | null
           sender_id?: string
           sent_at?: string

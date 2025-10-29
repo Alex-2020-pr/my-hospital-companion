@@ -54,7 +54,7 @@ export const NotificationBell = () => {
       // Buscar notificações push do usuário
       const { data: pushNotifications, error: pushError } = await supabase
         .from('push_notifications')
-        .select('id, title, body, created_at')
+        .select('id, title, body, created_at, is_read')
         .eq('recipient_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -78,14 +78,14 @@ export const NotificationBell = () => {
         type: 'organization' as const
       }));
 
-      // Combinar notificações push (sempre não lidas inicialmente)
+      // Combinar notificações push com seu próprio estado de is_read
       const pushMessagesFormatted = (pushNotifications || []).map(notif => ({
         id: notif.id,
         title: notif.title,
         message: notif.body,
         priority: 'normal',
         created_at: notif.created_at,
-        is_read: readIds.has(notif.id),
+        is_read: notif.is_read,
         type: 'push' as const
       }));
 
@@ -160,16 +160,29 @@ export const NotificationBell = () => {
     if (!user) return;
 
     try {
-      // Ambos os tipos vão para a tabela message_reads agora
-      const { error } = await supabase
-        .from('message_reads')
-        .insert({
-          message_id: messageId,
-          user_id: user.id
-        });
+      if (messageType === 'organization') {
+        // Mensagens de organização vão para message_reads
+        const { error } = await supabase
+          .from('message_reads')
+          .insert({
+            message_id: messageId,
+            user_id: user.id
+          });
 
-      if (error && !error.message.includes('duplicate')) {
-        throw error;
+        if (error && !error.message.includes('duplicate')) {
+          throw error;
+        }
+      } else if (messageType === 'push') {
+        // Notificações push atualizam seu próprio campo is_read
+        const { error } = await supabase
+          .from('push_notifications')
+          .update({ is_read: true })
+          .eq('id', messageId)
+          .eq('recipient_id', user.id);
+
+        if (error) {
+          throw error;
+        }
       }
 
       // Atualizar estado local
