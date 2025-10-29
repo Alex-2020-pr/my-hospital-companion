@@ -72,15 +72,21 @@ export const usePushNotifications = () => {
       // Salvar subscription no banco
       const subscriptionJSON = sub.toJSON();
       
+      // Primeiro, deletar qualquer subscription existente deste usuário para este endpoint
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('endpoint', subscriptionJSON.endpoint || '');
+
+      // Depois inserir a nova subscription
       const { error } = await supabase
         .from('push_subscriptions')
-        .upsert({
+        .insert({
           user_id: user.id,
           endpoint: subscriptionJSON.endpoint || '',
           p256dh: subscriptionJSON.keys?.p256dh || '',
           auth: subscriptionJSON.keys?.auth || ''
-        }, {
-          onConflict: 'user_id,endpoint'
         });
 
       if (error) throw error;
