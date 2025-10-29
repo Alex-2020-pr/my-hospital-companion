@@ -1,4 +1,4 @@
-import { Bell, Sparkles } from "lucide-react";
+import { Bell, Sparkles, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { NotificationResponseDialog } from "./NotificationResponseDialog";
 
 interface Message {
   id: string;
@@ -30,6 +31,8 @@ export const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [newVersionsCount, setNewVersionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [responseDialogOpen, setResponseDialogOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<{ id: string; title: string } | null>(null);
 
   const fetchMessages = async () => {
     if (!user) return;
@@ -192,6 +195,9 @@ export const NotificationBell = () => {
         )
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // Refetch para garantir sincronização
+      await fetchMessages();
     } catch (error) {
       console.error('Error marking message as read:', error);
       toast.error('Erro ao marcar mensagem como lida');
@@ -281,27 +287,48 @@ export const NotificationBell = () => {
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                    className={`p-3 rounded-lg border transition-colors ${
                       msg.is_read
                         ? 'bg-background'
-                        : 'bg-accent/50 hover:bg-accent'
+                        : 'bg-accent/50'
                     }`}
-                    onClick={() => !msg.is_read && markAsRead(msg.id, msg.type)}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h5 className="font-medium text-sm">{msg.title}</h5>
-                      <Badge
-                        className={`text-xs ${getPriorityColor(msg.priority)} text-white`}
-                      >
-                        {getPriorityLabel(msg.priority)}
-                      </Badge>
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => !msg.is_read && markAsRead(msg.id, msg.type)}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h5 className="font-medium text-sm">{msg.title}</h5>
+                        <Badge
+                          className={`text-xs ${getPriorityColor(msg.priority)} text-white`}
+                        >
+                          {getPriorityLabel(msg.priority)}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {msg.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(msg.created_at).toLocaleString('pt-BR')}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {msg.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(msg.created_at).toLocaleString('pt-BR')}
-                    </p>
+                    {msg.type === 'push' && (
+                      <div className="mt-2 pt-2 border-t">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedNotification({ id: msg.id, title: msg.title });
+                            setResponseDialogOpen(true);
+                          }}
+                        >
+                          <Reply className="h-3 w-3 mr-1" />
+                          Responder
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -309,6 +336,14 @@ export const NotificationBell = () => {
           </ScrollArea>
         </div>
       </PopoverContent>
+      {selectedNotification && (
+        <NotificationResponseDialog
+          open={responseDialogOpen}
+          onOpenChange={setResponseDialogOpen}
+          notificationId={selectedNotification.id}
+          notificationTitle={selectedNotification.title}
+        />
+      )}
     </Popover>
   );
 };

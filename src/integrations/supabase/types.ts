@@ -398,6 +398,38 @@ export type Database = {
           },
         ]
       }
+      notification_responses: {
+        Row: {
+          created_at: string
+          id: string
+          notification_id: string
+          response_text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notification_id: string
+          response_text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notification_id?: string
+          response_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_responses_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "push_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_api_tokens: {
         Row: {
           created_at: string
