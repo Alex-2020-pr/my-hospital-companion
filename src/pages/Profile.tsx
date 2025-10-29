@@ -132,25 +132,11 @@ export const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await signOut();
-      
-      if (error) {
-        console.error('Erro no logout:', error);
-        toast({
-          variant: "destructive",
-          title: "Erro ao sair",
-          description: error.message
-        });
-      } else {
-        toast({
-          title: "Logout realizado",
-          description: "Até logo!"
-        });
-        navigate("/auth");
-      }
+      await signOut();
+      // Sempre redireciona, independente de erro
+      navigate("/auth");
     } catch (err) {
-      console.error('Erro inesperado no logout:', err);
-      // Mesmo com erro, redireciona para auth
+      // Mesmo com erro (sessão expirada), apenas redireciona
       navigate("/auth");
     }
   };

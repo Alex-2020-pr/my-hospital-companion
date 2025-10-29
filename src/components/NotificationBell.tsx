@@ -160,21 +160,19 @@ export const NotificationBell = () => {
     if (!user) return;
 
     try {
-      // Apenas mensagens de organização vão para a tabela message_reads
-      if (messageType === 'organization') {
-        const { error } = await supabase
-          .from('message_reads')
-          .insert({
-            message_id: messageId,
-            user_id: user.id
-          });
+      // Ambos os tipos vão para a tabela message_reads agora
+      const { error } = await supabase
+        .from('message_reads')
+        .insert({
+          message_id: messageId,
+          user_id: user.id
+        });
 
-        if (error && !error.message.includes('duplicate')) {
-          throw error;
-        }
+      if (error && !error.message.includes('duplicate')) {
+        throw error;
       }
 
-      // Atualizar estado local para ambos os tipos
+      // Atualizar estado local
       setMessages(prev =>
         prev.map(msg =>
           msg.id === messageId ? { ...msg, is_read: true } : msg
