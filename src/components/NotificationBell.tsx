@@ -20,6 +20,7 @@ interface Message {
   priority: string;
   created_at: string;
   is_read: boolean;
+  type: 'organization' | 'push';
 }
 
 export const NotificationBell = () => {
@@ -50,6 +51,16 @@ export const NotificationBell = () => {
 
       if (msgError) throw msgError;
 
+      // Buscar notificações push do usuário
+      const { data: pushNotifications, error: pushError } = await supabase
+        .from('push_notifications')
+        .select('id, title, body, created_at')
+        .eq('recipient_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (pushError) throw pushError;
+
       // Buscar quais mensagens o usuário já leu
       const { data: reads, error: readsError } = await supabase
         .from('message_reads')
@@ -60,13 +71,31 @@ export const NotificationBell = () => {
 
       const readIds = new Set(reads?.map(r => r.message_id) || []);
 
-      const messagesWithReadStatus = (orgMessages || []).map(msg => ({
+      // Combinar mensagens de organização
+      const orgMessagesWithReadStatus = (orgMessages || []).map(msg => ({
         ...msg,
-        is_read: readIds.has(msg.id)
+        is_read: readIds.has(msg.id),
+        type: 'organization' as const
       }));
 
-      setMessages(messagesWithReadStatus);
-      setUnreadCount(messagesWithReadStatus.filter(m => !m.is_read).length);
+      // Combinar notificações push (sempre não lidas inicialmente)
+      const pushMessagesFormatted = (pushNotifications || []).map(notif => ({
+        id: notif.id,
+        title: notif.title,
+        message: notif.body,
+        priority: 'normal',
+        created_at: notif.created_at,
+        is_read: readIds.has(notif.id),
+        type: 'push' as const
+      }));
+
+      // Combinar e ordenar todas as notificações
+      const allMessages = [...orgMessagesWithReadStatus, ...pushMessagesFormatted]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 15);
+
+      setMessages(allMessages);
+      setUnreadCount(allMessages.filter(m => !m.is_read).length);
 
       // Check for new versions
       const { data: versionsData } = await supabase
@@ -93,9 +122,9 @@ export const NotificationBell = () => {
   useEffect(() => {
     fetchMessages();
 
-    // Configurar realtime para novas mensagens
+    // Configurar realtime para novas mensagens e notificações push
     const channel = supabase
-      .channel('organization_messages_changes')
+      .channel('notifications_changes')
       .on(
         'postgres_changes',
         {
@@ -105,6 +134,19 @@ export const NotificationBell = () => {
         },
         () => {
           fetchMessages();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'push_notifications',
+          filter: `recipient_id=eq.${user?.id}`
+        },
+        () => {
+          fetchMessages();
+          toast.success('Nova notificação recebida!');
         }
       )
       .subscribe();
