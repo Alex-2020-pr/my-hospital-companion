@@ -8,6 +8,7 @@ export const usePushNotifications = () => {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsSupported('serviceWorker' in navigator && 'PushManager' in window);
@@ -51,17 +52,21 @@ export const usePushNotifications = () => {
       return;
     }
 
+    setIsLoading(true);
+    
     try {
       // Verificar se a permissão já foi negada
       if (Notification.permission === 'denied') {
-        toast.error('Notificações bloqueadas. Vá nas configurações do navegador para permitir notificações deste site.');
+        toast.error('Notificações bloqueadas. Abra as configurações do navegador para permitir notificações deste site.');
+        setIsLoading(false);
         return;
       }
 
       const permission = await Notification.requestPermission();
       
       if (permission !== 'granted') {
-        toast.error('Você precisa permitir notificações para ativar este recurso. Clique no ícone ao lado da URL do site para permitir.');
+        toast.error('Permissão negada. Clique no ícone de cadeado ao lado da URL para permitir notificações.');
+        setIsLoading(false);
         return;
       }
 
@@ -102,13 +107,17 @@ export const usePushNotifications = () => {
       toast.success('Notificações ativadas com sucesso!');
     } catch (error) {
       console.error('Erro ao inscrever:', error);
-      toast.error('Erro ao ativar notificações');
+      toast.error('Erro ao ativar notificações. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const unsubscribe = async () => {
     if (!subscription || !user) return;
 
+    setIsLoading(true);
+    
     try {
       await subscription.unsubscribe();
 
@@ -127,13 +136,16 @@ export const usePushNotifications = () => {
       toast.success('Notificações desativadas');
     } catch (error) {
       console.error('Erro ao cancelar inscrição:', error);
-      toast.error('Erro ao desativar notificações');
+      toast.error('Erro ao desativar notificações. Tente novamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     isSupported,
     isSubscribed,
+    isLoading,
     subscribe,
     unsubscribe
   };

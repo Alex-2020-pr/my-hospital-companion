@@ -1,10 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bell, BellOff, Loader2 } from 'lucide-react';
+import { Bell, BellOff } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 export const PushNotificationSettings = () => {
-  const { isSupported, isSubscribed, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
 
   if (!isSupported) {
     return (
@@ -46,12 +46,12 @@ export const PushNotificationSettings = () => {
             </p>
           </div>
           {isSubscribed ? (
-            <Button onClick={unsubscribe} variant="outline" size="sm">
+            <Button onClick={unsubscribe} variant="outline" size="sm" disabled={isLoading}>
               <BellOff className="h-4 w-4 mr-2" />
               Desativar
             </Button>
           ) : (
-            <Button onClick={subscribe} size="sm">
+            <Button onClick={subscribe} size="sm" disabled={isLoading}>
               <Bell className="h-4 w-4 mr-2" />
               Ativar
             </Button>

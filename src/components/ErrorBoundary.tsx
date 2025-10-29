@@ -20,13 +20,14 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Unhandled application error:", error, errorInfo);
+    console.error("Erro não tratado na aplicação:", error, errorInfo);
   }
 
   private handleRetry = () => {
-    // Attempt a soft reset, then reload as fallback
-    this.setState({ hasError: false, error: null });
-    window.location.reload();
+    // Reset state and reload
+    this.setState({ hasError: false, error: null }, () => {
+      window.location.reload();
+    });
   };
 
   render() {
