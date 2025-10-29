@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import webpush from 'npm:web-push@3.6.7';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -91,9 +92,18 @@ serve(async (req) => {
       throw new Error('Usuário não possui notificações ativadas');
     }
 
-    // VAPID keys - você precisará gerar esses valores
-    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY') || '';
-    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY') || '';
+    // Configurar VAPID keys
+    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')!;
+    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
+    const vapidSubject = Deno.env.get('VAPID_SUBJECT')!;
+
+    webpush.setVapidDetails(
+      vapidSubject,
+      vapidPublicKey,
+      vapidPrivateKey
+    );
+
+    console.log('VAPID configurado, enviando notificações...');
 
     // Enviar notificação para todas as subscriptions do usuário
     const promises = subscriptions.map(async (sub: PushSubscription) => {
@@ -114,15 +124,17 @@ serve(async (req) => {
           data: payload.data || {},
         });
 
-        // Aqui você usaria a biblioteca web-push ou similar
-        // Por enquanto, vamos apenas simular o envio
-        console.log('Enviando notificação para:', pushSubscription.endpoint);
-        console.log('Payload:', notificationPayload);
+        console.log('Enviando notificação para:', sub.endpoint.substring(0, 50));
 
-        return { success: true, endpoint: sub.endpoint };
+        // Enviar notificação push real usando web-push
+        const result = await webpush.sendNotification(pushSubscription, notificationPayload);
+        
+        console.log('Notificação enviada com sucesso. Status:', result.statusCode);
+
+        return { success: true, endpoint: sub.endpoint, statusCode: result.statusCode };
       } catch (error) {
         console.error('Erro ao enviar push:', error);
-        return { success: false, endpoint: sub.endpoint, error };
+        return { success: false, endpoint: sub.endpoint, error: error.message };
       }
     });
 
