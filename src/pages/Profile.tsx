@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Loader2, Save, X } from "lucide-react";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 
 export const Profile = () => {
   const { signOut, user } = useAuth();
@@ -342,6 +343,9 @@ export const Profile = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Notificações Push */}
+        <PushNotificationSettings />
 
         {/* Integrações */}
         <Card>

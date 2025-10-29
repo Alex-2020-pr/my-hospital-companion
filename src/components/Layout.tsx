@@ -5,6 +5,7 @@ import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key } from
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
+import { PushNotificationPrompt } from './PushNotificationPrompt';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,6 +110,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
         {children}
       </main>
       
+      <PushNotificationPrompt />
       <BottomNavigation />
     </div>
   );

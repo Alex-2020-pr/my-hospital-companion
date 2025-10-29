@@ -115,7 +115,7 @@ export const AdminDashboard = () => {
       <div className="p-4 space-y-6">
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Gerenciamento</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Button onClick={() => navigate('/admin/users')} variant="outline" className="h-auto py-4 flex-col">
               <Shield className="h-6 w-6 mb-2" />
               <span className="text-sm">Usuários</span>
@@ -135,6 +135,10 @@ export const AdminDashboard = () => {
             <Button onClick={() => navigate('/token-generator')} variant="outline" className="h-auto py-4 flex-col">
               <FileText className="h-6 w-6 mb-2" />
               <span className="text-sm">Tokens</span>
+            </Button>
+            <Button onClick={() => navigate('/admin/push-notifications')} variant="outline" className="h-auto py-4 flex-col">
+              <Activity className="h-6 w-6 mb-2" />
+              <span className="text-sm">Notificações</span>
             </Button>
           </div>
         </div>

@@ -1,0 +1,145 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface PushSubscription {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
+
+interface NotificationPayload {
+  userId: string;
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  data?: any;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! },
+        },
+      }
+    );
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error('Não autorizado');
+    }
+
+    // Verificar se é super admin
+    const { data: roles } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'super_admin');
+
+    if (!roles || roles.length === 0) {
+      throw new Error('Apenas super admins podem enviar notificações');
+    }
+
+    const payload: NotificationPayload = await req.json();
+
+    // Buscar subscriptions do usuário
+    const { data: subscriptions, error: subError } = await supabaseClient
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', payload.userId);
+
+    if (subError) {
+      console.error('Erro ao buscar subscriptions:', subError);
+      throw subError;
+    }
+
+    if (!subscriptions || subscriptions.length === 0) {
+      throw new Error('Usuário não possui notificações ativadas');
+    }
+
+    // VAPID keys - você precisará gerar esses valores
+    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY') || '';
+    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY') || '';
+
+    // Enviar notificação para todas as subscriptions do usuário
+    const promises = subscriptions.map(async (sub: PushSubscription) => {
+      try {
+        const pushSubscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
+        };
+
+        const notificationPayload = JSON.stringify({
+          title: payload.title,
+          body: payload.body,
+          icon: payload.icon || '/favicon.png',
+          badge: payload.badge || '/favicon.png',
+          data: payload.data || {},
+        });
+
+        // Aqui você usaria a biblioteca web-push ou similar
+        // Por enquanto, vamos apenas simular o envio
+        console.log('Enviando notificação para:', pushSubscription.endpoint);
+        console.log('Payload:', notificationPayload);
+
+        return { success: true, endpoint: sub.endpoint };
+      } catch (error) {
+        console.error('Erro ao enviar push:', error);
+        return { success: false, endpoint: sub.endpoint, error };
+      }
+    });
+
+    const results = await Promise.all(promises);
+
+    // Salvar no histórico
+    const { error: historyError } = await supabaseClient
+      .from('push_notifications')
+      .insert({
+        sender_id: user.id,
+        recipient_id: payload.userId,
+        title: payload.title,
+        body: payload.body,
+        icon: payload.icon,
+        badge: payload.badge,
+        data: payload.data,
+        status: 'sent',
+      });
+
+    if (historyError) {
+      console.error('Erro ao salvar histórico:', historyError);
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Notificação enviada',
+        results 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Erro:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});

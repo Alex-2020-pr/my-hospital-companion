@@ -640,6 +640,78 @@ export type Database = {
           },
         ]
       }
+      push_notifications: {
+        Row: {
+          badge: string | null
+          body: string
+          created_at: string
+          data: Json | null
+          icon: string | null
+          id: string
+          recipient_id: string | null
+          sender_id: string
+          sent_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          badge?: string | null
+          body: string
+          created_at?: string
+          data?: Json | null
+          icon?: string | null
+          id?: string
+          recipient_id?: string | null
+          sender_id: string
+          sent_at?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          badge?: string | null
+          body?: string
+          created_at?: string
+          data?: Json | null
+          icon?: string | null
+          id?: string
+          recipient_id?: string | null
+          sender_id?: string
+          sent_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       system_config: {
         Row: {
           created_at: string | null
