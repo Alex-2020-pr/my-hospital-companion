@@ -156,22 +156,25 @@ export const NotificationBell = () => {
     };
   }, [user]);
 
-  const markAsRead = async (messageId: string) => {
+  const markAsRead = async (messageId: string, messageType: 'organization' | 'push') => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('message_reads')
-        .insert({
-          message_id: messageId,
-          user_id: user.id
-        });
+      // Apenas mensagens de organização vão para a tabela message_reads
+      if (messageType === 'organization') {
+        const { error } = await supabase
+          .from('message_reads')
+          .insert({
+            message_id: messageId,
+            user_id: user.id
+          });
 
-      if (error && !error.message.includes('duplicate')) {
-        throw error;
+        if (error && !error.message.includes('duplicate')) {
+          throw error;
+        }
       }
 
-      // Atualizar estado local
+      // Atualizar estado local para ambos os tipos
       setMessages(prev =>
         prev.map(msg =>
           msg.id === messageId ? { ...msg, is_read: true } : msg
@@ -272,7 +275,7 @@ export const NotificationBell = () => {
                         ? 'bg-background'
                         : 'bg-accent/50 hover:bg-accent'
                     }`}
-                    onClick={() => !msg.is_read && markAsRead(msg.id)}
+                    onClick={() => !msg.is_read && markAsRead(msg.id, msg.type)}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <h5 className="font-medium text-sm">{msg.title}</h5>
