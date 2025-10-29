@@ -52,10 +52,16 @@ export const usePushNotifications = () => {
     }
 
     try {
+      // Verificar se a permissão já foi negada
+      if (Notification.permission === 'denied') {
+        toast.error('Notificações bloqueadas. Vá nas configurações do navegador para permitir notificações deste site.');
+        return;
+      }
+
       const permission = await Notification.requestPermission();
       
       if (permission !== 'granted') {
-        toast.error('Permissão para notificações negada');
+        toast.error('Você precisa permitir notificações para ativar este recurso. Clique no ícone ao lado da URL do site para permitir.');
         return;
       }
 
