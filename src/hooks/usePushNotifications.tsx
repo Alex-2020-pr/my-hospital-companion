@@ -57,7 +57,10 @@ export const usePushNotifications = () => {
     try {
       // Verificar se a permissão já foi negada
       if (Notification.permission === 'denied') {
-        toast.error('Notificações bloqueadas. Abra as configurações do navegador para permitir notificações deste site.');
+        toast.error('Notificações bloqueadas pelo navegador', {
+          description: 'Para ativar: clique no ícone de cadeado 🔒 ao lado da URL e permita notificações.',
+          duration: 6000,
+        });
         setIsLoading(false);
         return;
       }
@@ -65,7 +68,10 @@ export const usePushNotifications = () => {
       const permission = await Notification.requestPermission();
       
       if (permission !== 'granted') {
-        toast.error('Permissão negada. Clique no ícone de cadeado ao lado da URL para permitir notificações.');
+        toast.error('Permissão de notificação negada', {
+          description: 'Para ativar: clique no ícone de cadeado 🔒 ao lado da URL e permita notificações.',
+          duration: 6000,
+        });
         setIsLoading(false);
         return;
       }
