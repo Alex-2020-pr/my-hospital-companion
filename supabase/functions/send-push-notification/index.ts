@@ -27,10 +27,13 @@ serve(async (req) => {
   }
 
   try {
-    // Get authorization header
+    // Criar cliente Supabase com autenticação do request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Não autorizado');
+      return new Response(
+        JSON.stringify({ error: 'Não autorizado' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const supabaseClient = createClient(
@@ -43,12 +46,19 @@ serve(async (req) => {
       }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    // Obter o usuário do JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
     if (userError || !user) {
       console.error('Erro de autenticação:', userError);
-      throw new Error('Não autorizado');
+      return new Response(
+        JSON.stringify({ error: 'Não autorizado' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+
+    console.log('Usuário autenticado:', user.id);
 
     // Verificar se é super admin
     const { data: roles } = await supabaseClient
@@ -58,7 +68,10 @@ serve(async (req) => {
       .eq('role', 'super_admin');
 
     if (!roles || roles.length === 0) {
-      throw new Error('Apenas super admins podem enviar notificações');
+      return new Response(
+        JSON.stringify({ error: 'Apenas super admins podem enviar notificações' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const payload: NotificationPayload = await req.json();
