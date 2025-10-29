@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key } from "lucide-react";
+import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
@@ -95,6 +95,10 @@ export const Layout = ({ children, title }: LayoutProps) => {
                         <DropdownMenuItem onClick={() => navigate('/token-generator')}>
                           <Key className="mr-2 h-4 w-4" />
                           <span>Gerar Tokens</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
+                          <Bell className="mr-2 h-4 w-4" />
+                          <span>Notificações Push</span>
                         </DropdownMenuItem>
                       </>
                     )}
