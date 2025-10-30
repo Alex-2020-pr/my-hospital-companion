@@ -1,5 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+const medicationSchema = z.object({
+  name: z.string().min(1).max(200),
+  dosage: z.string().min(1).max(100),
+  frequency: z.string().min(1).max(100),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  instructions: z.string().max(1000).optional(),
+  is_active: z.boolean().optional(),
+});
+
+const requestSchema = z.object({
+  patient_cpf: z.string().min(11).max(14),
+  medications: z.array(medicationSchema).min(1).max(100),
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,14 +58,21 @@ serve(async (req) => {
       );
     }
 
-    const { patient_cpf, medications } = await req.json();
-
-    if (!patient_cpf || !medications || !Array.isArray(medications)) {
+    const body = await req.json();
+    
+    // Validate input with zod
+    const validationResult = requestSchema.safeParse(body);
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ error: 'Dados inválidos. CPF do paciente e lista de medicamentos são obrigatórios.' }),
+        JSON.stringify({ 
+          error: 'Dados inválidos', 
+          details: validationResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const { patient_cpf, medications } = validationResult.data;
 
     // Buscar usuário pelo CPF
     const { data: profile, error: profileError } = await supabase

@@ -1,5 +1,22 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+const appointmentSchema = z.object({
+  doctor_name: z.string().min(1).max(200),
+  specialty: z.string().max(100).optional(),
+  appointment_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  appointment_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  type: z.string().max(100).optional(),
+  location: z.string().max(500).optional(),
+  notes: z.string().max(1000).optional(),
+  status: z.enum(['scheduled', 'confirmed', 'completed', 'cancelled']).optional(),
+});
+
+const requestSchema = z.object({
+  patient_cpf: z.string().min(11).max(14),
+  appointments: z.array(appointmentSchema).min(1).max(100),
+});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,14 +59,21 @@ serve(async (req) => {
       );
     }
 
-    const { patient_cpf, appointments } = await req.json();
-
-    if (!patient_cpf || !appointments || !Array.isArray(appointments)) {
+    const body = await req.json();
+    
+    // Validate input with zod
+    const validationResult = requestSchema.safeParse(body);
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ error: 'Dados inválidos. CPF do paciente e lista de consultas são obrigatórios.' }),
+        JSON.stringify({ 
+          error: 'Dados inválidos', 
+          details: validationResult.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ')
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const { patient_cpf, appointments } = validationResult.data;
 
     // Buscar usuário pelo CPF
     const { data: profile, error: profileError } = await supabase
