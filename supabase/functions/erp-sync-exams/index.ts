@@ -60,6 +60,63 @@ serve(async (req) => {
       );
     }
 
+    // Rate limiting: 100 requests per minute per partner
+    const RATE_LIMIT = 100;
+    const WINDOW_MS = 60000; // 1 minute
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - WINDOW_MS);
+
+    // Clean up old rate limit records
+    await supabase
+      .from('api_rate_limits')
+      .delete()
+      .lt('window_start', windowStart.toISOString());
+
+    // Check current rate limit
+    const { data: rateLimitData } = await supabase
+      .from('api_rate_limits')
+      .select('request_count, window_start')
+      .eq('partner_id', partner.id)
+      .gte('window_start', windowStart.toISOString())
+      .single();
+
+    if (rateLimitData && rateLimitData.request_count >= RATE_LIMIT) {
+      const retryAfter = Math.ceil((new Date(rateLimitData.window_start).getTime() + WINDOW_MS - now.getTime()) / 1000);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Limite de requisições excedido', 
+          retryAfter: `${retryAfter} segundos`,
+          limit: RATE_LIMIT,
+          window: '1 minuto'
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Retry-After': retryAfter.toString()
+          } 
+        }
+      );
+    }
+
+    // Update or insert rate limit record
+    if (rateLimitData) {
+      await supabase
+        .from('api_rate_limits')
+        .update({ request_count: rateLimitData.request_count + 1 })
+        .eq('partner_id', partner.id)
+        .gte('window_start', windowStart.toISOString());
+    } else {
+      await supabase
+        .from('api_rate_limits')
+        .insert({
+          partner_id: partner.id,
+          window_start: now.toISOString(),
+          request_count: 1
+        });
+    }
+
     const body = await req.json();
     
     // Validate input with zod
