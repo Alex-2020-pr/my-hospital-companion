@@ -35,7 +35,17 @@ export const NotificationResponseDialog = ({
 
     setSending(true);
     try {
-      const { error } = await supabase
+      // Buscar a notificação original para pegar o sender_id
+      const { data: notification, error: notifError } = await supabase
+        .from('push_notifications')
+        .select('sender_id, title')
+        .eq('id', notificationId)
+        .single();
+
+      if (notifError) throw notifError;
+
+      // Salvar a resposta
+      const { error: responseError } = await supabase
         .from('notification_responses')
         .insert({
           notification_id: notificationId,
@@ -43,7 +53,33 @@ export const NotificationResponseDialog = ({
           response_text: response.trim(),
         });
 
-      if (error) throw error;
+      if (responseError) throw responseError;
+
+      // Buscar informações do usuário que está respondendo
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .single();
+
+      const senderName = profile?.full_name || profile?.email || 'Um usuário';
+
+      // Enviar notificação push de volta para o sender
+      if (notification.sender_id) {
+        const { error: pushError } = await supabase
+          .from('push_notifications')
+          .insert({
+            sender_id: user.id,
+            recipient_id: notification.sender_id,
+            title: `Resposta: ${notification.title}`,
+            body: `${senderName} respondeu: ${response.trim()}`,
+            is_read: false
+          });
+
+        if (pushError) {
+          console.error('Error sending push notification:', pushError);
+        }
+      }
 
       toast.success('Resposta enviada com sucesso!');
       setResponse("");
