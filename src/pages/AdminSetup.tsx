@@ -83,48 +83,46 @@ export const AdminSetup = () => {
     setSubmitting(true);
 
     try {
-      // Primeiro tenta fazer login com as credenciais fornecidas
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      // Create new user account
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName
+          }
+        }
       });
 
-      let userId: string;
+      if (signUpError) throw signUpError;
+      if (!authData.user) throw new Error('Usuário não foi criado');
 
-      if (signInError) {
-        // Se o login falhar, tenta criar uma nova conta
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName
-            }
-          }
+      // Log admin setup attempt
+      await supabase
+        .from('admin_setup_attempts')
+        .insert({
+          attempted_email: formData.email,
+          success: true
         });
 
-        if (signUpError) throw signUpError;
-        if (!authData.user) throw new Error('Usuário não foi criado');
-        
-        userId = authData.user.id;
-      } else {
-        // Se o login foi bem sucedido, usa o ID do usuário existente
-        userId = signInData.user.id;
-      }
-
-      // Adiciona a role de super_admin
+      // Add super_admin role (atomic check is enforced by RLS policy)
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
-          user_id: userId,
+          user_id: authData.user.id,
           role: 'super_admin'
         });
 
       if (roleError) {
-        // Se já existe a role, ignora o erro
-        if (!roleError.message.includes('duplicate') && !roleError.message.includes('unique')) {
-          throw roleError;
-        }
+        // Log failed attempt
+        await supabase
+          .from('admin_setup_attempts')
+          .insert({
+            attempted_email: formData.email,
+            success: false
+          });
+        
+        throw new Error('Não foi possível criar o administrador. Pode já existir um administrador no sistema.');
       }
 
       toast({
@@ -132,7 +130,7 @@ export const AdminSetup = () => {
         description: "Conta de administrador configurada com sucesso!",
       });
 
-      // Aguarda um pouco e redireciona para a página admin
+      // Redirect to admin page
       setTimeout(() => {
         navigate('/admin');
       }, 1500);

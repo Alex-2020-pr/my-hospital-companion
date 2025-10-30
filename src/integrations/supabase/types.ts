@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_setup_attempts: {
+        Row: {
+          attempted_at: string
+          attempted_email: string
+          id: string
+          ip_address: string | null
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          attempted_at?: string
+          attempted_email: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          attempted_at?: string
+          attempted_email?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       app_versions: {
         Row: {
           category: string
@@ -947,7 +974,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_create_first_admin: { Args: never; Returns: boolean }
       generate_api_token: { Args: never; Returns: string }
+      get_active_partners: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }[]
+      }
+      get_patient_profiles_masked: {
+        Args: { _org_id: string }
+        Returns: {
+          cpf_masked: string
+          created_at: string
+          email_masked: string
+          full_name: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
