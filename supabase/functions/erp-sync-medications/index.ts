@@ -102,7 +102,7 @@ serve(async (req) => {
     if (insertError) {
       console.error('Insert error:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Erro ao inserir medicamentos', details: insertError.message }),
+        JSON.stringify({ error: 'Falha ao processar medicamentos', code: 'INSERT_FAILED' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

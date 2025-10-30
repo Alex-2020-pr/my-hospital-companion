@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
+
+const responseSchema = z.object({
+  response: z.string()
+    .trim()
+    .min(1, "Resposta não pode estar vazia")
+    .max(1000, "Resposta deve ter no máximo 1000 caracteres")
+});
 
 interface NotificationResponseDialogProps {
   open: boolean;
@@ -31,7 +39,14 @@ export const NotificationResponseDialog = ({
   const [sending, setSending] = useState(false);
 
   const handleSendResponse = async () => {
-    if (!user || !response.trim()) return;
+    if (!user) return;
+
+    // Validate input
+    const validation = responseSchema.safeParse({ response });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
 
     setSending(true);
     try {
@@ -107,8 +122,12 @@ export const NotificationResponseDialog = ({
             value={response}
             onChange={(e) => setResponse(e.target.value)}
             rows={5}
+            maxLength={1000}
             className="resize-none"
           />
+          <p className="text-xs text-muted-foreground text-right">
+            {response.length}/1000 caracteres
+          </p>
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"

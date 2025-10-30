@@ -102,7 +102,7 @@ serve(async (req) => {
     if (insertError) {
       console.error('Insert error:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Erro ao inserir documentos', details: insertError.message }),
+        JSON.stringify({ error: 'Falha ao processar documentos', code: 'INSERT_FAILED' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -121,7 +121,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in erp-sync-documents:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Erro interno ao processar documentos', code: 'PROCESSING_ERROR' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

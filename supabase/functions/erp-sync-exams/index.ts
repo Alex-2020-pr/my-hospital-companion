@@ -104,7 +104,7 @@ serve(async (req) => {
     if (insertError) {
       console.error('Insert error:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Erro ao inserir exames', details: insertError.message }),
+        JSON.stringify({ error: 'Falha ao processar exames', code: 'INSERT_FAILED' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -123,7 +123,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in erp-sync-exams:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Erro interno ao processar exames', code: 'PROCESSING_ERROR' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
