@@ -28,6 +28,12 @@ interface NotificationHistory {
     full_name: string;
     email: string;
   };
+  responses?: Array<{
+    id: string;
+    response_text: string;
+    created_at: string;
+    user_name: string;
+  }>;
 }
 
 export const AdminPushNotifications = () => {
@@ -87,9 +93,42 @@ export const AdminPushNotifications = () => {
 
       const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
+      // Buscar respostas para cada notificação
+      const notificationIds = data.map(n => n.id);
+      const { data: responses } = await supabase
+        .from('notification_responses')
+        .select('id, notification_id, response_text, created_at, user_id')
+        .in('notification_id', notificationIds)
+        .order('created_at', { ascending: false });
+
+      // Buscar perfis dos usuários que responderam
+      const responseUserIds = [...new Set(responses?.map(r => r.user_id) || [])];
+      const { data: responseUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', responseUserIds);
+
+      const responseUsersMap = new Map(responseUsers?.map(u => [u.id, u]) || []);
+
+      // Agrupar respostas por notification_id
+      const responsesMap = new Map<string, Array<any>>();
+      responses?.forEach(resp => {
+        if (!responsesMap.has(resp.notification_id)) {
+          responsesMap.set(resp.notification_id, []);
+        }
+        const respUser = responseUsersMap.get(resp.user_id);
+        responsesMap.get(resp.notification_id)?.push({
+          id: resp.id,
+          response_text: resp.response_text,
+          created_at: resp.created_at,
+          user_name: respUser?.full_name || respUser?.email || 'Usuário'
+        });
+      });
+
       const historyWithProfiles = data.map(notif => ({
         ...notif,
-        profiles: profilesMap.get(notif.recipient_id!) || { full_name: 'Desconhecido', email: '' }
+        profiles: profilesMap.get(notif.recipient_id!) || { full_name: 'Desconhecido', email: '' },
+        responses: responsesMap.get(notif.id) || []
       }));
 
       setHistory(historyWithProfiles);
@@ -261,6 +300,22 @@ export const AdminPushNotifications = () => {
                         {new Date(notif.sent_at).toLocaleString('pt-BR')}
                       </span>
                     </div>
+                    {notif.responses && notif.responses.length > 0 && (
+                      <div className="mt-3 pt-3 border-t space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          Respostas ({notif.responses.length}):
+                        </p>
+                        {notif.responses.map((resp) => (
+                          <div key={resp.id} className="pl-3 border-l-2 border-primary/30">
+                            <p className="text-xs font-medium">{resp.user_name}</p>
+                            <p className="text-xs text-muted-foreground">{resp.response_text}</p>
+                            <p className="text-xs text-muted-foreground/70 mt-1">
+                              {new Date(resp.created_at).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

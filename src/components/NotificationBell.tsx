@@ -22,6 +22,7 @@ interface Message {
   created_at: string;
   is_read: boolean;
   type: 'organization' | 'push';
+  sender_name?: string;
 }
 
 export const NotificationBell = () => {
@@ -57,12 +58,21 @@ export const NotificationBell = () => {
       // Buscar notificações push do usuário
       const { data: pushNotifications, error: pushError } = await supabase
         .from('push_notifications')
-        .select('id, title, body, created_at, is_read')
+        .select('id, title, body, created_at, is_read, sender_id')
         .eq('recipient_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (pushError) throw pushError;
+
+      // Buscar informações dos remetentes
+      const senderIds = [...new Set(pushNotifications?.map(n => n.sender_id).filter(Boolean) || [])];
+      const { data: senders } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', senderIds);
+
+      const sendersMap = new Map(senders?.map(s => [s.id, s]) || []);
 
       // Buscar quais mensagens o usuário já leu
       const { data: reads, error: readsError } = await supabase
@@ -82,15 +92,19 @@ export const NotificationBell = () => {
       }));
 
       // Combinar notificações push com seu próprio estado de is_read
-      const pushMessagesFormatted = (pushNotifications || []).map(notif => ({
-        id: notif.id,
-        title: notif.title,
-        message: notif.body,
-        priority: 'normal',
-        created_at: notif.created_at,
-        is_read: notif.is_read,
-        type: 'push' as const
-      }));
+      const pushMessagesFormatted = (pushNotifications || []).map(notif => {
+        const sender = sendersMap.get(notif.sender_id);
+        return {
+          id: notif.id,
+          title: notif.title,
+          message: notif.body,
+          priority: 'normal',
+          created_at: notif.created_at,
+          is_read: notif.is_read,
+          type: 'push' as const,
+          sender_name: sender?.full_name || sender?.email || 'Sistema'
+        };
+      });
 
       // Combinar e ordenar todas as notificações
       const allMessages = [...orgMessagesWithReadStatus, ...pushMessagesFormatted]
@@ -305,6 +319,11 @@ export const NotificationBell = () => {
                           {getPriorityLabel(msg.priority)}
                         </Badge>
                       </div>
+                      {msg.sender_name && (
+                        <p className="text-xs text-muted-foreground mb-1">
+                          De: {msg.sender_name}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground mb-2">
                         {msg.message}
                       </p>
