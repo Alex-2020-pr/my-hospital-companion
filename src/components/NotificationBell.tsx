@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { NotificationResponseDialog } from "./NotificationResponseDialog";
+import { PushNotificationDemo } from "./PushNotificationDemo";
+import { formatBrazilDate } from "@/lib/timezone";
 
 interface Message {
   id: string;
@@ -328,7 +330,7 @@ export const NotificationBell = () => {
                         {msg.message}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(msg.created_at).toLocaleString('pt-BR')}
+                        {formatBrazilDate(msg.created_at)}
                       </p>
                     </div>
                     {msg.type === 'push' && (
@@ -353,6 +355,7 @@ export const NotificationBell = () => {
               </div>
             )}
           </ScrollArea>
+          <PushNotificationDemo />
         </div>
       </PopoverContent>
       {selectedNotification && (

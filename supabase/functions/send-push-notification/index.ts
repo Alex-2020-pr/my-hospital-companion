@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 
+const BRAZIL_TIMEZONE = 'America/Sao_Paulo';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -140,7 +142,12 @@ serve(async (req) => {
 
     const results = await Promise.all(promises);
 
-    // Salvar no histórico
+    // Timestamp no horário de Brasília para histórico
+    const brazilTimestamp = new Date().toLocaleString('en-US', { 
+      timeZone: BRAZIL_TIMEZONE 
+    });
+
+    // Salvar no histórico com timestamp de Brasília
     const { error: historyError } = await supabaseClient
       .from('push_notifications')
       .insert({
@@ -152,6 +159,7 @@ serve(async (req) => {
         badge: payload.badge,
         data: payload.data,
         status: 'sent',
+        sent_at: new Date(brazilTimestamp).toISOString(),
       });
 
     if (historyError) {
