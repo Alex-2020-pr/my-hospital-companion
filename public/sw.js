@@ -2,6 +2,9 @@
 const CACHE_VERSION = 'v1.0.0';
 const CACHE_NAME = `am2-cache-${CACHE_VERSION}`;
 
+// Precache manifest injected by vite-plugin-pwa
+const precacheManifest = self.__WB_MANIFEST || [];
+
 // Service Worker para notificações push
 self.addEventListener('push', function(event) {
   console.log('Push recebido:', event);
