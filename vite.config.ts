@@ -21,12 +21,15 @@ export default defineConfig(({ mode }) => ({
       srcDir: 'public',
       filename: 'sw.js',
       injectManifest: {
-        injectionPoint: undefined
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       },
       devOptions: {
         enabled: true,
-        type: 'module'
+        type: 'module',
+        navigateFallback: undefined
       },
+      injectRegister: 'auto',
       manifest: {
         name: 'AM2 App - Saúde Digital',
         short_name: 'AM2',
