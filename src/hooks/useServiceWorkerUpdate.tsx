@@ -7,33 +7,64 @@ export const useServiceWorkerUpdate = () => {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
+    let interval: NodeJS.Timeout;
+
+    const checkForUpdate = (reg: ServiceWorkerRegistration) => {
+      // Verificar se há um service worker waiting
+      if (reg.waiting) {
+        console.log('Service Worker waiting detectado');
+        setUpdateAvailable(true);
+      }
+    };
+
     // Verificar se há atualização disponível
     navigator.serviceWorker.ready.then((reg) => {
       setRegistration(reg);
+      checkForUpdate(reg);
       
       // Verificar por atualizações a cada 60 segundos
-      const interval = setInterval(() => {
-        reg.update();
+      interval = setInterval(() => {
+        reg.update().then(() => {
+          checkForUpdate(reg);
+        });
       }, 60000);
 
-      return () => clearInterval(interval);
+      // Verificar quando um novo SW está instalando
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('Nova versão do Service Worker instalada');
+            setUpdateAvailable(true);
+          }
+        });
+      });
     });
 
-    // Escutar por novos service workers instalando
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!navigator.serviceWorker.controller) return;
-      console.log('Novo Service Worker detectado');
+    // Escutar por novos service workers assumindo o controle
+    const controllerChangeHandler = () => {
+      console.log('Controller change detectado');
       setUpdateAvailable(true);
-    });
+    };
 
     // Escutar mensagens do service worker
-    navigator.serviceWorker.addEventListener('message', (event) => {
+    const messageHandler = (event: MessageEvent) => {
       if (event.data && event.data.type === 'SW_UPDATED') {
         console.log('Service Worker atualizado para versão:', event.data.version);
         setUpdateAvailable(true);
       }
-    });
+    };
 
+    navigator.serviceWorker.addEventListener('controllerchange', controllerChangeHandler);
+    navigator.serviceWorker.addEventListener('message', messageHandler);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      navigator.serviceWorker.removeEventListener('controllerchange', controllerChangeHandler);
+      navigator.serviceWorker.removeEventListener('message', messageHandler);
+    };
   }, []);
 
   const applyUpdate = () => {
