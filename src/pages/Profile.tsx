@@ -25,6 +25,20 @@ import { useEffect, useState } from "react";
 import { Loader2, Save, X } from "lucide-react";
 import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 import { CacheClearButton } from "@/components/CacheClearButton";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  full_name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres").max(200, "Nome muito longo").trim(),
+  cpf: z.string().regex(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido (formato: XXX.XXX.XXX-XX)").optional().or(z.literal('')),
+  phone: z.string().regex(/^\(\d{2}\)\s?\d{4,5}-\d{4}$/, "Telefone inválido (formato: (XX) XXXXX-XXXX)").optional().or(z.literal('')),
+  birth_date: z.string().refine(date => {
+    if (!date) return true;
+    const d = new Date(date);
+    const now = new Date();
+    const minDate = new Date('1900-01-01');
+    return d < now && d > minDate;
+  }, "Data de nascimento inválida").optional().or(z.literal(''))
+});
 
 export const Profile = () => {
   const { signOut, user } = useAuth();
@@ -74,6 +88,25 @@ export const Profile = () => {
   const handleSave = async () => {
     if (!user) return;
     
+    // Validate input before saving
+    const validation = profileSchema.safeParse({
+      full_name: editedProfile.full_name,
+      cpf: editedProfile.cpf || '',
+      phone: editedProfile.phone || '',
+      birth_date: editedProfile.birth_date || ''
+    });
+
+    if (!validation.success) {
+      const errorMessage = validation.error.issues[0].message;
+      toast({
+        title: "Dados inválidos",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setSaving(false);
+      return;
+    }
+
     setSaving(true);
     const { error } = await supabase
       .from('profiles')

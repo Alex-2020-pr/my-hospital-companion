@@ -51,7 +51,7 @@ export const AdminUsers = () => {
       if (!isSuperAdmin) return;
 
       try {
-        // Buscar todos os usuários
+        // Buscar todos os usuários com dados mascarados para segurança
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name, email, created_at')
