@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, Phone } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
-import am2LogoCompleto from "@/assets/am2-logo-completo.png";
+import am2LogoCompleto from "@/assets/am2-logo-completo-512.png";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -136,13 +136,14 @@ export const Auth = () => {
       <div className="w-full max-w-md space-y-6">
         <Card className="w-full">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-2">
             <img 
               src={am2LogoCompleto} 
               alt="AM2 Soluções" 
-              className="h-20"
+              className="h-28"
             />
           </div>
+          <CardTitle className="text-2xl font-bold">Portal do Paciente</CardTitle>
           <CardDescription>
             Acesse seus dados médicos de forma segura
           </CardDescription>
@@ -280,7 +281,7 @@ export const Auth = () => {
           className="inline-block opacity-60 hover:opacity-100 transition-opacity"
         >
           <img 
-            src={am2Logo} 
+            src={am2LogoCompleto} 
             alt="AM2 Soluções" 
             className="h-8 mx-auto"
           />
