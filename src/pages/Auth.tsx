@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Mail, Phone } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
 import am2LogoCompleto from "@/assets/am2-logo-completo-512.png";
+import { getFormattedVersion } from "@/lib/version";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -305,6 +306,9 @@ export const Auth = () => {
         </div>
         <p className="text-xs text-muted-foreground/60">
           Desenvolvido por AM2 Soluções
+        </p>
+        <p className="text-[10px] text-muted-foreground/40 font-mono">
+          {getFormattedVersion()}
         </p>
       </div>
       </div>
