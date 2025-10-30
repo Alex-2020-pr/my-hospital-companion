@@ -99,8 +99,13 @@ serve(async (req) => {
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
     const vapidSubject = Deno.env.get('VAPID_SUBJECT')!;
 
+    // Garantir que o subject seja uma URL válida
+    const validSubject = vapidSubject.startsWith('http') || vapidSubject.startsWith('mailto:') 
+      ? vapidSubject 
+      : `https://${vapidSubject}`;
+
     webpush.setVapidDetails(
-      vapidSubject,
+      validSubject,
       vapidPublicKey,
       vapidPrivateKey
     );
