@@ -15,15 +15,28 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' &&
     componentTagger(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.png', 'robots.txt'],
+      strategies: 'injectManifest',
+      srcDir: 'public',
+      filename: 'sw.js',
+      injectManifest: {
+        injectionPoint: undefined
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
       manifest: {
-        name: 'AM2 App',
+        name: 'AM2 App - Saúde Digital',
         short_name: 'AM2',
         description: 'Aplicativo de Saúde Digital AM2',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#2563eb',
+        background_color: '#f5f7fa',
         display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        orientation: 'portrait',
         icons: [
           {
             src: '/favicon.png',
