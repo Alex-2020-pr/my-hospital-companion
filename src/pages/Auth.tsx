@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Stethoscope, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
+import am2LogoCompleto from "@/assets/am2-logo-completo.png";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -136,11 +137,12 @@ export const Auth = () => {
         <Card className="w-full">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <Stethoscope className="h-8 w-8 text-primary" />
-            </div>
+            <img 
+              src={am2LogoCompleto} 
+              alt="AM2 Soluções" 
+              className="h-20"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">Portal do Paciente</CardTitle>
           <CardDescription>
             Acesse seus dados médicos de forma segura
           </CardDescription>

@@ -16,6 +16,7 @@ import {
   Sparkles
 } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
+import am2LogoCompleto from "@/assets/am2-logo-completo.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -426,9 +427,9 @@ export const Profile = () => {
                 className="hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src={am2Logo} 
+                  src={am2LogoCompleto} 
                   alt="AM2 Soluções" 
-                  className="h-12"
+                  className="h-16"
                 />
               </a>
               <div className="flex-1 space-y-1">
