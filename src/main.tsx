@@ -3,16 +3,19 @@ import App from './App.tsx'
 import './index.css'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-// Register custom service worker for push notifications
+// Register both service workers
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    // Register app service worker
     navigator.serviceWorker.register('/sw.js', { scope: '/' })
       .then((registration) => {
-        console.log('Service Worker registrado:', registration);
+        console.log('App Service Worker registrado:', registration);
       })
       .catch((error) => {
-        console.error('Erro ao registrar Service Worker:', error);
+        console.error('Erro ao registrar App Service Worker:', error);
       });
+
+    // Firebase messaging service worker is registered separately by Firebase SDK
   });
 
   navigator.serviceWorker.addEventListener('message', (event) => {

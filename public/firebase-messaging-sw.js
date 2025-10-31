@@ -4,10 +4,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 
 // Configuração do Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDummy-key-for-fcm",
-  projectId: "seu-projeto-firebase",
-  messagingSenderId: "123456789",
-  appId: "1:123:web:abc"
+  apiKey: "AIzaSyCM4dZtxd7AA5daMjiRwoGKKpMgVWhLuOg",
+  authDomain: "am2app.firebaseapp.com",
+  projectId: "am2app",
+  storageBucket: "am2app.firebasestorage.app",
+  messagingSenderId: "99193179565",
+  appId: "1:99193179565:web:1202f7b4873336e915e524",
+  measurementId: "G-6FEGM33YZD"
 };
 
 firebase.initializeApp(firebaseConfig);
