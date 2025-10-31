@@ -25,7 +25,28 @@ export const usePushNotifications = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    setIsSupported('serviceWorker' in navigator && 'PushManager' in window);
+    const checkSupport = async () => {
+      // Check if service workers and notifications are supported
+      const hasServiceWorker = 'serviceWorker' in navigator;
+      const hasNotifications = 'Notification' in window;
+      const hasPermissionAPI = 'permissions' in navigator;
+      
+      // For iOS/Safari, also check if we can request permission
+      let canRequestPermission = true;
+      if (hasNotifications && hasPermissionAPI) {
+        try {
+          const permissionStatus = await navigator.permissions.query({ name: 'notifications' as PermissionName });
+          canRequestPermission = permissionStatus.state !== 'denied';
+        } catch (e) {
+          // If permissions API fails, assume we can try to request
+          canRequestPermission = true;
+        }
+      }
+      
+      setIsSupported(hasServiceWorker && hasNotifications && canRequestPermission);
+    };
+    
+    checkSupport();
     if (user) {
       checkSubscription();
     }
