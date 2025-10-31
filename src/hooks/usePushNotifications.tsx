@@ -65,7 +65,7 @@ export const usePushNotifications = () => {
         await supabase.from('push_subscriptions').upsert([{
           user_id: user?.id,
           subscription: token,
-          endpoint: 'fcm',
+          endpoint: token,
           auth: token,
           p256dh: token
         }]);
