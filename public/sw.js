@@ -21,6 +21,12 @@ self.addEventListener('push', function(event) {
       data = event.data.json();
     } catch (e) {
       console.error('Erro ao parsear dados do push:', e);
+      data = {
+        title: 'Nova Notificação',
+        body: event.data.text(),
+        icon: '/favicon.png',
+        badge: '/favicon.png'
+      };
     }
   }
 
@@ -29,6 +35,9 @@ self.addEventListener('push', function(event) {
     icon: data.icon || '/favicon.png',
     badge: data.badge || '/favicon.png',
     vibrate: [200, 100, 200],
+    requireInteraction: false,
+    tag: 'notification-' + Date.now(),
+    renotify: true,
     data: data.data || {},
     actions: [
       {
@@ -44,6 +53,9 @@ self.addEventListener('push', function(event) {
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
+      .catch(error => {
+        console.error('Erro ao mostrar notificação:', error);
+      })
   );
 });
 
