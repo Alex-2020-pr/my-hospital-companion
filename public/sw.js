@@ -131,12 +131,6 @@ self.addEventListener('message', function(event) {
         return Promise.all(
           cacheNames.map(cacheName => caches.delete(cacheName))
         );
-      }).then(() => {
-        return self.registration.unregister();
-      }).then(() => {
-        return self.clients.matchAll();
-      }).then(clients => {
-        clients.forEach(client => client.navigate(client.url));
       })
     );
   }

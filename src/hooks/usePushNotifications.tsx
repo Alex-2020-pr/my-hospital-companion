@@ -26,24 +26,34 @@ export const usePushNotifications = () => {
 
   useEffect(() => {
     const checkSupport = async () => {
-      // Check if service workers and notifications are supported
       const hasServiceWorker = 'serviceWorker' in navigator;
       const hasNotifications = 'Notification' in window;
-      const hasPermissionAPI = 'permissions' in navigator;
       
-      // For iOS/Safari, also check if we can request permission
-      let canRequestPermission = true;
-      if (hasNotifications && hasPermissionAPI) {
+      // Detect if running as PWA
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                    (window.navigator as any).standalone === true;
+      
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      
+      // iOS only supports push notifications when installed as PWA
+      if (isIOS && !isPWA) {
+        setIsSupported(false);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Check if permission is denied
+      let permissionDenied = false;
+      if (hasNotifications) {
         try {
-          const permissionStatus = await navigator.permissions.query({ name: 'notifications' as PermissionName });
-          canRequestPermission = permissionStatus.state !== 'denied';
+          permissionDenied = Notification.permission === 'denied';
         } catch (e) {
-          // If permissions API fails, assume we can try to request
-          canRequestPermission = true;
+          console.error('Erro ao verificar permissão:', e);
         }
       }
       
-      setIsSupported(hasServiceWorker && hasNotifications && canRequestPermission);
+      setIsSupported(hasServiceWorker && hasNotifications && !permissionDenied);
     };
     
     checkSupport();

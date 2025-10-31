@@ -82,20 +82,19 @@ export const useServiceWorkerUpdate = () => {
     }, 500);
   };
 
-  const clearCacheAndReload = () => {
+  const clearCacheAndReload = async () => {
     // Limpar todos os caches
     if ('caches' in window) {
-      caches.keys().then((names: string[]) => {
-        Promise.all(names.map((name: string) => caches.delete(name)));
-      });
+      const names = await caches.keys();
+      await Promise.all(names.map((name: string) => caches.delete(name)));
     }
 
-    // Enviar mensagem para o service worker se disponível
-    if (registration?.active) {
+    // Enviar mensagem apenas para o app service worker
+    if (registration?.active && registration.scope.includes('/sw.js')) {
       registration.active.postMessage({ type: 'CLEAR_CACHE' });
     }
     
-    // Recarregar a página
+    // Recarregar a página sem afetar o Firebase SW
     setTimeout(() => {
       window.location.reload();
     }, 500);
