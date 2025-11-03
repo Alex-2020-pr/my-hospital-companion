@@ -27,11 +27,46 @@ messaging.onBackgroundMessage((payload) => {
     badge: '/favicon.png',
     tag: 'notification-' + Date.now(),
     requireInteraction: true,
-    vibrate: [200, 100, 200],
+    renotify: true,
+    silent: false,
+    vibrate: [200, 100, 200, 100, 200],
+    actions: [],
     data: payload.data || {}
   };
 
+  console.log('Exibindo notificação:', notificationTitle);
   return self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Handle push events directly (para iOS e dispositivos que não suportam onBackgroundMessage)
+self.addEventListener('push', function(event) {
+  console.log('Push event recebido:', event);
+  
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      console.log('Payload do push:', payload);
+      
+      const notificationTitle = payload.notification?.title || payload.title || 'Nova Notificação';
+      const notificationOptions = {
+        body: payload.notification?.body || payload.body || '',
+        icon: payload.notification?.icon || payload.icon || '/favicon.png',
+        badge: '/favicon.png',
+        tag: 'notification-' + Date.now(),
+        requireInteraction: true,
+        renotify: true,
+        silent: false,
+        vibrate: [200, 100, 200, 100, 200],
+        data: payload.data || {}
+      };
+
+      event.waitUntil(
+        self.registration.showNotification(notificationTitle, notificationOptions)
+      );
+    } catch (e) {
+      console.error('Erro ao processar push:', e);
+    }
+  }
 });
 
 // Handle notification clicks

@@ -114,6 +114,16 @@ export const usePushNotifications = () => {
 
       console.log('Token FCM gerado com sucesso');
       
+      // Extrai apenas o token do FCM (remove URL se houver)
+      let fcmToken = token;
+      if (token.includes('/')) {
+        // Se for uma URL completa, extrai apenas a parte do token
+        const parts = token.split('/');
+        fcmToken = parts[parts.length - 1];
+      }
+      
+      console.log('Token FCM processado');
+      
       // Remove subscriptions antigas do usuário antes de criar uma nova
       console.log('Removendo subscriptions antigas...');
       await supabase
@@ -121,13 +131,13 @@ export const usePushNotifications = () => {
         .delete()
         .eq('user_id', user.id);
       
-      // Salva a nova subscription no banco
+      // Salva a nova subscription no banco (apenas o token, sem URL)
       console.log('Salvando nova subscription no banco...');
       const { error } = await supabase.from('push_subscriptions').insert({
         user_id: user.id,
-        endpoint: token,
-        p256dh: token.substring(0, 87),
-        auth: token.substring(0, 24)
+        endpoint: fcmToken,
+        p256dh: fcmToken.substring(0, Math.min(87, fcmToken.length)),
+        auth: fcmToken.substring(0, Math.min(24, fcmToken.length))
       });
       
       if (error) {

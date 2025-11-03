@@ -41,6 +41,15 @@ export const NotificationBell = () => {
     if (!user) return;
 
     try {
+      // Buscar perfil do usuário para pegar a organization_id
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
       // Buscar mensagens da organização do usuário
       const { data: orgMessages, error: msgError } = await supabase
         .from('organization_messages')
@@ -52,6 +61,7 @@ export const NotificationBell = () => {
           created_at
         `)
         .eq('is_active', true)
+        .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(10);
 
