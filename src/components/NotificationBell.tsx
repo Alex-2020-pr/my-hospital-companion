@@ -67,11 +67,11 @@ export const NotificationBell = () => {
 
       if (msgError) throw msgError;
 
-      // Buscar notificações push do usuário
+      // Buscar notificações push do usuário (enviadas e recebidas)
       const { data: pushNotifications, error: pushError } = await supabase
         .from('push_notifications')
-        .select('id, title, body, created_at, is_read, sender_id')
-        .eq('recipient_id', user.id)
+        .select('id, title, body, created_at, is_read, sender_id, recipient_id')
+        .or(`recipient_id.eq.${user.id},sender_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
         .limit(10);
 
