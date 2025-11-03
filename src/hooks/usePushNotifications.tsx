@@ -78,6 +78,11 @@ export const usePushNotifications = () => {
   };
 
   const subscribe = async () => {
+    if (!user?.id) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
     try {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
@@ -93,16 +98,27 @@ export const usePushNotifications = () => {
       });
 
       if (token) {
-        await supabase.from('push_subscriptions').upsert([{
-          user_id: user?.id,
+        const { error } = await supabase.from('push_subscriptions').upsert([{
+          user_id: user.id,
           subscription: token,
           endpoint: token,
           auth: token,
           p256dh: token
         }]);
         
+        if (error) {
+          console.error('Erro ao salvar subscription:', error);
+          toast.error('Erro ao salvar configuração de notificações');
+          return;
+        }
+        
         setIsSubscribed(true);
         toast.success('Notificações ativadas com sucesso!');
+        
+        // Recarrega o status da subscription
+        await checkSubscription();
+      } else {
+        toast.error('Não foi possível gerar token de notificação');
       }
     } catch (error) {
       console.error('Erro ao ativar notificações:', error);
@@ -111,16 +127,30 @@ export const usePushNotifications = () => {
   };
 
   const unsubscribe = async () => {
+    if (!user?.id) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
     try {
       await deleteToken(messaging);
       
-      await supabase
+      const { error } = await supabase
         .from('push_subscriptions')
         .delete()
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error('Erro ao remover subscription:', error);
+        toast.error('Erro ao desativar notificações');
+        return;
+      }
       
       setIsSubscribed(false);
       toast.success('Notificações desativadas');
+      
+      // Recarrega o status da subscription
+      await checkSubscription();
     } catch (error) {
       console.error('Erro ao desativar notificações:', error);
       toast.error('Erro ao desativar notificações');
