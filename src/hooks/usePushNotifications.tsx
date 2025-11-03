@@ -98,26 +98,29 @@ export const usePushNotifications = () => {
       });
 
       if (token) {
-        const { error } = await supabase.from('push_subscriptions').upsert([{
+        console.log('Token FCM gerado:', token.substring(0, 50) + '...');
+        
+        const { data, error } = await supabase.from('push_subscriptions').insert({
           user_id: user.id,
-          subscription: token,
           endpoint: token,
-          auth: token,
-          p256dh: token
-        }]);
+          p256dh: token.substring(0, 87),
+          auth: token.substring(0, 24)
+        });
         
         if (error) {
           console.error('Erro ao salvar subscription:', error);
-          toast.error('Erro ao salvar configuração de notificações');
+          toast.error(`Erro ao salvar notificação: ${error.message}`);
           return;
         }
         
+        console.log('Subscription salva com sucesso');
         setIsSubscribed(true);
         toast.success('Notificações ativadas com sucesso!');
         
         // Recarrega o status da subscription
         await checkSubscription();
       } else {
+        console.error('Token FCM não foi gerado');
         toast.error('Não foi possível gerar token de notificação');
       }
     } catch (error) {
