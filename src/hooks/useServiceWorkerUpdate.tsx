@@ -19,6 +19,11 @@ export const useServiceWorkerUpdate = () => {
 
     // Verificar se há atualização disponível
     navigator.serviceWorker.ready.then((reg) => {
+      // Ignorar o Firebase Service Worker
+      if (reg.active?.scriptURL.includes('firebase-messaging-sw.js')) {
+        return;
+      }
+      
       setRegistration(reg);
       checkForUpdate(reg);
       
@@ -33,6 +38,11 @@ export const useServiceWorkerUpdate = () => {
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         if (!newWorker) return;
+        
+        // Ignorar Firebase Service Worker
+        if (newWorker.scriptURL.includes('firebase-messaging-sw.js')) {
+          return;
+        }
 
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -52,6 +62,10 @@ export const useServiceWorkerUpdate = () => {
     // Escutar mensagens do service worker
     const messageHandler = (event: MessageEvent) => {
       if (event.data && event.data.type === 'SW_UPDATED') {
+        // Verificar se a mensagem vem do app SW, não do Firebase
+        if (event.source && (event.source as any).scriptURL?.includes('firebase-messaging-sw.js')) {
+          return;
+        }
         console.log('Service Worker atualizado para versão:', event.data.version);
         setUpdateAvailable(true);
       }
