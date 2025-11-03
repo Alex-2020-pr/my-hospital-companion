@@ -85,20 +85,6 @@ export const usePushNotifications = () => {
 
     try {
       console.log('Iniciando processo de ativação de notificações...');
-      
-      // Verifica se já existe uma subscription ativa
-      const { data: existingSubscription } = await supabase
-        .from('push_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (existingSubscription) {
-        console.log('Subscription já existe, atualizando estado...');
-        setIsSubscribed(true);
-        toast.success('Notificações já estão ativadas!');
-        return;
-      }
 
       console.log('Solicitando permissão de notificações...');
       const permission = await Notification.requestPermission();
@@ -126,10 +112,17 @@ export const usePushNotifications = () => {
         return;
       }
 
-      console.log('Token FCM gerado com sucesso:', token.substring(0, 50) + '...');
+      console.log('Token FCM gerado com sucesso');
       
-      // Salva a subscription no banco
-      console.log('Salvando subscription no banco...');
+      // Remove subscriptions antigas do usuário antes de criar uma nova
+      console.log('Removendo subscriptions antigas...');
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', user.id);
+      
+      // Salva a nova subscription no banco
+      console.log('Salvando nova subscription no banco...');
       const { error } = await supabase.from('push_subscriptions').insert({
         user_id: user.id,
         endpoint: token,
