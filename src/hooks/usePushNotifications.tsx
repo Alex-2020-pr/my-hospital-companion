@@ -84,48 +84,74 @@ export const usePushNotifications = () => {
     }
 
     try {
+      console.log('Iniciando processo de ativação de notificações...');
+      
+      // Verifica se já existe uma subscription ativa
+      const { data: existingSubscription } = await supabase
+        .from('push_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (existingSubscription) {
+        console.log('Subscription já existe, atualizando estado...');
+        setIsSubscribed(true);
+        toast.success('Notificações já estão ativadas!');
+        return;
+      }
+
+      console.log('Solicitando permissão de notificações...');
       const permission = await Notification.requestPermission();
+      console.log('Permissão concedida:', permission);
+      
       if (permission !== 'granted') {
         toast.error('Permissão para notificações negada');
         return;
       }
 
+      console.log('Registrando service worker...');
       const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      await navigator.serviceWorker.ready;
+      console.log('Service worker registrado com sucesso');
       
+      console.log('Gerando token FCM...');
       const token = await getToken(messaging, {
         vapidKey: 'BGwmZJGhdL2LpYfRXi6UR7TpvI8hjuQ1hEDZ6xiFee_bjTwk4vXUohgkG4GAC7f_cPqMNssdG1CpB3ID9ai2RZg',
         serviceWorkerRegistration: registration
       });
 
-      if (token) {
-        console.log('Token FCM gerado:', token.substring(0, 50) + '...');
-        
-        const { data, error } = await supabase.from('push_subscriptions').insert({
-          user_id: user.id,
-          endpoint: token,
-          p256dh: token.substring(0, 87),
-          auth: token.substring(0, 24)
-        });
-        
-        if (error) {
-          console.error('Erro ao salvar subscription:', error);
-          toast.error(`Erro ao salvar notificação: ${error.message}`);
-          return;
-        }
-        
-        console.log('Subscription salva com sucesso');
-        setIsSubscribed(true);
-        toast.success('Notificações ativadas com sucesso!');
-        
-        // Recarrega o status da subscription
-        await checkSubscription();
-      } else {
+      if (!token) {
         console.error('Token FCM não foi gerado');
-        toast.error('Não foi possível gerar token de notificação');
+        toast.error('Não foi possível gerar token de notificação. Verifique as configurações do Firebase.');
+        return;
       }
-    } catch (error) {
-      console.error('Erro ao ativar notificações:', error);
-      toast.error('Erro ao ativar notificações');
+
+      console.log('Token FCM gerado com sucesso:', token.substring(0, 50) + '...');
+      
+      // Salva a subscription no banco
+      console.log('Salvando subscription no banco...');
+      const { error } = await supabase.from('push_subscriptions').insert({
+        user_id: user.id,
+        endpoint: token,
+        p256dh: token.substring(0, 87),
+        auth: token.substring(0, 24)
+      });
+      
+      if (error) {
+        console.error('Erro ao salvar subscription:', error);
+        toast.error(`Erro ao salvar: ${error.message}`);
+        return;
+      }
+      
+      console.log('Subscription salva com sucesso!');
+      setIsSubscribed(true);
+      toast.success('Notificações ativadas com sucesso!');
+      
+      // Recarrega o status da subscription
+      await checkSubscription();
+    } catch (error: any) {
+      console.error('Erro detalhado ao ativar notificações:', error);
+      toast.error(`Erro: ${error?.message || 'Erro desconhecido ao ativar notificações'}`);
     }
   };
 
