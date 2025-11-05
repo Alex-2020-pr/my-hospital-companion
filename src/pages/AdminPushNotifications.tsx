@@ -9,13 +9,15 @@ import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bell, Send, Users, Loader2 } from "lucide-react";
+import { Bell, Send, Users, Loader2, BellOff } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface User {
   id: string;
   full_name: string;
   email: string;
+  hasNotifications?: boolean;
 }
 
 interface NotificationHistory {
@@ -64,7 +66,19 @@ export const AdminPushNotifications = () => {
       return;
     }
 
-    setUsers(data || []);
+    // Verificar quais usuários têm notificações ativadas
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('user_id');
+
+    const usersWithNotifications = new Set(subs?.map(s => s.user_id) || []);
+
+    const usersWithStatus = (data || []).map(user => ({
+      ...user,
+      hasNotifications: usersWithNotifications.has(user.id)
+    }));
+
+    setUsers(usersWithStatus);
   };
 
   const loadHistory = async () => {
@@ -153,7 +167,16 @@ export const AdminPushNotifications = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Verificar se é erro de notificações não ativadas
+        const errorMessage = error.message || '';
+        if (errorMessage.includes('notificações ativadas') || errorMessage.includes('userHasNotifications')) {
+          toast.error('Este usuário não ativou as notificações push no perfil');
+        } else {
+          toast.error('Erro ao enviar notificação: ' + errorMessage);
+        }
+        throw error;
+      }
 
       toast.success('Notificação enviada com sucesso!');
       setTitle('');
@@ -162,7 +185,6 @@ export const AdminPushNotifications = () => {
       loadHistory();
     } catch (error) {
       console.error('Erro ao enviar notificação:', error);
-      toast.error('Erro ao enviar notificação');
     } finally {
       setSending(false);
     }
@@ -213,7 +235,15 @@ export const AdminPushNotifications = () => {
                 <SelectContent>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
-                      {user.full_name || user.email}
+                      <div className="flex items-center gap-2">
+                        <span>{user.full_name || user.email}</span>
+                        {!user.hasNotifications && (
+                          <Badge variant="destructive" className="text-xs">
+                            <BellOff className="h-3 w-3 mr-1" />
+                            Sem notificações
+                          </Badge>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

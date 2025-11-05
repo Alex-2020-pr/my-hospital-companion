@@ -155,7 +155,13 @@ serve(async (req) => {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      throw new Error('Usuário não possui notificações ativadas');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Usuário não possui notificações ativadas',
+          userHasNotifications: false 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`Encontradas ${subscriptions.length} subscriptions para o usuário`);
