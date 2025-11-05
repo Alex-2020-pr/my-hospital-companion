@@ -5,71 +5,8 @@ const CACHE_NAME = `am2-cache-${CACHE_VERSION}`;
 // Precache manifest injected by vite-plugin-pwa
 const precacheManifest = self.__WB_MANIFEST || [];
 
-// Service Worker para notificações push
-self.addEventListener('push', function(event) {
-  console.log('Push recebido:', event);
-  
-  let data = {
-    title: 'Nova Notificação',
-    body: 'Você tem uma nova notificação',
-    icon: '/favicon.png',
-    badge: '/favicon.png'
-  };
-
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch (e) {
-      console.error('Erro ao parsear dados do push:', e);
-      data = {
-        title: 'Nova Notificação',
-        body: event.data.text(),
-        icon: '/favicon.png',
-        badge: '/favicon.png'
-      };
-    }
-  }
-
-  const options = {
-    body: data.body,
-    icon: data.icon || '/favicon.png',
-    badge: data.badge || '/favicon.png',
-    vibrate: [200, 100, 200],
-    requireInteraction: false,
-    tag: 'notification-' + Date.now(),
-    renotify: true,
-    data: data.data || {},
-    actions: [
-      {
-        action: 'open',
-        title: 'Abrir'
-      },
-      {
-        action: 'close',
-        title: 'Fechar'
-      }
-    ]
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-      .catch(error => {
-        console.error('Erro ao mostrar notificação:', error);
-      })
-  );
-});
-
-self.addEventListener('notificationclick', function(event) {
-  console.log('Notificação clicada:', event.action);
-  
-  event.notification.close();
-
-  if (event.action === 'open') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
-});
+// Push notifications são gerenciadas pelo firebase-messaging-sw.js
+// Removido para evitar notificações duplicadas
 
 // Evento de instalação com cache busting
 self.addEventListener('install', function(event) {
