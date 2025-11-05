@@ -13,6 +13,7 @@ import { Mail, Phone } from "lucide-react";
 import am2Logo from "@/assets/am2-logo.jpg";
 import am2LogoCompleto from "@/assets/am2-logo-completo-512.png";
 import { getFormattedVersion } from "@/lib/version";
+import { useOrganization } from "@/hooks/useOrganization";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,6 +26,7 @@ export const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { organization } = useOrganization();
 
   useEffect(() => {
     if (user) {
@@ -139,12 +141,14 @@ export const Auth = () => {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <img 
-              src={am2LogoCompleto} 
-              alt="AM2 Soluções" 
-              className="h-28"
+              src={organization?.logo_url || am2LogoCompleto} 
+              alt={organization?.name || "AM2 Soluções"}
+              className="h-28 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Portal do Paciente</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {organization?.name || "Portal do Paciente"}
+          </CardTitle>
           <CardDescription>
             Acesse seus dados médicos de forma segura
           </CardDescription>

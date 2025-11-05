@@ -601,7 +601,12 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          logo_icon_url: string | null
+          logo_url: string | null
           name: string
+          primary_color: string | null
+          secondary_color: string | null
+          theme_config: Json | null
           type: string
           updated_at: string
           website: string | null
@@ -614,7 +619,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          logo_icon_url?: string | null
+          logo_url?: string | null
           name: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          theme_config?: Json | null
           type: string
           updated_at?: string
           website?: string | null
@@ -627,7 +637,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          logo_icon_url?: string | null
+          logo_url?: string | null
           name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          theme_config?: Json | null
           type?: string
           updated_at?: string
           website?: string | null

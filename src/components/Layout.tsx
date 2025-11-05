@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
 import { PushNotificationPrompt } from './PushNotificationPrompt';
+import { useOrganization } from "@/hooks/useOrganization";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,7 @@ interface LayoutProps {
 export const Layout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
   const { isSuperAdmin, isHospitalAdmin } = useUserRole();
+  const { organization } = useOrganization();
 
   const handleAdminClick = () => {
     if (isSuperAdmin) {
@@ -33,11 +35,35 @@ export const Layout = ({ children, title }: LayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background"
+      style={{
+        ...(organization?.primary_color && {
+          '--primary': organization.primary_color,
+        }),
+        ...(organization?.secondary_color && {
+          '--secondary': organization.secondary_color,
+        }),
+      } as React.CSSProperties}
+    >
       {title && (
-        <header className="bg-primary text-primary-foreground px-4 py-4 shadow-sm">
+        <header 
+          className="text-primary-foreground px-4 py-4 shadow-sm"
+          style={{
+            backgroundColor: organization?.primary_color || 'hsl(var(--primary))'
+          }}
+        >
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold flex-1">{title}</h1>
+            <div className="flex items-center gap-3 flex-1">
+              {organization?.logo_url && (
+                <img 
+                  src={organization.logo_url} 
+                  alt={organization.name}
+                  className="h-8 object-contain"
+                />
+              )}
+              <h1 className="text-xl font-semibold">{title}</h1>
+            </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
               {(isSuperAdmin || isHospitalAdmin) && (

@@ -36,6 +36,11 @@ interface Organization {
   contact_phone?: string;
   address?: string;
   is_active: boolean;
+  logo_url?: string;
+  logo_icon_url?: string;
+  primary_color?: string;
+  secondary_color?: string;
+  theme_config?: any;
 }
 
 interface ApiToken {
@@ -66,8 +71,13 @@ export const AdminOrganizations = () => {
     contact_email: '',
     contact_phone: '',
     address: '',
-    is_active: true
+    is_active: true,
+    logo_url: '',
+    primary_color: '#1E40AF',
+    secondary_color: '#10B981'
   });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [loadingWebsiteData, setLoadingWebsiteData] = useState(false);
   
   // Token management states
@@ -104,24 +114,76 @@ export const AdminOrganizations = () => {
     }
   }, [isSuperAdmin]);
 
+  const handleLogoUpload = async (orgId: string): Promise<string | null> => {
+    if (!logoFile) return null;
+
+    try {
+      setUploadingLogo(true);
+      const fileExt = logoFile.name.split('.').pop();
+      const fileName = `${orgId}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('organization-logos')
+        .upload(filePath, logoFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('organization-logos')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast.error('Erro ao fazer upload do logo');
+      return null;
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
+      let logoUrl = formData.logo_url;
+
       if (editingOrg) {
+        // Se tem novo arquivo de logo, faz upload
+        if (logoFile) {
+          const uploadedUrl = await handleLogoUpload(editingOrg.id);
+          if (uploadedUrl) logoUrl = uploadedUrl;
+        }
+
         const { error } = await supabase
           .from('organizations')
-          .update(formData)
+          .update({ ...formData, logo_url: logoUrl })
           .eq('id', editingOrg.id);
 
         if (error) throw error;
         toast.success('Organização atualizada com sucesso');
       } else {
-        const { error } = await supabase
+        // Criar organização primeiro para obter o ID
+        const { data: newOrg, error: insertError } = await supabase
           .from('organizations')
-          .insert([formData]);
+          .insert([formData])
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (insertError) throw insertError;
+
+        // Se tem logo, fazer upload e atualizar
+        if (logoFile && newOrg) {
+          const uploadedUrl = await handleLogoUpload(newOrg.id);
+          if (uploadedUrl) {
+            await supabase
+              .from('organizations')
+              .update({ logo_url: uploadedUrl })
+              .eq('id', newOrg.id);
+          }
+        }
+
         toast.success('Organização criada com sucesso');
       }
 
@@ -161,9 +223,13 @@ export const AdminOrganizations = () => {
       contact_email: '',
       contact_phone: '',
       address: '',
-      is_active: true
+      is_active: true,
+      logo_url: '',
+      primary_color: '#1E40AF',
+      secondary_color: '#10B981'
     });
     setEditingOrg(null);
+    setLogoFile(null);
   };
 
   const fetchWebsiteData = async () => {
@@ -219,7 +285,10 @@ export const AdminOrganizations = () => {
       contact_email: org.contact_email || '',
       contact_phone: org.contact_phone || '',
       address: org.address || '',
-      is_active: org.is_active
+      is_active: org.is_active,
+      logo_url: org.logo_url || '',
+      primary_color: org.primary_color || '#1E40AF',
+      secondary_color: org.secondary_color || '#10B981'
     });
     setDialogOpen(true);
   };
@@ -481,8 +550,92 @@ export const AdminOrganizations = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full">
-                  {editingOrg ? 'Atualizar Organização' : 'Criar Organização'}
+                <Tabs defaultValue="dados" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="dados">Dados</TabsTrigger>
+                    <TabsTrigger value="white-label">White-Label</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="dados" className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Campos básicos já preenchidos acima
+                    </p>
+                  </TabsContent>
+
+                  <TabsContent value="white-label" className="space-y-4">
+                    <div>
+                      <Label htmlFor="logo">Logo da Organização</Label>
+                      <Input
+                        id="logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) setLogoFile(file);
+                        }}
+                      />
+                      {(formData.logo_url || logoFile) && (
+                        <div className="mt-2">
+                          <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                          <img 
+                            src={logoFile ? URL.createObjectURL(logoFile) : formData.logo_url} 
+                            alt="Logo preview" 
+                            className="h-16 object-contain border rounded p-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="primary_color">Cor Primária</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="primary_color"
+                          type="color"
+                          value={formData.primary_color}
+                          onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })}
+                          className="w-20 h-10"
+                        />
+                        <Input
+                          type="text"
+                          value={formData.primary_color}
+                          onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })}
+                          placeholder="#1E40AF"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Cor principal do app para esta organização
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="secondary_color">Cor Secundária</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="secondary_color"
+                          type="color"
+                          value={formData.secondary_color}
+                          onChange={(e) => setFormData({ ...formData, secondary_color: e.target.value })}
+                          className="w-20 h-10"
+                        />
+                        <Input
+                          type="text"
+                          value={formData.secondary_color}
+                          onChange={(e) => setFormData({ ...formData, secondary_color: e.target.value })}
+                          placeholder="#10B981"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Cor de destaque/acentuação
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <Button type="submit" className="w-full" disabled={uploadingLogo}>
+                  {uploadingLogo ? 'Fazendo upload...' : editingOrg ? 'Atualizar Organização' : 'Criar Organização'}
                 </Button>
               </form>
             </DialogContent>
