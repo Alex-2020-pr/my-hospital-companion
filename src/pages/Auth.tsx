@@ -14,6 +14,7 @@ import am2Logo from "@/assets/am2-logo.jpg";
 import am2LogoCompleto from "@/assets/am2-logo-completo-512.png";
 import { getFormattedVersion } from "@/lib/version";
 import { useOrganization } from "@/hooks/useOrganization";
+import { useOrganizationBySlug } from "@/hooks/useOrganizationBySlug";
 
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -26,7 +27,11 @@ export const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { organization } = useOrganization();
+  const { organization: userOrg } = useOrganization();
+  const { organization: slugOrg } = useOrganizationBySlug();
+  
+  // Priorizar organização por slug (URL) sobre organização do usuário
+  const organization = slugOrg || userOrg;
 
   useEffect(() => {
     if (user) {

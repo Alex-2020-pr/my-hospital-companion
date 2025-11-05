@@ -606,6 +606,7 @@ export type Database = {
           name: string
           primary_color: string | null
           secondary_color: string | null
+          slug: string | null
           theme_config: Json | null
           type: string
           updated_at: string
@@ -624,6 +625,7 @@ export type Database = {
           name: string
           primary_color?: string | null
           secondary_color?: string | null
+          slug?: string | null
           theme_config?: Json | null
           type: string
           updated_at?: string
@@ -642,6 +644,7 @@ export type Database = {
           name?: string
           primary_color?: string | null
           secondary_color?: string | null
+          slug?: string | null
           theme_config?: Json | null
           type?: string
           updated_at?: string

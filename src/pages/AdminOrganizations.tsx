@@ -41,6 +41,7 @@ interface Organization {
   primary_color?: string;
   secondary_color?: string;
   theme_config?: any;
+  slug?: string;
 }
 
 interface ApiToken {
@@ -74,7 +75,8 @@ export const AdminOrganizations = () => {
     is_active: true,
     logo_url: '',
     primary_color: '#1E40AF',
-    secondary_color: '#10B981'
+    secondary_color: '#10B981',
+    slug: ''
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -226,7 +228,8 @@ export const AdminOrganizations = () => {
       is_active: true,
       logo_url: '',
       primary_color: '#1E40AF',
-      secondary_color: '#10B981'
+      secondary_color: '#10B981',
+      slug: ''
     });
     setEditingOrg(null);
     setLogoFile(null);
@@ -288,7 +291,8 @@ export const AdminOrganizations = () => {
       is_active: org.is_active,
       logo_url: org.logo_url || '',
       primary_color: org.primary_color || '#1E40AF',
-      secondary_color: org.secondary_color || '#10B981'
+      secondary_color: org.secondary_color || '#10B981',
+      slug: org.slug || ''
     });
     setDialogOpen(true);
   };
@@ -564,6 +568,26 @@ export const AdminOrganizations = () => {
 
                   <TabsContent value="white-label" className="space-y-4">
                     <div>
+                      <Label htmlFor="slug">URL Personalizada (Slug)</Label>
+                      <Input
+                        id="slug"
+                        placeholder="hospital-exemplo"
+                        value={formData.slug}
+                        onChange={(e) => {
+                          // Apenas letras minúsculas, números e hífens
+                          const slug = e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9-]/g, '')
+                            .replace(/--+/g, '-');
+                          setFormData({ ...formData, slug });
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Link personalizado: {window.location.origin}/auth?org={formData.slug || 'seu-slug'}
+                      </p>
+                    </div>
+
+                    <div>
                       <Label htmlFor="logo">Logo da Organização</Label>
                       <Input
                         id="logo"
@@ -681,6 +705,19 @@ export const AdminOrganizations = () => {
                   <div className="space-y-2 text-sm">
                     <p><strong>Tipo:</strong> {org.type === 'hospital' ? 'Hospital' : 'Clínica'}</p>
                     {org.cnpj && <p><strong>CNPJ:</strong> {org.cnpj}</p>}
+                    {org.slug && (
+                      <p>
+                        <strong>URL Personalizada:</strong>{' '}
+                        <a 
+                          href={`${window.location.origin}/auth?org=${org.slug}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {window.location.origin}/auth?org={org.slug}
+                        </a>
+                      </p>
+                    )}
                     {org.website && (
                       <p>
                         <strong>Site:</strong>{' '}
