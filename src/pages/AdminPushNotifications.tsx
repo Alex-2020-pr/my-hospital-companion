@@ -9,9 +9,10 @@ import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bell, Send, Users, Loader2, BellOff, RefreshCw } from "lucide-react";
+import { Bell, Send, Users, Loader2, BellOff, RefreshCw, TestTube } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
   id: string;
@@ -40,11 +41,13 @@ interface NotificationHistory {
 
 export const AdminPushNotifications = () => {
   const { isSuperAdmin, loading: roleLoading } = useUserRole();
+  const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [history, setHistory] = useState<NotificationHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
@@ -150,6 +153,41 @@ export const AdminPushNotifications = () => {
     setLoadingHistory(false);
   };
 
+  const handleSendTest = async () => {
+    if (!user?.id) {
+      toast.error('Usuário não autenticado');
+      return;
+    }
+
+    setSendingTest(true);
+
+    try {
+      console.log('[Admin] Enviando notificação de teste para:', user.id);
+      
+      const { error } = await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userId: user.id,
+          title: '🧪 Teste de Notificação',
+          body: 'Se você está vendo isso, as notificações estão funcionando! ✅'
+        }
+      });
+
+      if (error) {
+        console.error('[Admin] Erro ao enviar teste:', error);
+        toast.error('Erro ao enviar teste: ' + error.message);
+        throw error;
+      }
+
+      console.log('[Admin] Teste enviado com sucesso!');
+      toast.success('Teste enviado! Verifique se a notificação apareceu.');
+      loadHistory();
+    } catch (error) {
+      console.error('[Admin] Erro ao enviar teste:', error);
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!selectedUserId || !title || !body) {
       toast.error('Preencha todos os campos');
@@ -215,13 +253,52 @@ export const AdminPushNotifications = () => {
           </div>
         </div>
 
-        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
-          <div className="flex items-start gap-2">
-            <RefreshCw className="h-4 w-4 mt-0.5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              <strong>Notificações não chegando?</strong> Tente: 1) Verificar permissões no celular/navegador, 2) Desativar e reativar notificações no Perfil, 3) Limpar cache do app (Ctrl+Shift+R)
-            </p>
+        <div className="mb-6 space-y-4">
+          <div className="p-4 border rounded-lg bg-muted/50">
+            <div className="flex items-start gap-2">
+              <RefreshCw className="h-4 w-4 mt-0.5 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Notificações não chegando?</strong> Tente: 1) Verificar permissões no celular/navegador, 2) Desativar e reativar notificações no Perfil, 3) Limpar cache do app (Ctrl+Shift+R)
+                </p>
+              </div>
+            </div>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TestTube className="h-4 w-4" />
+                Teste de Notificação
+              </CardTitle>
+              <CardDescription>
+                Envie uma notificação de teste para você mesmo para verificar se está funcionando
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={handleSendTest} 
+                disabled={sendingTest}
+                variant="outline"
+                className="w-full"
+              >
+                {sendingTest ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enviando teste...
+                  </>
+                ) : (
+                  <>
+                    <TestTube className="mr-2 h-4 w-4" />
+                    Enviar Notificação de Teste para Mim
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Após clicar, verifique o console do navegador (F12) para ver os logs do service worker
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>
