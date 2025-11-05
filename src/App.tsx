@@ -28,6 +28,7 @@ import { HospitalMessaging } from "./pages/HospitalMessaging";
 import { AdminSetup } from "./pages/AdminSetup";
 import Changelog from "./pages/Changelog";
 import { AdminPushNotifications } from "./pages/AdminPushNotifications";
+import HealthChat from "./pages/HealthChat";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/admin/push-notifications" element={<ProtectedRoute><AdminPushNotifications /></ProtectedRoute>} />
           <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
           <Route path="/hospital/messaging" element={<ProtectedRoute><HospitalMessaging /></ProtectedRoute>} />
+          <Route path="/health-chat" element={<ProtectedRoute><HealthChat /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

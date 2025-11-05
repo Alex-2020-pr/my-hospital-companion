@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell } from "lucide-react";
+import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";

@@ -16,7 +16,8 @@ import {
   Bell,
   Activity,
   Pill,
-  Video
+  Video,
+  MessageSquare
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/medical-hero.jpg";
@@ -335,6 +336,13 @@ export const Dashboard = () => {
               description="Receitas e atestados"
               icon={FileText}
               onClick={() => navigate('/documentos')}
+            />
+            <QuickActionCard
+              title="Assistente IA"
+              description="Tire dúvidas de saúde"
+              icon={MessageSquare}
+              onClick={() => navigate('/health-chat')}
+              variant="accent"
             />
           </div>
         </div>
