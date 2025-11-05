@@ -95,24 +95,22 @@ export const usePushNotifications = () => {
         return;
       }
 
-      // Desregistra todos os service workers antigos para evitar duplicatas
-      console.log('Desregistrando service workers antigos...');
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (const registration of registrations) {
-        await registration.unregister();
-        console.log('Service worker antigo desregistrado');
+      console.log('Verificando service worker do Firebase...');
+      let registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      
+      if (!registration) {
+        console.log('Registrando service worker do Firebase...');
+        registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+          scope: '/',
+          updateViaCache: 'none'
+        });
+      } else {
+        console.log('Service worker já registrado, forçando atualização...');
+        await registration.update();
       }
       
-      console.log('Registrando novo service worker...');
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-        scope: '/',
-        updateViaCache: 'none' // Força buscar versão atualizada
-      });
-      
-      // Força atualização imediata
-      await registration.update();
       await navigator.serviceWorker.ready;
-      console.log('Service worker registrado com sucesso');
+      console.log('Service worker pronto');
       
       console.log('Gerando token FCM...');
       const token = await getToken(messaging, {
@@ -126,17 +124,7 @@ export const usePushNotifications = () => {
         return;
       }
 
-      console.log('Token FCM gerado com sucesso');
-      
-      // Extrai apenas o token do FCM (remove URL se houver)
-      let fcmToken = token;
-      if (token.includes('/')) {
-        // Se for uma URL completa, extrai apenas a parte do token
-        const parts = token.split('/');
-        fcmToken = parts[parts.length - 1];
-      }
-      
-      console.log('Token FCM processado');
+      console.log('Token FCM gerado:', token.substring(0, 30) + '...');
       
       // Remove subscriptions antigas do usuário antes de criar uma nova
       console.log('Removendo subscriptions antigas...');
@@ -145,13 +133,13 @@ export const usePushNotifications = () => {
         .delete()
         .eq('user_id', user.id);
       
-      // Salva a nova subscription no banco (apenas o token, sem URL)
-      console.log('Salvando nova subscription no banco...');
+      // Salva a nova subscription no banco (apenas o token FCM puro)
+      console.log('Salvando subscription no banco...');
       const { error } = await supabase.from('push_subscriptions').insert({
         user_id: user.id,
-        endpoint: fcmToken,
-        p256dh: fcmToken.substring(0, Math.min(87, fcmToken.length)),
-        auth: fcmToken.substring(0, Math.min(24, fcmToken.length))
+        endpoint: token, // Salva o token FCM puro
+        p256dh: token.substring(0, Math.min(87, token.length)),
+        auth: token.substring(0, Math.min(24, token.length))
       });
       
       if (error) {

@@ -175,15 +175,10 @@ serve(async (req) => {
       try {
         const fcmEndpoint = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
         
-        // Extrai apenas o token do FCM (remove URL se houver)
-        let fcmToken = sub.endpoint;
-        if (fcmToken.includes('fcm.googleapis.com') || fcmToken.includes('web.push.apple.com') || fcmToken.includes('updates.push.services.mozilla.com')) {
-          // Se for uma URL completa, extrai apenas a parte do token
-          const parts = fcmToken.split('/');
-          fcmToken = parts[parts.length - 1];
-        }
+        // Usa o token diretamente (já está limpo no banco)
+        const fcmToken = sub.endpoint;
         
-        console.log('Processando token:', fcmToken.substring(0, 20) + '...');
+        console.log('📤 Enviando notificação para token:', fcmToken.substring(0, 30) + '...');
         
         const message = {
           message: {
