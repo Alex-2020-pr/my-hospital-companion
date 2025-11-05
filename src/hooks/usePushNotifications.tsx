@@ -95,8 +95,22 @@ export const usePushNotifications = () => {
         return;
       }
 
-      console.log('Registrando service worker...');
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      // Desregistra todos os service workers antigos para evitar duplicatas
+      console.log('Desregistrando service workers antigos...');
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log('Service worker antigo desregistrado');
+      }
+      
+      console.log('Registrando novo service worker...');
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/',
+        updateViaCache: 'none' // Força buscar versão atualizada
+      });
+      
+      // Força atualização imediata
+      await registration.update();
       await navigator.serviceWorker.ready;
       console.log('Service worker registrado com sucesso');
       

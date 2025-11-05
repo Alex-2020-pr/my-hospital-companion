@@ -1,5 +1,5 @@
-// Firebase Messaging Service Worker v1.1 - Debug version
-console.log('[SW] Service Worker carregando...');
+// Firebase Messaging Service Worker v2.0 - Single notification fix
+console.log('[SW] Service Worker v2.0 carregando...');
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
