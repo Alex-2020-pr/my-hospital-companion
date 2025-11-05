@@ -32,12 +32,11 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.notification?.body || '',
     icon: payload.notification?.icon || '/favicon.png',
     badge: '/favicon.png',
-    tag: 'notification-' + Date.now(),
-    requireInteraction: true,
-    renotify: true,
+    tag: payload.data?.notificationId || 'notification-' + Date.now(),
+    requireInteraction: false,
+    renotify: false,
     silent: false,
-    vibrate: [200, 100, 200, 100, 200],
-    actions: [],
+    vibrate: [200, 100, 200],
     data: payload.data || {}
   };
 
@@ -45,39 +44,8 @@ messaging.onBackgroundMessage((payload) => {
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle push events directly (para iOS e dispositivos que não suportam onBackgroundMessage)
-self.addEventListener('push', function(event) {
-  console.log('[SW] ✅ Push event recebido diretamente:', event);
-  
-  if (event.data) {
-    try {
-      const payload = event.data.json();
-      console.log('[SW] 📦 Payload do push:', payload);
-      
-      const notificationTitle = payload.notification?.title || payload.title || 'Nova Notificação';
-      const notificationOptions = {
-        body: payload.notification?.body || payload.body || '',
-        icon: payload.notification?.icon || payload.icon || '/favicon.png',
-        badge: '/favicon.png',
-        tag: 'notification-' + Date.now(),
-        requireInteraction: true,
-        renotify: true,
-        silent: false,
-        vibrate: [200, 100, 200, 100, 200],
-        data: payload.data || {}
-      };
-
-      console.log('[SW] 📢 Exibindo notificação via push event');
-      event.waitUntil(
-        self.registration.showNotification(notificationTitle, notificationOptions)
-      );
-    } catch (e) {
-      console.error('[SW] ❌ Erro ao processar push:', e);
-    }
-  } else {
-    console.log('[SW] ⚠️ Push event sem dados');
-  }
-});
+// REMOVIDO: Este listener estava causando notificações duplicadas
+// O Firebase Messaging já gerencia os eventos de push através do onBackgroundMessage
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {

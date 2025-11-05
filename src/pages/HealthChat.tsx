@@ -145,10 +145,10 @@ const HealthChat = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Digite sua pergunta sobre saúde..."
+            placeholder="Digite sua pergunta sobre saúde... (Ctrl+Enter para enviar)"
             className="min-h-[60px] resize-none"
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
+              if (e.key === 'Enter' && e.ctrlKey) {
                 e.preventDefault();
                 handleSubmit(e);
               }
