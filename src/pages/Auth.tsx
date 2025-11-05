@@ -139,8 +139,18 @@ export const Auth = () => {
     }
   };
 
+  // Aplicar cores da organização se disponível
+  const orgStyle = organization?.primary_color ? {
+    '--primary': organization.primary_color.startsWith('#') 
+      ? organization.primary_color.replace('#', '').match(/.{2}/g)?.map(x => parseInt(x, 16) / 255).join(' ')
+      : organization.primary_color,
+  } as React.CSSProperties : {};
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center p-4">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center p-4"
+      style={orgStyle}
+    >
       <div className="w-full max-w-md space-y-6">
         <Card className="w-full">
         <CardHeader className="space-y-1 text-center">

@@ -34,23 +34,64 @@ export const Layout = ({ children, title }: LayoutProps) => {
     }
   };
 
+  // Converter cores hex para HSL se necessário
+  const hexToHSL = (hex: string) => {
+    // Remove # se existir
+    hex = hex.replace('#', '');
+    
+    // Converte para RGB
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  };
+
+  const primaryColor = organization?.primary_color 
+    ? (organization.primary_color.startsWith('#') 
+      ? hexToHSL(organization.primary_color) 
+      : organization.primary_color)
+    : undefined;
+
+  const secondaryColor = organization?.secondary_color 
+    ? (organization.secondary_color.startsWith('#') 
+      ? hexToHSL(organization.secondary_color) 
+      : organization.secondary_color)
+    : undefined;
+
   return (
     <div 
       className="min-h-screen bg-background"
       style={{
-        ...(organization?.primary_color && {
-          '--primary': organization.primary_color,
-        }),
-        ...(organization?.secondary_color && {
-          '--secondary': organization.secondary_color,
-        }),
+        ...(primaryColor && { '--primary': primaryColor }),
+        ...(secondaryColor && { '--secondary': secondaryColor }),
       } as React.CSSProperties}
     >
       {title && (
         <header 
-          className="text-primary-foreground px-4 py-4 shadow-sm"
+          className="px-4 py-4 shadow-sm"
           style={{
-            backgroundColor: organization?.primary_color || 'hsl(var(--primary))'
+            backgroundColor: organization?.primary_color 
+              ? (organization.primary_color.startsWith('#') 
+                ? organization.primary_color 
+                : `hsl(${organization.primary_color})`)
+              : 'hsl(var(--primary))',
+            color: 'white'
           }}
         >
           <div className="flex items-center justify-between">
