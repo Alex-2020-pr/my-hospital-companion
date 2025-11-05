@@ -9,7 +9,7 @@ import { Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bell, Send, Users, Loader2, BellOff } from "lucide-react";
+import { Bell, Send, Users, Loader2, BellOff, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -212,6 +212,15 @@ export const AdminPushNotifications = () => {
           <div>
             <h1 className="text-2xl font-bold">Notificações Push</h1>
             <p className="text-muted-foreground">Envie notificações personalizadas para os usuários</p>
+          </div>
+        </div>
+
+        <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+          <div className="flex items-start gap-2">
+            <RefreshCw className="h-4 w-4 mt-0.5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              <strong>Notificações não chegando?</strong> Tente: 1) Verificar permissões no celular/navegador, 2) Desativar e reativar notificações no Perfil, 3) Limpar cache do app (Ctrl+Shift+R)
+            </p>
           </div>
         </div>
 
