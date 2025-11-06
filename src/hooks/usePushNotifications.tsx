@@ -150,7 +150,28 @@ export const usePushNotifications = () => {
       
       console.log('Subscription salva com sucesso!');
       setIsSubscribed(true);
-      toast.success('Notificações ativadas com sucesso!');
+      
+      // Envia notificação de teste automática
+      console.log('Enviando notificação de teste...');
+      try {
+        const { error: testError } = await supabase.functions.invoke('send-push-notification', {
+          body: {
+            targetUserId: user.id,
+            title: '✅ Notificações Ativadas!',
+            body: 'Seu dispositivo está pronto para receber notificações. Se você viu esta mensagem, tudo está funcionando perfeitamente!'
+          }
+        });
+        
+        if (testError) {
+          console.error('Erro ao enviar teste:', testError);
+          toast.success('Notificações ativadas! Aguarde alguns segundos para receber a mensagem de teste.');
+        } else {
+          toast.success('Notificações ativadas! Você receberá uma mensagem de teste em instantes.');
+        }
+      } catch (testError) {
+        console.error('Erro ao enviar teste:', testError);
+        toast.success('Notificações ativadas com sucesso!');
+      }
       
       // Recarrega o status da subscription
       await checkSubscription();

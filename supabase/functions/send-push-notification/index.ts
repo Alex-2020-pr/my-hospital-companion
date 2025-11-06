@@ -179,6 +179,8 @@ serve(async (req) => {
         const fcmToken = sub.endpoint;
         
         console.log('📤 Enviando notificação para token:', fcmToken.substring(0, 30) + '...');
+        console.log('📋 Título:', notificationPayload.title);
+        console.log('📋 Corpo:', notificationPayload.body);
         
         const message = {
           message: {
@@ -218,8 +220,6 @@ serve(async (req) => {
           }
         };
 
-        console.log('Enviando notificação FCM para token:', sub.endpoint.substring(0, 20) + '...');
-
         const response = await fetch(fcmEndpoint, {
           method: 'POST',
           headers: {
@@ -232,12 +232,19 @@ serve(async (req) => {
         const responseText = await response.text();
         
         if (!response.ok) {
-          console.error('Erro FCM:', response.status, responseText);
-          return { success: false, token: sub.endpoint.substring(0, 20), error: responseText };
+          console.error(`❌ Erro FCM [${response.status}] para token ${fcmToken.substring(0, 20)}:`, responseText);
+          return { success: false, token: fcmToken.substring(0, 20), error: `[${response.status}] ${responseText}` };
         }
 
-        console.log('Notificação FCM enviada com sucesso:', responseText);
-        return { success: true, token: sub.endpoint.substring(0, 20) };
+        try {
+          const fcmResult = JSON.parse(responseText);
+          console.log('✅ Notificação FCM enviada com sucesso:', fcmResult);
+          console.log('📱 Message ID:', fcmResult.name);
+          return { success: true, token: fcmToken.substring(0, 20), messageId: fcmResult.name };
+        } catch (e) {
+          console.log('✅ Notificação enviada (resposta não-JSON):', responseText);
+          return { success: true, token: fcmToken.substring(0, 20) };
+        }
 
       } catch (error) {
         console.error('Erro ao enviar FCM:', error);
