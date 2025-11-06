@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 interface NotificationPayload {
-  userId: string;
+  targetUserId: string;
   title: string;
   body: string;
   icon?: string;
@@ -147,7 +147,7 @@ serve(async (req) => {
     const { data: subscriptions, error: subError } = await supabaseClient
       .from('push_subscriptions')
       .select('*')
-      .eq('user_id', payload.userId);
+      .eq('user_id', payload.targetUserId);
 
     if (subError) {
       console.error('Erro ao buscar subscriptions:', subError);
@@ -179,8 +179,8 @@ serve(async (req) => {
         const fcmToken = sub.endpoint;
         
         console.log('📤 Enviando notificação para token:', fcmToken.substring(0, 30) + '...');
-        console.log('📋 Título:', notificationPayload.title);
-        console.log('📋 Corpo:', notificationPayload.body);
+        console.log('📋 Título:', payload.title);
+        console.log('📋 Corpo:', payload.body);
         
         const message = {
           message: {
@@ -264,7 +264,7 @@ serve(async (req) => {
       .from('push_notifications')
       .insert({
         sender_id: user.id,
-        recipient_id: payload.userId,
+        recipient_id: payload.targetUserId,
         title: payload.title,
         body: payload.body,
         icon: payload.icon,
