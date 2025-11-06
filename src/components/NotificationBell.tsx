@@ -51,7 +51,7 @@ export const NotificationBell = () => {
       if (profileError) throw profileError;
 
       // Buscar mensagens da organização do usuário
-      const { data: orgMessages, error: msgError } = await supabase
+      let query = supabase
         .from('organization_messages')
         .select(`
           id,
@@ -61,9 +61,17 @@ export const NotificationBell = () => {
           created_at
         `)
         .eq('is_active', true)
-        .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
         .limit(10);
+
+      // Aplicar filtro de organization_id corretamente
+      if (profile.organization_id === null) {
+        query = query.is('organization_id', null);
+      } else {
+        query = query.eq('organization_id', profile.organization_id);
+      }
+
+      const { data: orgMessages, error: msgError } = await query;
 
       if (msgError) throw msgError;
 

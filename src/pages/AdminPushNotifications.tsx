@@ -167,7 +167,7 @@ export const AdminPushNotifications = () => {
       
       const { error } = await supabase.functions.invoke('send-push-notification', {
         body: {
-          userId: user.id,
+          targetUserId: user.id,
           title: '🧪 Teste de Notificação',
           body: 'Se você está vendo isso, as notificações estão funcionando! ✅'
         }
@@ -208,7 +208,7 @@ export const AdminPushNotifications = () => {
         try {
           const { error } = await supabase.functions.invoke('send-push-notification', {
             body: {
-              userId,
+              targetUserId: userId,
               title,
               body
             }
