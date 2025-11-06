@@ -213,8 +213,11 @@ serve(async (req) => {
               notification: {
                 icon: payload.icon || '/favicon.png',
                 badge: payload.badge || '/favicon.png',
-                requireInteraction: true,
+                requireInteraction: false,
+                renotify: true,
                 tag: 'notification-' + Date.now(),
+                vibrate: [200, 100, 200],
+                silent: false
               }
             }
           }
