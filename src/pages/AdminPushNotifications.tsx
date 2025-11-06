@@ -43,7 +43,8 @@ export const AdminPushNotifications = () => {
   const { isSuperAdmin, loading: roleLoading } = useUserRole();
   const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]); // Múltiplos usuários
+  const [sendMode, setSendMode] = useState<'single' | 'multiple'>('single');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
@@ -189,40 +190,56 @@ export const AdminPushNotifications = () => {
   };
 
   const handleSend = async () => {
-    if (!selectedUserId || !title || !body) {
-      toast.error('Preencha todos os campos');
+    const targetIds = sendMode === 'multiple' ? selectedUserIds : selectedUserIds.slice(0, 1);
+    
+    if (targetIds.length === 0 || !title || !body) {
+      toast.error('Preencha todos os campos e selecione pelo menos um usuário');
       return;
     }
 
     setSending(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-push-notification', {
-        body: {
-          userId: selectedUserId,
-          title,
-          body
-        }
-      });
+      let successCount = 0;
+      let errorCount = 0;
 
-      if (error) {
-        // Verificar se é erro de notificações não ativadas
-        const errorMessage = error.message || '';
-        if (errorMessage.includes('notificações ativadas') || errorMessage.includes('userHasNotifications')) {
-          toast.error('Este usuário não ativou as notificações push no perfil');
-        } else {
-          toast.error('Erro ao enviar notificação: ' + errorMessage);
+      // Enviar para cada usuário selecionado
+      for (const userId of targetIds) {
+        try {
+          const { error } = await supabase.functions.invoke('send-push-notification', {
+            body: {
+              userId,
+              title,
+              body
+            }
+          });
+
+          if (error) {
+            console.error(`Erro ao enviar para ${userId}:`, error);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Erro ao enviar para ${userId}:`, error);
+          errorCount++;
         }
-        throw error;
       }
 
-      toast.success('Notificação enviada com sucesso!');
+      if (successCount > 0) {
+        toast.success(`${successCount} notificação(ões) enviada(s) com sucesso!`);
+      }
+      if (errorCount > 0) {
+        toast.error(`${errorCount} notificação(ões) falharam`);
+      }
+
       setTitle('');
       setBody('');
-      setSelectedUserId('');
+      setSelectedUserIds([]);
       loadHistory();
     } catch (error) {
-      console.error('Erro ao enviar notificação:', error);
+      console.error('Erro geral ao enviar notificações:', error);
+      toast.error('Erro ao enviar notificações');
     } finally {
       setSending(false);
     }
@@ -313,27 +330,108 @@ export const AdminPushNotifications = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="user">Destinatário</Label>
-              <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um usuário" />
-                </SelectTrigger>
-                <SelectContent>
+              <Label>Modo de Envio</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={sendMode === 'single' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSendMode('single');
+                    setSelectedUserIds([]);
+                  }}
+                  className="flex-1"
+                >
+                  Único Usuário
+                </Button>
+                <Button
+                  type="button"
+                  variant={sendMode === 'multiple' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSendMode('multiple');
+                    setSelectedUserIds([]);
+                  }}
+                  className="flex-1"
+                >
+                  Múltiplos Usuários
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="user">
+                Destinatário{sendMode === 'multiple' ? 's' : ''} 
+                {sendMode === 'multiple' && selectedUserIds.length > 0 && ` (${selectedUserIds.length} selecionados)`}
+              </Label>
+              
+              {sendMode === 'single' ? (
+                <Select 
+                  value={selectedUserIds[0] || ''} 
+                  onValueChange={(value) => setSelectedUserIds([value])}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um usuário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{user.full_name || user.email}</span>
+                          {!user.hasNotifications && (
+                            <Badge variant="destructive" className="text-xs">
+                              <BellOff className="h-3 w-3 mr-1" />
+                              Sem notificações
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="border rounded-lg p-3 space-y-2 max-h-64 overflow-y-auto">
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedUserIds(users.filter(u => u.hasNotifications).map(u => u.id))}
+                    >
+                      Selecionar todos com notificações
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedUserIds([])}
+                    >
+                      Limpar seleção
+                    </Button>
+                  </div>
                   {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{user.full_name || user.email}</span>
-                        {!user.hasNotifications && (
-                          <Badge variant="destructive" className="text-xs">
-                            <BellOff className="h-3 w-3 mr-1" />
-                            Sem notificações
-                          </Badge>
-                        )}
-                      </div>
-                    </SelectItem>
+                    <label key={user.id} className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserIds.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedUserIds([...selectedUserIds, user.id]);
+                          } else {
+                            setSelectedUserIds(selectedUserIds.filter(id => id !== user.id));
+                          }
+                        }}
+                        className="h-4 w-4"
+                      />
+                      <span className="flex-1">{user.full_name || user.email}</span>
+                      {!user.hasNotifications && (
+                        <Badge variant="destructive" className="text-xs">
+                          <BellOff className="h-3 w-3 mr-1" />
+                          Sem notificações
+                        </Badge>
+                      )}
+                    </label>
                   ))}
-                </SelectContent>
-              </Select>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -361,18 +459,18 @@ export const AdminPushNotifications = () => {
 
             <Button 
               onClick={handleSend} 
-              disabled={sending || !selectedUserId || !title || !body}
+              disabled={sending || selectedUserIds.length === 0 || !title || !body}
               className="w-full"
             >
               {sending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enviando...
+                  Enviando para {selectedUserIds.length} usuário(s)...
                 </>
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
-                  Enviar Notificação
+                  Enviar para {selectedUserIds.length || 0} usuário(s)
                 </>
               )}
             </Button>

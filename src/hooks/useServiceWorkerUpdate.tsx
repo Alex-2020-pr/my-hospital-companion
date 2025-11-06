@@ -8,18 +8,25 @@ export const useServiceWorkerUpdate = () => {
     if (!('serviceWorker' in navigator)) return;
 
     let interval: NodeJS.Timeout;
+    let hasShownUpdate = false;
 
     const checkForUpdate = (reg: ServiceWorkerRegistration) => {
-      // Verificar se há um service worker waiting
-      if (reg.waiting) {
-        console.log('Service Worker waiting detectado');
+      // Ignora Firebase SW
+      if (reg.active?.scriptURL.includes('firebase-messaging-sw.js')) {
+        return;
+      }
+
+      // Só mostra se houver um SW esperando E ainda não mostrou
+      if (reg.waiting && !hasShownUpdate) {
+        hasShownUpdate = true;
+        console.log('[Update] Service Worker aguardando instalação');
         setUpdateAvailable(true);
+        setRegistration(reg);
       }
     };
 
-    // Verificar se há atualização disponível
+    // Verificar atualizações
     navigator.serviceWorker.ready.then((reg) => {
-      // Ignorar o Firebase Service Worker
       if (reg.active?.scriptURL.includes('firebase-messaging-sw.js')) {
         return;
       }
@@ -27,57 +34,30 @@ export const useServiceWorkerUpdate = () => {
       setRegistration(reg);
       checkForUpdate(reg);
       
-      // Verificar por atualizações a cada 60 segundos
+      // Verificar a cada 5 minutos (não a cada minuto para evitar overhead)
       interval = setInterval(() => {
-        reg.update().then(() => {
-          checkForUpdate(reg);
-        });
-      }, 60000);
+        reg.update().then(() => checkForUpdate(reg));
+      }, 300000);
 
-      // Verificar quando um novo SW está instalando
+      // Detectar novo SW instalando
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
-        if (!newWorker) return;
-        
-        // Ignorar Firebase Service Worker
-        if (newWorker.scriptURL.includes('firebase-messaging-sw.js')) {
+        if (!newWorker || newWorker.scriptURL.includes('firebase-messaging-sw.js')) {
           return;
         }
 
         newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('Nova versão do Service Worker instalada');
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !hasShownUpdate) {
+            hasShownUpdate = true;
+            console.log('[Update] Nova versão instalada');
             setUpdateAvailable(true);
           }
         });
       });
     });
 
-    // Escutar por novos service workers assumindo o controle
-    const controllerChangeHandler = () => {
-      console.log('Controller change detectado');
-      setUpdateAvailable(true);
-    };
-
-    // Escutar mensagens do service worker
-    const messageHandler = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'SW_UPDATED') {
-        // Verificar se a mensagem vem do app SW, não do Firebase
-        if (event.source && (event.source as any).scriptURL?.includes('firebase-messaging-sw.js')) {
-          return;
-        }
-        console.log('Service Worker atualizado para versão:', event.data.version);
-        setUpdateAvailable(true);
-      }
-    };
-
-    navigator.serviceWorker.addEventListener('controllerchange', controllerChangeHandler);
-    navigator.serviceWorker.addEventListener('message', messageHandler);
-
     return () => {
       if (interval) clearInterval(interval);
-      navigator.serviceWorker.removeEventListener('controllerchange', controllerChangeHandler);
-      navigator.serviceWorker.removeEventListener('message', messageHandler);
     };
   }, []);
 
@@ -87,31 +67,21 @@ export const useServiceWorkerUpdate = () => {
       return;
     }
 
-    // Pedir ao service worker para tomar controle
     registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-    
-    // Recarregar após um pequeno delay
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    setTimeout(() => window.location.reload(), 500);
   };
 
   const clearCacheAndReload = async () => {
-    // Limpar todos os caches
     if ('caches' in window) {
       const names = await caches.keys();
       await Promise.all(names.map((name: string) => caches.delete(name)));
     }
 
-    // Enviar mensagem apenas para o app service worker
-    if (registration?.active && registration.scope.includes('/sw.js')) {
+    if (registration?.active && !registration.active.scriptURL.includes('firebase-messaging-sw.js')) {
       registration.active.postMessage({ type: 'CLEAR_CACHE' });
     }
     
-    // Recarregar a página sem afetar o Firebase SW
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    setTimeout(() => window.location.reload(), 500);
   };
 
   return {

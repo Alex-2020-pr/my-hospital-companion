@@ -141,12 +141,12 @@ const HealthChat = () => {
           </div>
         </ScrollArea>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-col sm:flex-row gap-2">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Digite sua pergunta sobre saúde... (Ctrl+Enter para enviar)"
-            className="min-h-[60px] resize-none"
+            className="min-h-[60px] max-h-[120px] resize-none flex-1"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && e.ctrlKey) {
                 e.preventDefault();
@@ -155,11 +155,16 @@ const HealthChat = () => {
             }}
             disabled={isLoading}
           />
-          <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={!input.trim() || isLoading}
+            className="shrink-0 self-end sm:self-auto h-[60px] w-[60px]"
+          >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
           </Button>
         </form>
