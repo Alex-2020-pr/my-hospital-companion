@@ -34,7 +34,6 @@ messaging.onBackgroundMessage((payload) => {
     badge: '/favicon.png',
     tag: payload.data?.notificationId || 'notification-' + Date.now(),
     requireInteraction: false,
-    renotify: false,
     silent: false,
     vibrate: [200, 100, 200],
     data: payload.data || {}

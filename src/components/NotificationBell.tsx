@@ -211,15 +211,23 @@ export const NotificationBell = () => {
         }
       } else if (messageType === 'push') {
         // Notificações push atualizam seu próprio campo is_read
-        // Permite marcar como lida tanto para recipient quanto para sender
-        const { error } = await supabase
+        // Buscar a notificação primeiro para verificar permissões
+        const { data: notification } = await supabase
           .from('push_notifications')
-          .update({ is_read: true })
+          .select('recipient_id, sender_id')
           .eq('id', messageId)
-          .or(`recipient_id.eq.${user.id},sender_id.eq.${user.id}`);
+          .single();
 
-        if (error) {
-          throw error;
+        // Só atualiza se o usuário for recipient ou sender
+        if (notification && (notification.recipient_id === user.id || notification.sender_id === user.id)) {
+          const { error } = await supabase
+            .from('push_notifications')
+            .update({ is_read: true })
+            .eq('id', messageId);
+
+          if (error) {
+            throw error;
+          }
         }
       }
 

@@ -196,25 +196,32 @@ serve(async (req) => {
               notification: {
                 icon: '/favicon.png',
                 sound: 'default',
+                priority: 'max',
+                defaultVibrateTimings: true,
+                notification_priority: 'PRIORITY_MAX'
               }
             },
             apns: {
+              headers: {
+                'apns-priority': '10'
+              },
               payload: {
                 aps: {
                   sound: 'default',
                   badge: 1,
+                  'content-available': 1
                 }
               }
             },
             webpush: {
               headers: {
-                Urgency: 'high'
+                Urgency: 'high',
+                TTL: '0'
               },
               notification: {
                 icon: payload.icon || '/favicon.png',
                 badge: payload.badge || '/favicon.png',
                 requireInteraction: false,
-                renotify: true,
                 tag: 'notification-' + Date.now(),
                 vibrate: [200, 100, 200],
                 silent: false
