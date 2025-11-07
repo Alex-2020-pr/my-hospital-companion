@@ -126,9 +126,11 @@ export const usePushNotifications = () => {
       
       const correctSW = registrations.find(reg => reg.active?.scriptURL.includes('firebase-messaging-sw.js'));
       
+      let registration: ServiceWorkerRegistration;
+      
       if (correctSW) {
         console.log('[Push] SW correto já está registrado, usando ele');
-        await navigator.serviceWorker.ready;
+        registration = correctSW;
       } else {
         // Desregistrar apenas os SWs antigos (não firebase-messaging-sw.js)
         for (const reg of registrations) {
@@ -139,7 +141,7 @@ export const usePushNotifications = () => {
         }
         
         console.log('[Push] Registrando novo SW consolidado...');
-        await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
           scope: '/',
           updateViaCache: 'none'
         });
@@ -148,7 +150,6 @@ export const usePushNotifications = () => {
         await navigator.serviceWorker.ready;
       }
       
-      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
       if (!registration) {
         throw new Error('Service Worker não foi registrado corretamente');
       }
