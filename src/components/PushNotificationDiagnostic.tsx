@@ -111,6 +111,7 @@ export const PushNotificationDiagnostic = () => {
     const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
                   (window.navigator as any).standalone === true;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
     
     if (isIOS) {
       diagnostics.push({
@@ -120,6 +121,37 @@ export const PushNotificationDiagnostic = () => {
           ? 'App instalado como PWA' 
           : 'No iOS, notificações só funcionam se o app estiver instalado na tela inicial (PWA)'
       });
+    }
+
+    // 6. Informações sobre plataforma
+    diagnostics.push({
+      name: 'Plataforma Detectada',
+      status: 'success',
+      message: `${isIOS ? 'iOS' : isAndroid ? 'Android' : 'Desktop'} | ${isPWA ? 'PWA' : 'Navegador'} | ${navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Outro'}`
+    });
+
+    // 7. Testar se consegue criar notificação local
+    if (Notification.permission === 'granted') {
+      try {
+        const testNotification = new Notification('Teste Local', {
+          body: 'Se você viu esta notificação, o navegador está funcionando',
+          tag: 'test-local',
+          silent: true
+        });
+        setTimeout(() => testNotification.close(), 2000);
+        
+        diagnostics.push({
+          name: 'Notificação Local',
+          status: 'success',
+          message: 'Conseguiu exibir notificação local'
+        });
+      } catch (error) {
+        diagnostics.push({
+          name: 'Notificação Local',
+          status: 'error',
+          message: `Erro ao criar notificação local: ${error}`
+        });
+      }
     }
 
     setResults(diagnostics);
@@ -222,11 +254,13 @@ export const PushNotificationDiagnostic = () => {
           <AlertDescription>
             <strong>Importante:</strong> Se as notificações não chegam no seu celular:
             <ul className="list-disc ml-5 mt-2 space-y-1">
-              <li>Verifique as configurações de notificações do navegador/sistema</li>
-              <li>Em Android: Configurações → Apps → [Navegador] → Notificações → Permitir</li>
-              <li>Em iOS: Adicione o app à tela inicial primeiro (Compartilhar → Tela de Início)</li>
-              <li>Certifique-se de que não está em modo Não Perturbe</li>
-              <li>Alguns navegadores bloqueiam notificações em modo anônimo</li>
+              <li><strong>Android Chrome:</strong> Configurações → Apps → Chrome → Notificações → Permitir tudo</li>
+              <li><strong>Android Firefox:</strong> Configurações → Apps → Firefox → Notificações → Ativar</li>
+              <li><strong>iOS Safari:</strong> Adicione o app à tela inicial (Compartilhar → Tela de Início), depois abra pelo ícone</li>
+              <li>Desative o modo "Não Perturbe" ou "Foco" do celular</li>
+              <li>Modo anônimo/privado pode bloquear notificações</li>
+              <li>Limpe o cache do navegador e reative as notificações</li>
+              <li>Certifique-se que o site tem permissão no sistema (não só no navegador)</li>
             </ul>
           </AlertDescription>
         </Alert>

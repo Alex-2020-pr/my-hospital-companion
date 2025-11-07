@@ -29,15 +29,21 @@ export const usePushNotifications = () => {
       const hasServiceWorker = 'serviceWorker' in navigator;
       const hasNotifications = 'Notification' in window;
       
+      console.log('[Push] Verificando suporte:', { hasServiceWorker, hasNotifications });
+      
       // Detect if running as PWA
       const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
                     (window.navigator as any).standalone === true;
       
-      // Detect iOS
+      // Detect mobile OS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      console.log('[Push] Plataforma:', { isPWA, isIOS, isAndroid, userAgent: navigator.userAgent });
       
       // iOS only supports push notifications when installed as PWA
       if (isIOS && !isPWA) {
+        console.log('[Push] iOS detectado mas não está como PWA - notificações não suportadas');
         setIsSupported(false);
         setIsLoading(false);
         return;
@@ -48,12 +54,15 @@ export const usePushNotifications = () => {
       if (hasNotifications) {
         try {
           permissionDenied = Notification.permission === 'denied';
+          console.log('[Push] Permissão de notificações:', Notification.permission);
         } catch (e) {
-          console.error('Erro ao verificar permissão:', e);
+          console.error('[Push] Erro ao verificar permissão:', e);
         }
       }
       
-      setIsSupported(hasServiceWorker && hasNotifications && !permissionDenied);
+      const supported = hasServiceWorker && hasNotifications && !permissionDenied;
+      console.log('[Push] Suporte final:', supported);
+      setIsSupported(supported);
     };
     
     checkSupport();
