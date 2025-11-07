@@ -1,5 +1,5 @@
-// Firebase Messaging Service Worker v3.0 - Melhorias para notificações em background
-console.log('[SW] Service Worker v3.0 carregando...');
+// Firebase Messaging Service Worker v4.0 - FORÇAR EXIBIÇÃO
+console.log('[SW] Service Worker v4.0 carregando...');
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
@@ -34,23 +34,23 @@ messaging.onBackgroundMessage((payload) => {
     body: notificationBody,
     icon: payload.notification?.icon || payload.data?.icon || '/favicon.png',
     badge: '/favicon.png',
-    tag: payload.data?.notificationId || 'notification-' + Date.now(),
-    requireInteraction: true,
-    silent: false,
-    vibrate: [200, 100, 200],
+    tag: 'am2-notif-' + Date.now(), // Tag única para cada notificação
+    requireInteraction: true, // ⚡ FORÇA permanência na tela
+    silent: false, // Som ativado
+    vibrate: [300, 100, 300, 100, 300], // Vibração mais intensa
+    timestamp: Date.now(),
+    renotify: true, // Força nova notificação
+    sticky: true, // Android: mantém persistente
+    dir: 'ltr',
+    lang: 'pt-BR',
     data: {
       url: '/',
+      timestamp: Date.now(),
       ...payload.data
     },
     actions: [
-      {
-        action: 'open',
-        title: 'Abrir'
-      },
-      {
-        action: 'close',
-        title: 'Fechar'
-      }
+      { action: 'open', title: '✅ Abrir' },
+      { action: 'close', title: '❌ Fechar' }
     ]
   };
 

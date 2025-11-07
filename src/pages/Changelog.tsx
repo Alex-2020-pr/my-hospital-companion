@@ -5,8 +5,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, TrendingUp, Bug } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatBrazilDate } from '@/lib/timezone';
 
 interface Version {
   id: string;
@@ -163,7 +162,12 @@ export default function Changelog() {
                     </div>
                     <CardTitle className="text-xl">{version.title}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {format(new Date(version.release_date), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {formatBrazilDate(new Date(version.release_date), {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                        timeZone: 'America/Sao_Paulo'
+                      })}
                     </p>
                   </div>
                 </div>

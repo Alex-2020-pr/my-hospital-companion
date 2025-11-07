@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.send-scheduled-notifications]
 verify_jwt = false
+
+[functions.send-medication-reminders]
+verify_jwt = false

@@ -15,40 +15,55 @@ import {
   AlertTriangle,
   CheckCircle
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { formatBrazilDate } from "@/lib/timezone";
+import { useToast } from "@/hooks/use-toast";
+
+interface Message {
+  id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  is_read: boolean;
+  sender_id: string;
+  recipient_id: string;
+}
 
 export const Communication = () => {
   const [message, setMessage] = useState("");
   const [subject, setSubject] = useState("");
+  const [recentMessages, setRecentMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const recentMessages = [
-    {
-      id: 1,
-      subject: "Reagendamento de consulta",
-      message: "Gostaria de reagendar minha consulta do dia 15/01",
-      date: "10/01/2024",
-      time: "14:30",
-      status: "respondida",
-      response: "Sua consulta foi reagendada para 18/01 às 14:30"
-    },
-    {
-      id: 2,
-      subject: "Dúvida sobre medicamento",
-      message: "Posso tomar o medicamento com leite?",
-      date: "08/01/2024",
-      time: "09:15",
-      status: "respondida",
-      response: "Evite tomar com leite. Prefira água."
-    },
-    {
-      id: 3,
-      subject: "Resultado de exame",
-      message: "Quando ficará pronto o resultado do hemograma?",
-      date: "05/01/2024",
-      time: "16:20",
-      status: "pendente"
+  useEffect(() => {
+    if (user) {
+      fetchMessages();
     }
-  ];
+  }, [user]);
+
+  const fetchMessages = async () => {
+    if (!user) return;
+    
+    try {
+      // Buscar mensagens push enviadas e recebidas pelo usuário
+      const { data, error } = await supabase
+        .from('push_notifications')
+        .select('*')
+        .or(`recipient_id.eq.${user.id},sender_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setRecentMessages(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const quickActions = [
     {
@@ -107,12 +122,37 @@ export const Communication = () => {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (message.trim() && subject.trim()) {
-      // Aqui você enviaria a mensagem
-      setMessage("");
-      setSubject("");
-      // Toast de sucesso seria mostrado aqui
+      try {
+        const { error } = await supabase
+          .from('push_notifications')
+          .insert({
+            sender_id: user?.id,
+            recipient_id: user?.id, // Por enquanto envia para si mesmo, pode ser alterado
+            title: subject,
+            body: message,
+            is_read: false
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Mensagem enviada!",
+          description: "Sua mensagem foi registrada com sucesso."
+        });
+
+        setMessage("");
+        setSubject("");
+        fetchMessages();
+      } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar",
+          description: "Não foi possível enviar sua mensagem."
+        });
+      }
     }
   };
 
@@ -222,51 +262,47 @@ export const Communication = () => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-4">
-            {recentMessages.map((msg) => (
-              <Card key={msg.id} className="w-full">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-base">{msg.subject}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant={getStatusColor(msg.status)}>
-                          {getStatusText(msg.status)}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {msg.date} às {msg.time}
-                        </span>
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Carregando mensagens...</p>
+              </div>
+            ) : recentMessages.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
+                <p className="text-muted-foreground">Nenhuma mensagem encontrada</p>
+              </div>
+            ) : (
+              recentMessages.map((msg) => {
+                const isSender = msg.sender_id === user?.id;
+                return (
+                  <Card key={msg.id} className="w-full">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-base">{msg.title}</CardTitle>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant={msg.is_read ? 'default' : 'secondary'}>
+                              {msg.is_read ? 'Lida' : 'Não lida'}
+                            </Badge>
+                            <Badge variant={isSender ? 'outline' : 'default'}>
+                              {isSender ? 'Enviada' : 'Recebida'}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {formatBrazilDate(msg.created_at)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <p className="text-sm font-medium mb-1">Sua mensagem:</p>
-                    <p className="text-sm text-muted-foreground">{msg.message}</p>
-                  </div>
-
-                  {msg.response && (
-                    <div className="bg-accent/10 p-3 rounded-lg border border-accent/20">
-                      <div className="flex items-center mb-1">
-                        <CheckCircle className="h-4 w-4 text-accent mr-2" />
-                        <p className="text-sm font-medium text-accent-foreground">
-                          Resposta da equipe:
-                        </p>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="bg-muted/50 p-3 rounded-lg">
+                        <p className="text-sm text-muted-foreground">{msg.body}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{msg.response}</p>
-                    </div>
-                  )}
-
-                  {msg.status === 'pendente' && (
-                    <div className="bg-secondary/50 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        📝 Sua mensagem foi recebida e será respondida em breve.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </TabsContent>
         </Tabs>
       </div>
