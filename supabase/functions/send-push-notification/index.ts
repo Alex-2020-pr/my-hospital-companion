@@ -196,7 +196,6 @@ serve(async (req) => {
               notification: {
                 icon: '/favicon.png',
                 sound: 'default',
-                priority: 'max',
                 defaultVibrateTimings: true,
                 notification_priority: 'PRIORITY_MAX'
               }
