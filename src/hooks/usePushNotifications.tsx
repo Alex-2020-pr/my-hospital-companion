@@ -63,6 +63,20 @@ export const usePushNotifications = () => {
       const supported = hasServiceWorker && hasNotifications && !permissionDenied;
       console.log('[Push] Suporte final:', supported);
       setIsSupported(supported);
+
+      // Manter o service worker ativo com heartbeat
+      if (hasServiceWorker && supported) {
+        setInterval(async () => {
+          const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+          if (registration?.active) {
+            const messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = (event) => {
+              console.log('[Push] Heartbeat response:', event.data);
+            };
+            registration.active.postMessage({ type: 'HEARTBEAT' }, [messageChannel.port2]);
+          }
+        }, 60000); // A cada 1 minuto
+      }
     };
     
     checkSupport();

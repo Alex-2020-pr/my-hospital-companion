@@ -330,36 +330,32 @@ export const NotificationBell = () => {
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`p-3 rounded-lg border transition-colors ${
+                    className={`p-3 rounded-lg border transition-colors cursor-pointer ${
                       msg.is_read
                         ? 'bg-background'
                         : 'bg-accent/50'
                     }`}
+                    onClick={() => !msg.is_read && markAsRead(msg.id, msg.type)}
                   >
-                    <div 
-                      className="cursor-pointer"
-                      onClick={() => !msg.is_read && markAsRead(msg.id, msg.type)}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h5 className="font-medium text-sm">{msg.title}</h5>
-                        <Badge
-                          className={`text-xs ${getPriorityColor(msg.priority)} text-white`}
-                        >
-                          {getPriorityLabel(msg.priority)}
-                        </Badge>
-                      </div>
-                      {msg.sender_name && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          De: {msg.sender_name}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {msg.message}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatBrazilDate(msg.created_at)}
-                      </p>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h5 className="font-medium text-sm">{msg.title}</h5>
+                      <Badge
+                        className={`text-xs ${getPriorityColor(msg.priority)} text-white`}
+                      >
+                        {getPriorityLabel(msg.priority)}
+                      </Badge>
                     </div>
+                    {msg.sender_name && (
+                      <p className="text-xs text-muted-foreground mb-1">
+                        De: {msg.sender_name}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {msg.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatBrazilDate(msg.created_at)}
+                    </p>
                     {msg.type === 'push' && (
                       <div className="mt-2 pt-2 border-t">
                         <Button
