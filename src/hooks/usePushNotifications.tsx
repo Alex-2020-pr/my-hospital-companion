@@ -120,25 +120,39 @@ export const usePushNotifications = () => {
 
       console.log('Verificando service worker do Firebase...');
       
-      // Desregistrar TODOS os service workers antigos primeiro
+      // Verifica se já existe o SW correto registrado
       const registrations = await navigator.serviceWorker.getRegistrations();
       console.log(`[Push] Encontrados ${registrations.length} service workers registrados`);
       
-      for (const reg of registrations) {
-        console.log('[Push] Desregistrando SW:', reg.scope);
-        await reg.unregister();
+      const correctSW = registrations.find(reg => reg.active?.scriptURL.includes('firebase-messaging-sw.js'));
+      
+      if (correctSW) {
+        console.log('[Push] SW correto já está registrado, usando ele');
+        await navigator.serviceWorker.ready;
+      } else {
+        // Desregistrar apenas os SWs antigos (não firebase-messaging-sw.js)
+        for (const reg of registrations) {
+          if (!reg.active?.scriptURL.includes('firebase-messaging-sw.js')) {
+            console.log('[Push] Desregistrando SW antigo:', reg.scope);
+            await reg.unregister();
+          }
+        }
+        
+        console.log('[Push] Registrando novo SW consolidado...');
+        await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+          scope: '/',
+          updateViaCache: 'none'
+        });
+        
+        console.log('[Push] SW registrado, aguardando ficar pronto...');
+        await navigator.serviceWorker.ready;
       }
       
-      console.log('[Push] Todos os SWs antigos removidos. Registrando novo SW consolidado...');
+      const registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      if (!registration) {
+        throw new Error('Service Worker não foi registrado corretamente');
+      }
       
-      // Registrar o novo service worker consolidado
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-        scope: '/',
-        updateViaCache: 'none'
-      });
-      
-      console.log('[Push] SW registrado com sucesso:', registration.scope);
-      await navigator.serviceWorker.ready;
       console.log('[Push] Service worker pronto e ativo');
       
       console.log('Gerando token FCM...');
