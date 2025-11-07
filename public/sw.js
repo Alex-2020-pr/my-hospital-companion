@@ -1,12 +1,16 @@
-// Service Worker para notificações push com controle de versão
-const CACHE_VERSION = 'v1.0.0';
-const CACHE_NAME = `am2-cache-${CACHE_VERSION}`;
+// ⚠️ ESTE SERVICE WORKER FOI DESATIVADO ⚠️
+// 
+// O projeto agora usa um único service worker consolidado:
+// firebase-messaging-sw.js
+//
+// Isso evita conflitos e garante que as notificações push funcionem
+// corretamente em todos os dispositivos.
+//
+// NÃO REATIVE ESTE ARQUIVO - ele causará problemas!
 
-// Precache manifest injected by vite-plugin-pwa
-const precacheManifest = self.__WB_MANIFEST || [];
+console.log('[SW ANTIGO] Este SW foi desativado. Use firebase-messaging-sw.js');
 
-// Push notifications são gerenciadas pelo firebase-messaging-sw.js
-// Removido para evitar notificações duplicadas
+// Desativa este service worker automaticamente
 
 // Evento de instalação com cache busting
 self.addEventListener('install', function(event) {

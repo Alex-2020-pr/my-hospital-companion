@@ -1,5 +1,9 @@
-// Firebase Messaging Service Worker v5.0 - MODO PUSH NATIVO
-console.log('[SW] Service Worker v5.0 carregando...');
+// Firebase Messaging Service Worker v6.0 - CONSOLIDADO + PWA
+console.log('[SW] Service Worker v6.0 carregando...');
+
+// ===== CACHE E PWA =====
+const CACHE_VERSION = 'v1.0.0';
+const CACHE_NAME = `am2-cache-${CACHE_VERSION}`;
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
@@ -147,25 +151,72 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Log quando o SW é instalado
+// ===== INSTALAÇÃO COM CACHE =====
 self.addEventListener('install', (event) => {
-  console.log('[SW] 📥 Service Worker instalado');
-  self.skipWaiting(); // Ativa imediatamente
+  console.log('[SW] 📥 Service Worker instalado - versão:', CACHE_VERSION);
+  self.skipWaiting();
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll([
+        '/',
+        '/favicon.png'
+      ]);
+    })
+  );
 });
 
-// Log quando o SW é ativado
+// ===== ATIVAÇÃO COM LIMPEZA DE CACHE =====
 self.addEventListener('activate', (event) => {
-  console.log('[SW] ✅ Service Worker ativado');
-  event.waitUntil(clients.claim()); // Toma controle imediatamente
+  console.log('[SW] ✅ Service Worker ativado - versão:', CACHE_VERSION);
+  
+  event.waitUntil(
+    Promise.all([
+      // Limpar caches antigos
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('[SW] Removendo cache antigo:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Tomar controle imediatamente
+      clients.claim()
+    ])
+  );
+  
+  // Notificar clientes sobre atualização
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({ type: 'SW_UPDATED', version: CACHE_VERSION });
+    });
+  });
 });
 
-// Heartbeat para manter o SW ativo
+// ===== MENSAGENS (HEARTBEAT + CACHE) =====
 self.addEventListener('message', (event) => {
   console.log('[SW] 💬 Mensagem recebida do cliente:', event.data);
   
   if (event.data && event.data.type === 'HEARTBEAT') {
     console.log('[SW] ❤️ Heartbeat recebido, SW está ativo');
     event.ports[0].postMessage({ type: 'HEARTBEAT_RESPONSE', timestamp: Date.now() });
+  }
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => caches.delete(cacheName))
+        );
+      })
+    );
   }
 });
 

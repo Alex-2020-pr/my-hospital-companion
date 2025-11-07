@@ -119,21 +119,27 @@ export const usePushNotifications = () => {
       }
 
       console.log('Verificando service worker do Firebase...');
-      let registration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
       
-      if (!registration) {
-        console.log('Registrando service worker do Firebase...');
-        registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-          scope: '/',
-          updateViaCache: 'none'
-        });
-      } else {
-        console.log('Service worker já registrado, forçando atualização...');
-        await registration.update();
+      // Desregistrar TODOS os service workers antigos primeiro
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      console.log(`[Push] Encontrados ${registrations.length} service workers registrados`);
+      
+      for (const reg of registrations) {
+        console.log('[Push] Desregistrando SW:', reg.scope);
+        await reg.unregister();
       }
       
+      console.log('[Push] Todos os SWs antigos removidos. Registrando novo SW consolidado...');
+      
+      // Registrar o novo service worker consolidado
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/',
+        updateViaCache: 'none'
+      });
+      
+      console.log('[Push] SW registrado com sucesso:', registration.scope);
       await navigator.serviceWorker.ready;
-      console.log('Service worker pronto');
+      console.log('[Push] Service worker pronto e ativo');
       
       console.log('Gerando token FCM...');
       const token = await getToken(messaging, {

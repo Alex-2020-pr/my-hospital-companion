@@ -1,0 +1,23 @@
+⚠️ IMPORTANTE: SERVICE WORKER CONSOLIDADO ⚠️
+
+Este projeto usa um ÚNICO service worker: firebase-messaging-sw.js
+
+Esse service worker agora consolida:
+✅ Notificações Push do Firebase (FCM)
+✅ Cache e PWA
+✅ Gestão de ciclo de vida
+
+O arquivo sw.js foi DESATIVADO para evitar conflitos.
+
+NÃO crie múltiplos service workers - isso causa conflitos e impede
+que as notificações push funcionem corretamente!
+
+Para depurar:
+1. Abra DevTools → Application → Service Workers
+2. Deve haver apenas 1 SW ativo: firebase-messaging-sw.js
+3. Se houver mais de 1, desregistre todos e recarregue a página
+
+Logs a procurar no console:
+[SW] Service Worker v6.0 carregando...
+[SW] Firebase inicializado
+[Push] SW registrado com sucesso
