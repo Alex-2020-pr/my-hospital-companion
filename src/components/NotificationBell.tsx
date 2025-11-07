@@ -75,11 +75,11 @@ export const NotificationBell = () => {
 
       if (msgError) throw msgError;
 
-      // Buscar notificações push do usuário (enviadas e recebidas)
+      // Buscar apenas notificações push RECEBIDAS pelo usuário
       const { data: pushNotifications, error: pushError } = await supabase
         .from('push_notifications')
         .select('id, title, body, created_at, is_read, sender_id, recipient_id')
-        .or(`recipient_id.eq.${user.id},sender_id.eq.${user.id}`)
+        .eq('recipient_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -211,23 +211,15 @@ export const NotificationBell = () => {
         }
       } else if (messageType === 'push') {
         // Notificações push atualizam seu próprio campo is_read
-        // Buscar a notificação primeiro para verificar permissões
-        const { data: notification } = await supabase
+        // Só o destinatário pode marcar como lida
+        const { error } = await supabase
           .from('push_notifications')
-          .select('recipient_id, sender_id')
+          .update({ is_read: true })
           .eq('id', messageId)
-          .single();
+          .eq('recipient_id', user.id);
 
-        // Só atualiza se o usuário for recipient ou sender
-        if (notification && (notification.recipient_id === user.id || notification.sender_id === user.id)) {
-          const { error } = await supabase
-            .from('push_notifications')
-            .update({ is_read: true })
-            .eq('id', messageId);
-
-          if (error) {
-            throw error;
-          }
+        if (error) {
+          throw error;
         }
       }
 

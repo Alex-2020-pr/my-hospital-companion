@@ -215,15 +215,20 @@ serve(async (req) => {
             webpush: {
               headers: {
                 Urgency: 'high',
-                TTL: '0'
+                TTL: '86400' // 24 horas para garantir entrega
               },
               notification: {
                 icon: payload.icon || '/favicon.png',
                 badge: payload.badge || '/favicon.png',
-                requireInteraction: false,
+                requireInteraction: true, // Força a notificação a aparecer
                 tag: 'notification-' + Date.now(),
                 vibrate: [200, 100, 200],
-                silent: false
+                silent: false,
+                renotify: true, // Força nova notificação mesmo com mesma tag
+                timestamp: Date.now()
+              },
+              fcm_options: {
+                link: '/' // Link para abrir ao clicar
               }
             }
           }
