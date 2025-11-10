@@ -20,34 +20,40 @@ export const StoragePurchaseDialog = ({ currentLimit, organizationId }: StorageP
   const [selectedPlan, setSelectedPlan] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Planos baseados no custo do Supabase + 100% de margem
+  // Custo base Supabase: $0.021/GB/mês
+  // Margem de lucro: 200% (3x)
+  const SUPABASE_COST_PER_GB = 0.021;
+  const PROFIT_MARGIN = 3;
+  const COST_PER_GB = SUPABASE_COST_PER_GB * PROFIT_MARGIN;
+
+  // Planos baseados no custo do Supabase com margem de 200%
   const plans = [
     { 
       id: '1gb',
       name: '1 GB Extra',
       size: 1024, // MB
-      cost: 0.05, // $0.021 * 2 = $0.042, arredondado para $0.05
+      cost: parseFloat((1 * COST_PER_GB * 5.5).toFixed(2)), // Convertido para BRL
       popular: false
     },
     { 
       id: '5gb',
       name: '5 GB Extra',
       size: 5120, // MB
-      cost: 0.22, // $0.021 * 5 * 2 = $0.21, arredondado
+      cost: parseFloat((5 * COST_PER_GB * 5.5).toFixed(2)),
       popular: true
     },
     { 
       id: '10gb',
       name: '10 GB Extra',
       size: 10240, // MB
-      cost: 0.42, // $0.021 * 10 * 2 = $0.42
+      cost: parseFloat((10 * COST_PER_GB * 5.5).toFixed(2)),
       popular: false
     },
     { 
       id: '50gb',
       name: '50 GB Extra',
       size: 51200, // MB
-      cost: 2.10, // $0.021 * 50 * 2 = $2.10
+      cost: parseFloat((50 * COST_PER_GB * 5.5).toFixed(2)),
       popular: false
     }
   ];
@@ -63,7 +69,7 @@ export const StoragePurchaseDialog = ({ currentLimit, organizationId }: StorageP
       const newLimitBytes = (currentLimit + (plan.size * 1024 * 1024));
 
       // Criar solicitação de compra
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('storage_requests')
         .insert({
           user_id: user.id,
@@ -71,14 +77,28 @@ export const StoragePurchaseDialog = ({ currentLimit, organizationId }: StorageP
           requested_bytes: newLimitBytes,
           request_type: 'purchase',
           amount_paid: plan.cost,
-          notes: `Compra de ${plan.name} - ${plan.cost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
-        });
+          notes: `Compra de ${plan.name} - R$ ${plan.cost.toFixed(2)}`
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
+      // Notificar super admin
+      await supabase.functions.invoke('notify-storage-request', {
+        body: {
+          requestId: insertData.id,
+          requestType: 'patient',
+          userId: user.id,
+          organizationId,
+          planName: plan.name,
+          amount: plan.cost.toFixed(2)
+        }
+      });
+
       toast({
-        title: 'Compra registrada',
-        description: 'Sua compra foi registrada e será processada em breve. Você receberá instruções de pagamento por e-mail.'
+        title: 'Solicitação enviada!',
+        description: 'Seu pedido foi enviado para análise. O administrador entrará em contato.'
       });
 
       setOpen(false);
@@ -134,7 +154,7 @@ export const StoragePurchaseDialog = ({ currentLimit, organizationId }: StorageP
                       <Label htmlFor={plan.id} className="cursor-pointer">
                         <div className="font-semibold text-lg">{plan.name}</div>
                         <div className="text-2xl font-bold text-primary mt-1">
-                          ${plan.cost.toFixed(2)}
+                          R$ {plan.cost.toFixed(2)}
                           <span className="text-sm text-muted-foreground">/mês</span>
                         </div>
                         <div className="text-sm text-muted-foreground mt-2">

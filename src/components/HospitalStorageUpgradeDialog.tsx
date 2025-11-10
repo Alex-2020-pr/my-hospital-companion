@@ -28,9 +28,9 @@ export const HospitalStorageUpgradeDialog = ({
   const [submitting, setSubmitting] = useState(false);
 
   // Custo base Supabase: $0.021/GB/mês
-  // Margem de lucro: 150% (2.5x)
+  // Margem de lucro: 200% (3x)
   const SUPABASE_COST_PER_GB = 0.021;
-  const PROFIT_MARGIN = 2.5;
+  const PROFIT_MARGIN = 3;
   const COST_PER_GB = SUPABASE_COST_PER_GB * PROFIT_MARGIN;
 
   const calculateMonthlyPrice = (gb: number) => {
@@ -53,7 +53,7 @@ export const HospitalStorageUpgradeDialog = ({
       const requestedBytes = additionalGB * 1073741824; // GB para bytes
       const monthlyAmount = parseFloat(calculateMonthlyPrice(additionalGB));
 
-      const { error } = await supabase
+      const { data: insertData, error } = await supabase
         .from('storage_requests')
         .insert({
           user_id: user.id,
@@ -63,9 +63,23 @@ export const HospitalStorageUpgradeDialog = ({
           amount_paid: monthlyAmount,
           notes: notes || `Solicitação de ${additionalGB} GB adicionais. Valor mensal: R$ ${(monthlyAmount * 5.5).toFixed(2)}`,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Notificar super admin
+      await supabase.functions.invoke('notify-storage-request', {
+        body: {
+          requestId: insertData.id,
+          requestType: 'hospital',
+          userId: user.id,
+          organizationId: organizationId,
+          additionalGB,
+          monthlyAmount: (monthlyAmount * 5.5).toFixed(2)
+        }
+      });
 
       toast.success(
         "Solicitação enviada com sucesso! O administrador será notificado e entrará em contato para finalizar a contratação."
