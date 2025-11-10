@@ -57,13 +57,31 @@ serve(async (req) => {
     }
 
     // Buscar todos os super admins
-    const { data: superAdmins } = await supabase
+    const { data: superAdminRoles, error: rolesError } = await supabase
       .from('user_roles')
-      .select('user_id, profiles(email)')
+      .select('user_id')
       .eq('role', 'super_admin');
 
-    if (!superAdmins || superAdmins.length === 0) {
+    if (rolesError) {
+      console.error('Erro ao buscar roles:', rolesError);
+      throw new Error('Erro ao buscar super admins');
+    }
+
+    if (!superAdminRoles || superAdminRoles.length === 0) {
       throw new Error('Nenhum super admin encontrado');
+    }
+
+    const superAdminIds = superAdminRoles.map(r => r.user_id);
+    
+    // Buscar emails dos super admins
+    const { data: superAdminProfiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .in('id', superAdminIds);
+
+    if (profilesError) {
+      console.error('Erro ao buscar perfis:', profilesError);
+      throw new Error('Erro ao buscar perfis de super admins');
     }
 
     // Criar mensagem
@@ -101,8 +119,8 @@ serve(async (req) => {
     }
 
     // Criar notificações in-app para todos os super admins
-    const notifications = superAdmins.map(admin => ({
-      recipient_id: admin.user_id,
+    const notifications = superAdminIds.map(adminId => ({
+      recipient_id: adminId,
       sender_id: userId,
       title,
       body,
@@ -113,14 +131,20 @@ serve(async (req) => {
       }
     }));
 
-    await supabase.from('push_notifications').insert(notifications);
+    const { error: notifError } = await supabase
+      .from('push_notifications')
+      .insert(notifications);
+
+    if (notifError) {
+      console.error('Erro ao criar notificações:', notifError);
+    }
 
     // Enviar e-mails para todos os super admins (se RESEND_API_KEY estiver configurado)
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
-    if (resendApiKey) {
-      const emailPromises = superAdmins.map(async (admin: any) => {
-        const adminEmail = admin.profiles?.email;
+    if (resendApiKey && superAdminProfiles) {
+      const emailPromises = superAdminProfiles.map(async (admin) => {
+        const adminEmail = admin.email;
         if (!adminEmail) return;
 
         try {
