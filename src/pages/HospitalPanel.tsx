@@ -22,6 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { HospitalStorageUpgradeDialog } from "@/components/HospitalStorageUpgradeDialog";
+import { Progress } from "@/components/ui/progress";
 
 interface Patient {
   id: string;
@@ -218,14 +220,29 @@ export const HospitalPanel = () => {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Armazenamento Total</CardTitle>
+                  <CardTitle className="text-sm font-medium">Armazenamento da Organização</CardTitle>
                   <HardDrive className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{formatBytes(stats.totalStorageUsed)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    de {formatBytes(stats.totalStorageLimit)}
-                  </p>
+                <CardContent className="space-y-3">
+                  <div>
+                    <div className="text-2xl font-bold">
+                      {((organizationData?.storage_used_bytes || 0) / 1073741824).toFixed(2)} GB
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      de {((organizationData?.storage_limit_bytes || 536870912) / 1073741824).toFixed(2)} GB contratados
+                    </p>
+                  </div>
+                  <Progress 
+                    value={((organizationData?.storage_used_bytes || 0) / (organizationData?.storage_limit_bytes || 536870912)) * 100} 
+                    className="h-2"
+                  />
+                  {organizationData && (
+                    <HospitalStorageUpgradeDialog
+                      organizationId={organizationData.id}
+                      currentLimit={organizationData.storage_limit_bytes || 536870912}
+                      currentUsed={organizationData.storage_used_bytes || 0}
+                    />
+                  )}
                 </CardContent>
               </Card>
 
