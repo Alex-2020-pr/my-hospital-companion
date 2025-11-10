@@ -270,7 +270,7 @@ export const HospitalPanel = () => {
                 <CardTitle>Ações Rápidas</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button
                     onClick={() => navigate('/hospital/messaging')}
                     variant="outline"
@@ -291,6 +291,17 @@ export const HospitalPanel = () => {
                     <div className="text-center">
                       <p className="font-semibold">Mensagem Individual</p>
                       <p className="text-xs text-muted-foreground">Enviar para pacientes específicos</p>
+                    </div>
+                  </Button>
+                  <Button
+                    onClick={() => navigate('/admin/storage')}
+                    variant="outline"
+                    className="h-auto py-6 flex-col gap-2"
+                  >
+                    <HardDrive className="h-8 w-8" />
+                    <div className="text-center">
+                      <p className="font-semibold">Gestão de Armazenamento</p>
+                      <p className="text-xs text-muted-foreground">Gerenciar limites de storage</p>
                     </div>
                   </Button>
                 </div>

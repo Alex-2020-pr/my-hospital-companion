@@ -29,6 +29,8 @@ import { AdminSetup } from "./pages/AdminSetup";
 import Changelog from "./pages/Changelog";
 import { AdminPushNotifications } from "./pages/AdminPushNotifications";
 import HealthChat from "./pages/HealthChat";
+import { AdminCosts } from "./pages/AdminCosts";
+import { AdminStorageManagement } from "./pages/AdminStorageManagement";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +62,8 @@ const App = () => (
           <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />
           <Route path="/admin/partners" element={<ProtectedRoute><AdminPartners /></ProtectedRoute>} />
           <Route path="/admin/push-notifications" element={<ProtectedRoute><AdminPushNotifications /></ProtectedRoute>} />
+          <Route path="/admin/costs" element={<ProtectedRoute><AdminCosts /></ProtectedRoute>} />
+          <Route path="/admin/storage" element={<ProtectedRoute><AdminStorageManagement /></ProtectedRoute>} />
           <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
           <Route path="/hospital/messaging" element={<ProtectedRoute><HospitalMessaging /></ProtectedRoute>} />
           <Route path="/health-chat" element={<ProtectedRoute><HealthChat /></ProtectedRoute>} />

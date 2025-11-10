@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, Mail, Phone } from 'lucide-react';
+import { AlertTriangle, Mail, Phone, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { StorageRequestDialog } from './StorageRequestDialog';
+import { StoragePurchaseDialog } from './StoragePurchaseDialog';
+import { useNavigate } from 'react-router-dom';
 
 export const StorageAlert = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [storageInfo, setStorageInfo] = useState<{
     used: number;
     limit: number;
     percentage: number;
+    organizationId?: string;
     organization?: { name: string; contact_email?: string; contact_phone?: string };
   } | null>(null);
 
@@ -43,6 +47,7 @@ export const StorageAlert = () => {
             used: profile.storage_used_bytes,
             limit: profile.storage_limit_bytes,
             percentage,
+            organizationId: profile.organization_id,
             organization: profile.organizations as any
           });
         }
@@ -64,26 +69,36 @@ export const StorageAlert = () => {
     <Alert variant="destructive" className="mb-4">
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle>Limite de Armazenamento Próximo</AlertTitle>
-      <AlertDescription className="space-y-3">
+      <AlertDescription className="space-y-4">
         <p>
           Você está usando {formatBytes(storageInfo.used)} de {formatBytes(storageInfo.limit)} ({storageInfo.percentage.toFixed(1)}%)
         </p>
-        <p className="text-sm">
-          Entre em contato para contratar mais espaço:
-        </p>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Mail className="h-4 w-4" />
-            <span>contato@saudedigital.com</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Phone className="h-4 w-4" />
-            <span>(11) 1234-5678</span>
-          </div>
-          {storageInfo.organization && (
-            <>
-              <p className="text-sm font-semibold mt-2">Ou fale com seu hospital/clínica:</p>
-              <p className="text-sm font-medium">{storageInfo.organization.name}</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <button
+            onClick={() => navigate('/documents')}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-background text-foreground border border-border rounded-md hover:bg-muted transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+            Gerenciar Documentos
+          </button>
+          
+          <StorageRequestDialog 
+            currentLimit={storageInfo.limit}
+            organizationId={storageInfo.organizationId}
+          />
+          
+          <StoragePurchaseDialog 
+            currentLimit={storageInfo.limit}
+            organizationId={storageInfo.organizationId}
+          />
+        </div>
+
+        {storageInfo.organization && (
+          <div className="pt-4 border-t">
+            <p className="text-sm font-semibold mb-2">Contato do hospital/clínica:</p>
+            <p className="text-sm font-medium mb-2">{storageInfo.organization.name}</p>
+            <div className="flex flex-col gap-1">
               {storageInfo.organization.contact_email && (
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4" />
@@ -96,9 +111,9 @@ export const StorageAlert = () => {
                   <span>{storageInfo.organization.contact_phone}</span>
                 </div>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
       </AlertDescription>
     </Alert>
   );

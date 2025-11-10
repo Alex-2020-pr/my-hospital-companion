@@ -492,6 +492,48 @@ export type Database = {
           },
         ]
       }
+      operational_costs: {
+        Row: {
+          created_at: string | null
+          firebase_cost: number
+          id: string
+          lovable_hosting_cost: number
+          month_year: string
+          supabase_bandwidth_gb: number
+          supabase_db_size_gb: number
+          supabase_storage_gb: number
+          supabase_total_cost: number
+          total_cost: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          firebase_cost?: number
+          id?: string
+          lovable_hosting_cost?: number
+          month_year: string
+          supabase_bandwidth_gb?: number
+          supabase_db_size_gb?: number
+          supabase_storage_gb?: number
+          supabase_total_cost?: number
+          total_cost?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          firebase_cost?: number
+          id?: string
+          lovable_hosting_cost?: number
+          month_year?: string
+          supabase_bandwidth_gb?: number
+          supabase_db_size_gb?: number
+          supabase_storage_gb?: number
+          supabase_total_cost?: number
+          total_cost?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       organization_api_tokens: {
         Row: {
           created_at: string
@@ -599,6 +641,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          default_patient_storage_limit: number | null
           id: string
           is_active: boolean
           logo_icon_url: string | null
@@ -607,6 +650,9 @@ export type Database = {
           primary_color: string | null
           secondary_color: string | null
           slug: string | null
+          storage_limit_bytes: number | null
+          storage_plan: string | null
+          storage_used_bytes: number | null
           theme_config: Json | null
           type: string
           updated_at: string
@@ -618,6 +664,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          default_patient_storage_limit?: number | null
           id?: string
           is_active?: boolean
           logo_icon_url?: string | null
@@ -626,6 +673,9 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           slug?: string | null
+          storage_limit_bytes?: number | null
+          storage_plan?: string | null
+          storage_used_bytes?: number | null
           theme_config?: Json | null
           type: string
           updated_at?: string
@@ -637,6 +687,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          default_patient_storage_limit?: number | null
           id?: string
           is_active?: boolean
           logo_icon_url?: string | null
@@ -645,6 +696,9 @@ export type Database = {
           primary_color?: string | null
           secondary_color?: string | null
           slug?: string | null
+          storage_limit_bytes?: number | null
+          storage_plan?: string | null
+          storage_used_bytes?: number | null
           theme_config?: Json | null
           type?: string
           updated_at?: string
@@ -826,6 +880,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      storage_requests: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string | null
+          request_type: string
+          requested_bytes: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string | null
+          request_type?: string
+          requested_bytes: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string | null
+          request_type?: string
+          requested_bytes?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_config: {
         Row: {
@@ -1027,6 +1134,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_org_storage_usage: { Args: { org_id: string }; Returns: number }
       can_create_first_admin: { Args: never; Returns: boolean }
       generate_api_token: { Args: never; Returns: string }
       get_active_partners: {
