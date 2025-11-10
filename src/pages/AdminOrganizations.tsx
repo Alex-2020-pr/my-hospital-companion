@@ -42,6 +42,10 @@ interface Organization {
   secondary_color?: string;
   theme_config?: any;
   slug?: string;
+  storage_plan?: string;
+  storage_limit_bytes?: number;
+  storage_used_bytes?: number;
+  default_patient_storage_limit?: number;
 }
 
 interface ApiToken {
@@ -76,7 +80,10 @@ export const AdminOrganizations = () => {
     logo_url: '',
     primary_color: '#1E40AF',
     secondary_color: '#10B981',
-    slug: ''
+    slug: '',
+    storage_plan: 'trial',
+    storage_limit_bytes: 536870912, // 512 MB padrão
+    default_patient_storage_limit: 10485760 // 10 MB padrão por paciente
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -229,7 +236,10 @@ export const AdminOrganizations = () => {
       logo_url: '',
       primary_color: '#1E40AF',
       secondary_color: '#10B981',
-      slug: ''
+      slug: '',
+      storage_plan: 'trial',
+      storage_limit_bytes: 536870912,
+      default_patient_storage_limit: 10485760
     });
     setEditingOrg(null);
     setLogoFile(null);
@@ -292,7 +302,10 @@ export const AdminOrganizations = () => {
       logo_url: org.logo_url || '',
       primary_color: org.primary_color || '#1E40AF',
       secondary_color: org.secondary_color || '#10B981',
-      slug: org.slug || ''
+      slug: org.slug || '',
+      storage_plan: org.storage_plan || 'trial',
+      storage_limit_bytes: org.storage_limit_bytes || 536870912,
+      default_patient_storage_limit: org.default_patient_storage_limit || 10485760
     });
     setDialogOpen(true);
   };
@@ -555,8 +568,9 @@ export const AdminOrganizations = () => {
                 </div>
 
                 <Tabs defaultValue="dados" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="dados">Dados</TabsTrigger>
+                    <TabsTrigger value="storage">Armazenamento</TabsTrigger>
                     <TabsTrigger value="white-label">White-Label</TabsTrigger>
                   </TabsList>
 
@@ -564,6 +578,76 @@ export const AdminOrganizations = () => {
                     <p className="text-sm text-muted-foreground">
                       Campos básicos já preenchidos acima
                     </p>
+                  </TabsContent>
+
+                  <TabsContent value="storage" className="space-y-4">
+                    <div>
+                      <Label htmlFor="storage_plan">Plano de Armazenamento</Label>
+                      <Select
+                        value={formData.storage_plan}
+                        onValueChange={(value) => setFormData({ ...formData, storage_plan: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="trial">Trial (512 MB)</SelectItem>
+                          <SelectItem value="starter">Starter (5 GB)</SelectItem>
+                          <SelectItem value="professional">Professional (20 GB)</SelectItem>
+                          <SelectItem value="enterprise">Enterprise (100 GB)</SelectItem>
+                          <SelectItem value="custom">Personalizado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Define o plano de armazenamento contratado pelo hospital
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="storage_limit_bytes">Limite Total de Armazenamento (GB)</Label>
+                      <Input
+                        id="storage_limit_bytes"
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={(formData.storage_limit_bytes / 1073741824).toFixed(2)}
+                        onChange={(e) => {
+                          const gb = parseFloat(e.target.value) || 0.5;
+                          setFormData({ ...formData, storage_limit_bytes: Math.round(gb * 1073741824) });
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Total de espaço contratado pela organização
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="default_patient_storage_limit">Limite Padrão por Paciente (MB)</Label>
+                      <Input
+                        id="default_patient_storage_limit"
+                        type="number"
+                        step="1"
+                        min="1"
+                        value={(formData.default_patient_storage_limit / 1048576).toFixed(0)}
+                        onChange={(e) => {
+                          const mb = parseInt(e.target.value) || 10;
+                          setFormData({ ...formData, default_patient_storage_limit: mb * 1048576 });
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Quanto de espaço cada paciente terá por padrão
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-muted rounded-lg space-y-2 text-sm">
+                      <p className="font-semibold">Resumo:</p>
+                      <p>• Plano: <strong>{formData.storage_plan}</strong></p>
+                      <p>• Limite total: <strong>{(formData.storage_limit_bytes / 1073741824).toFixed(2)} GB</strong></p>
+                      <p>• Por paciente: <strong>{(formData.default_patient_storage_limit / 1048576).toFixed(0)} MB</strong></p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        💡 Com {(formData.storage_limit_bytes / 1073741824).toFixed(2)} GB, você pode ter até ~{Math.floor(formData.storage_limit_bytes / formData.default_patient_storage_limit)} pacientes usando o limite padrão
+                      </p>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="white-label" className="space-y-4">
@@ -735,6 +819,13 @@ export const AdminOrganizations = () => {
                     {org.contact_phone && <p><strong>Telefone:</strong> {org.contact_phone}</p>}
                     {org.address && <p><strong>Endereço:</strong> {org.address}</p>}
                     <p><strong>Status:</strong> {org.is_active ? 'Ativo' : 'Inativo'}</p>
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="font-semibold mb-2">📦 Armazenamento:</p>
+                      <p><strong>Plano:</strong> {org.storage_plan || 'trial'}</p>
+                      <p><strong>Limite Total:</strong> {((org.storage_limit_bytes || 536870912) / 1073741824).toFixed(2)} GB</p>
+                      <p><strong>Usado:</strong> {((org.storage_used_bytes || 0) / 1073741824).toFixed(2)} GB ({((org.storage_used_bytes || 0) / (org.storage_limit_bytes || 536870912) * 100).toFixed(1)}%)</p>
+                      <p><strong>Limite por Paciente:</strong> {((org.default_patient_storage_limit || 10485760) / 1048576).toFixed(0)} MB</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
