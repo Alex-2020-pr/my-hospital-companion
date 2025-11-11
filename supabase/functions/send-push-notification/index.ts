@@ -108,15 +108,17 @@ serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     // Verificar se é chamada de outra edge function (usando SERVICE_ROLE_KEY)
-    const isServiceRole = token === serviceRoleKey || token === Deno.env.get('SUPABASE_ANON_KEY');
+    const isServiceRole = token === serviceRoleKey;
     
     let userId: string | null = null;
 
     if (isServiceRole) {
       // Chamada de outra edge function - não precisa verificar user
-      console.log('Chamada de edge function detectada');
+      console.log('✅ Chamada de edge function detectada (SERVICE_ROLE_KEY)');
     } else {
       // Chamada de usuário - verificar autenticação
+      console.log('🔐 Validando JWT de usuário...');
+      
       const supabaseClient = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -130,14 +132,14 @@ serve(async (req) => {
       const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
 
       if (userError || !user) {
-        console.error('Erro de autenticação:', userError);
+        console.error('❌ Erro de autenticação:', userError);
         return new Response(
           JSON.stringify({ error: 'Não autorizado' }),
           { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      console.log('Usuário autenticado:', user.id);
+      console.log('✅ Usuário autenticado:', user.id);
       userId = user.id;
 
       // Verificar se é super admin
@@ -148,11 +150,14 @@ serve(async (req) => {
         .eq('role', 'super_admin');
 
       if (!roles || roles.length === 0) {
+        console.log('❌ Usuário não é super admin');
         return new Response(
           JSON.stringify({ error: 'Apenas super admins podem enviar notificações' }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      
+      console.log('✅ Usuário é super admin');
     }
 
     // Usar SERVICE_ROLE_KEY para operações no banco
