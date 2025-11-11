@@ -119,37 +119,57 @@ serve(async (req) => {
       `;
     }
 
-    // Criar notificações in-app para todos os super admins
-    const notifications = superAdminIds.map(adminId => ({
-      recipient_id: adminId,
-      sender_id: userId,
-      title,
-      body,
-      data: {
-        type: 'storage_request',
-        requestId,
-        requestType
-      }
-    }));
-
+    // Criar UMA ÚNICA notificação in-app (não duplicar para cada admin)
     const { error: notifError } = await supabase
       .from('push_notifications')
-      .insert(notifications);
+      .insert({
+        recipient_id: superAdminIds[0], // Apenas o primeiro super admin recebe a notificação
+        sender_id: userId,
+        title,
+        body,
+        data: {
+          type: 'storage_request',
+          requestId,
+          requestType
+        }
+      });
 
     if (notifError) {
-      console.error('Erro ao criar notificações:', notifError);
+      console.error('Erro ao criar notificação:', notifError);
     }
 
     // Enviar e-mails para todos os super admins usando Gmail SMTP
-    const gmailHost = Deno.env.get("GMAIL_SMTP_HOST")?.replace(/^https?:\/\//, ''); // Remove http:// ou https://
+    const gmailHost = Deno.env.get("GMAIL_SMTP_HOST");
     const gmailPort = Deno.env.get("GMAIL_SMTP_PORT");
     const gmailUsername = Deno.env.get("GMAIL_USERNAME");
     const gmailPassword = Deno.env.get("GMAIL_PASSWORD");
-    const gmailFromName = Deno.env.get("GMAIL_FROM_NAME");
+    const gmailFromName = Deno.env.get("GMAIL_FROM_NAME") || "AM2 Saúde";
     const gmailFromEmail = Deno.env.get("GMAIL_FROM_EMAIL");
     
-    if (gmailHost && gmailPort && gmailUsername && gmailPassword && superAdminProfiles) {
+    console.log('📧 Configuração SMTP:', {
+      host: gmailHost,
+      port: gmailPort,
+      from: gmailFromEmail,
+      adminCount: superAdminProfiles?.length || 0
+    });
+
+    if (!gmailHost || !gmailPort || !gmailUsername || !gmailPassword || !gmailFromEmail) {
+      console.log('⚠️ Configuração SMTP incompleta, pulando envio de e-mails');
+      console.log('Configure as variáveis: GMAIL_SMTP_HOST, GMAIL_SMTP_PORT, GMAIL_USERNAME, GMAIL_PASSWORD, GMAIL_FROM_EMAIL');
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Notificações criadas (e-mail desabilitado - configure SMTP)'
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
+    if (superAdminProfiles && superAdminProfiles.length > 0) {
       try {
+        console.log(`📨 Iniciando envio de e-mails para ${superAdminProfiles.length} super admins`);
+        
         const client = new SMTPClient({
           connection: {
             hostname: gmailHost,
@@ -162,9 +182,12 @@ serve(async (req) => {
           },
         });
 
-        const emailPromises = superAdminProfiles.map(async (admin) => {
+        for (const admin of superAdminProfiles) {
           const adminEmail = admin.email;
-          if (!adminEmail) return;
+          if (!adminEmail) {
+            console.log('⚠️ Admin sem e-mail, pulando...');
+            continue;
+          }
 
           try {
             await client.send({
@@ -174,16 +197,16 @@ serve(async (req) => {
               html: emailBody,
             });
             
-            console.log(`E-mail enviado com sucesso para ${adminEmail}`);
+            console.log(`✅ E-mail enviado para ${adminEmail}`);
           } catch (error) {
-            console.error(`Erro ao enviar e-mail para ${adminEmail}:`, error);
+            console.error(`❌ Erro ao enviar e-mail para ${adminEmail}:`, error);
           }
-        });
+        }
 
-        await Promise.all(emailPromises);
         await client.close();
+        console.log('✅ Todos os e-mails processados');
       } catch (emailError) {
-        console.error('Erro geral ao enviar e-mails:', emailError);
+        console.error('❌ Erro geral ao enviar e-mails:', emailError);
       }
     }
 
