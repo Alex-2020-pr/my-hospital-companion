@@ -104,47 +104,67 @@ serve(async (req) => {
       );
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
-    );
-
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    // Verificar se é chamada de outra edge function (usando SERVICE_ROLE_KEY)
+    const isServiceRole = token === serviceRoleKey || token === Deno.env.get('SUPABASE_ANON_KEY');
+    
+    let userId: string | null = null;
 
-    if (userError || !user) {
-      console.error('Erro de autenticação:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Não autorizado' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    if (isServiceRole) {
+      // Chamada de outra edge function - não precisa verificar user
+      console.log('Chamada de edge function detectada');
+    } else {
+      // Chamada de usuário - verificar autenticação
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        {
+          global: {
+            headers: { Authorization: authHeader },
+          },
+        }
       );
+
+      const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+      if (userError || !user) {
+        console.error('Erro de autenticação:', userError);
+        return new Response(
+          JSON.stringify({ error: 'Não autorizado' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Usuário autenticado:', user.id);
+      userId = user.id;
+
+      // Verificar se é super admin
+      const { data: roles } = await supabaseClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'super_admin');
+
+      if (!roles || roles.length === 0) {
+        return new Response(
+          JSON.stringify({ error: 'Apenas super admins podem enviar notificações' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
-    console.log('Usuário autenticado:', user.id);
-
-    // Verificar se é super admin
-    const { data: roles } = await supabaseClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'super_admin');
-
-    if (!roles || roles.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'Apenas super admins podem enviar notificações' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Usar SERVICE_ROLE_KEY para operações no banco
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
     const payload: NotificationPayload = await req.json();
 
     // Buscar FCM tokens do usuário
-    const { data: subscriptions, error: subError } = await supabaseClient
+    const { data: subscriptions, error: subError } = await supabaseAdmin
       .from('push_subscriptions')
       .select('*')
       .eq('user_id', payload.targetUserId);
@@ -274,10 +294,10 @@ serve(async (req) => {
     });
 
     // Salvar no histórico
-    const { error: historyError } = await supabaseClient
+    const { error: historyError } = await supabaseAdmin
       .from('push_notifications')
       .insert({
-        sender_id: user.id,
+        sender_id: userId || payload.targetUserId, // Se for edge function, usa o targetUserId
         recipient_id: payload.targetUserId,
         title: payload.title,
         body: payload.body,
