@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -139,38 +140,47 @@ serve(async (req) => {
       console.error('Erro ao criar notificações:', notifError);
     }
 
-    // Enviar e-mails para todos os super admins (se RESEND_API_KEY estiver configurado)
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    // Enviar e-mails para todos os super admins usando Gmail SMTP
+    const gmailHost = Deno.env.get("GMAIL_SMTP_HOST");
+    const gmailPort = Deno.env.get("GMAIL_SMTP_PORT");
+    const gmailUsername = Deno.env.get("GMAIL_USERNAME");
+    const gmailPassword = Deno.env.get("GMAIL_PASSWORD");
+    const gmailFromName = Deno.env.get("GMAIL_FROM_NAME");
+    const gmailFromEmail = Deno.env.get("GMAIL_FROM_EMAIL");
     
-    if (resendApiKey && superAdminProfiles) {
+    if (gmailHost && gmailPort && gmailUsername && gmailPassword && superAdminProfiles) {
+      const client = new SMTPClient({
+        connection: {
+          hostname: gmailHost,
+          port: parseInt(gmailPort),
+          tls: true,
+          auth: {
+            username: gmailUsername,
+            password: gmailPassword,
+          },
+        },
+      });
+
       const emailPromises = superAdminProfiles.map(async (admin) => {
         const adminEmail = admin.email;
         if (!adminEmail) return;
 
         try {
-          const response = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${resendApiKey}`,
-            },
-            body: JSON.stringify({
-              from: "AM2 Sistema <noreply@am2sistema.com>",
-              to: [adminEmail],
-              subject: title,
-              html: emailBody,
-            }),
+          await client.send({
+            from: `${gmailFromName} <${gmailFromEmail}>`,
+            to: adminEmail,
+            subject: title,
+            html: emailBody,
           });
-
-          if (!response.ok) {
-            console.error(`Erro ao enviar e-mail para ${adminEmail}:`, await response.text());
-          }
+          
+          console.log(`E-mail enviado com sucesso para ${adminEmail}`);
         } catch (error) {
           console.error(`Erro ao enviar e-mail para ${adminEmail}:`, error);
         }
       });
 
       await Promise.all(emailPromises);
+      await client.close();
     }
 
     return new Response(
