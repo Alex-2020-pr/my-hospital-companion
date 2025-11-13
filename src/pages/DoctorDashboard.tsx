@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DoctorMenu } from "@/components/DoctorMenu";
 import { 
   Video, 
   FileText, 
@@ -69,17 +70,21 @@ export default function DoctorDashboard() {
       <div className="min-h-screen bg-background pb-24">
         {/* Topbar com informações do médico */}
         <div className="bg-primary text-primary-foreground p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-14 w-14 border-2 border-primary-foreground">
+          <div className="flex items-center justify-between gap-3">
+            <DoctorMenu 
+              onDutyMode={onDuty} 
+              onToggleDutyMode={setOnDuty}
+            />
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Avatar className="h-12 w-12 border-2 border-primary-foreground">
                 <AvatarImage src={DOCTOR_DATA.avatar || undefined} />
                 <AvatarFallback className="bg-primary-foreground text-primary text-lg font-semibold">
                   {DOCTOR_DATA.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h2 className="font-semibold text-lg">{DOCTOR_DATA.name}</h2>
-                <p className="text-sm opacity-90">{DOCTOR_DATA.specialty}</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-semibold text-base truncate">{DOCTOR_DATA.name}</h2>
+                <p className="text-sm opacity-90 truncate">{DOCTOR_DATA.specialty}</p>
               </div>
             </div>
             <Badge 
