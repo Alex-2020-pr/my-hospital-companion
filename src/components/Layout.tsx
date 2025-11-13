@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
-import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare } from "lucide-react";
+import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare, Stethoscope } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
@@ -166,6 +166,15 @@ export const Layout = ({ children, title }: LayoutProps) => {
                         <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
                           <Bell className="mr-2 h-4 w-4" />
                           <span>Notificações Push</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/medico-dashboard')}>
+                          <Stethoscope className="mr-2 h-4 w-4" />
+                          <span>Dashboard Médico (MVP)</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate('/paciente/p1')}>
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Ficha do Paciente (MVP)</span>
                         </DropdownMenuItem>
                       </>
                     )}
