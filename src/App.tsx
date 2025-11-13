@@ -31,6 +31,7 @@ import { AdminPushNotifications } from "./pages/AdminPushNotifications";
 import HealthChat from "./pages/HealthChat";
 import { AdminCosts } from "./pages/AdminCosts";
 import { AdminStorageManagement } from "./pages/AdminStorageManagement";
+import DoctorDashboard from "./pages/DoctorDashboard";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
           <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
           <Route path="/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
+          <Route path="/medico-dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />
