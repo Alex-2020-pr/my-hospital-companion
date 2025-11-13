@@ -5,7 +5,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Building2, Activity, FileText, HardDrive, Shield, DollarSign } from "lucide-react";
+import { Users, Building2, Activity, FileText, HardDrive, Shield, DollarSign, Stethoscope } from "lucide-react";
 
 interface DashboardStats {
   totalUsers: number;
@@ -147,6 +147,10 @@ export const AdminDashboard = () => {
             <Button onClick={() => navigate('/admin/storage')} variant="outline" className="h-auto py-4 flex-col">
               <HardDrive className="h-6 w-6 mb-2" />
               <span className="text-sm">Armazenamento</span>
+            </Button>
+            <Button onClick={() => navigate('/admin/doctors')} variant="outline" className="h-auto py-4 flex-col">
+              <Stethoscope className="h-6 w-6 mb-2" />
+              <span className="text-sm">Médicos</span>
             </Button>
           </div>
         </div>

@@ -73,7 +73,8 @@ const MENU_SECTIONS: MenuSection[] = [
         id: "pacientes",
         label: "Pacientes",
         description: "Lista e prontuários",
-        icon: Users
+        icon: Users,
+        path: "/paciente/p1" // Mock - depois conectar ao banco
       },
       {
         id: "prontuario",
