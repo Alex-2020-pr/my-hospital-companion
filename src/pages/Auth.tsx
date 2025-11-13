@@ -6,6 +6,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,9 @@ export const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [isResetPassword, setIsResetPassword] = useState(false);
+  const [userType, setUserType] = useState<"patient" | "doctor">("patient");
+  const [crm, setCrm] = useState("");
+  const [specialty, setSpecialty] = useState("");
   
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const { toast } = useToast();
@@ -106,7 +110,17 @@ export const Auth = () => {
           return;
         }
 
-        const { error } = await signUp(email, password, fullName);
+        if (userType === "doctor" && (!crm.trim() || !specialty.trim())) {
+          toast({
+            variant: "destructive",
+            title: "Dados obrigatórios",
+            description: "Por favor, informe seu CRM e especialidade"
+          });
+          setLoading(false);
+          return;
+        }
+
+        const { data, error } = await signUp(email, password, fullName);
         
         if (error) {
           if (error.message.includes("already registered")) {
@@ -122,10 +136,47 @@ export const Auth = () => {
               description: error.message
             });
           }
-        } else {
+        } else if (data.user) {
+          // Se for médico, criar registro na tabela doctors
+          if (userType === "doctor") {
+            const { error: doctorError } = await (supabase as any)
+              .from("doctors")
+              .insert({
+                user_id: data.user.id,
+                crm: crm.trim(),
+                specialty: specialty.trim(),
+                full_name: fullName.trim()
+              });
+
+            if (doctorError) {
+              console.error("Erro ao criar perfil médico:", doctorError);
+              toast({
+                variant: "destructive",
+                title: "Erro ao criar perfil médico",
+                description: "A conta foi criada, mas houve um erro ao registrar os dados médicos."
+              });
+              setLoading(false);
+              return;
+            }
+
+            // Criar role de médico
+            const { error: roleError } = await supabase
+              .from("user_roles")
+              .insert({
+                user_id: data.user.id,
+                role: "doctor" as any
+              });
+
+            if (roleError) {
+              console.error("Erro ao criar role de médico:", roleError);
+            }
+          }
+
           toast({
             title: "Conta criada com sucesso!",
-            description: "Você já pode acessar o portal"
+            description: userType === "doctor" 
+              ? "Seu perfil médico foi criado. Aguarde aprovação do administrador."
+              : "Você já pode acessar o portal"
           });
         }
       }
