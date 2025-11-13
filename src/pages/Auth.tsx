@@ -359,6 +359,19 @@ export const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="user-type">Tipo de Cadastro</Label>
+                  <Select value={userType} onValueChange={(value: "patient" | "doctor") => setUserType(value)}>
+                    <SelectTrigger id="user-type">
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="patient">Paciente</SelectItem>
+                      <SelectItem value="doctor">Médico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
                   <Label htmlFor="signup-name">Nome Completo</Label>
                   <Input
                     id="signup-name"
@@ -369,6 +382,34 @@ export const Auth = () => {
                     required
                   />
                 </div>
+                
+                {userType === "doctor" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="crm">CRM</Label>
+                      <Input
+                        id="crm"
+                        type="text"
+                        placeholder="Número do CRM"
+                        value={crm}
+                        onChange={(e) => setCrm(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="specialty">Especialidade</Label>
+                      <Input
+                        id="specialty"
+                        type="text"
+                        placeholder="Ex: Cardiologia"
+                        value={specialty}
+                        onChange={(e) => setSpecialty(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
