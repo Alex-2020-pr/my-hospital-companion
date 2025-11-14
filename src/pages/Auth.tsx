@@ -139,13 +139,16 @@ export const Auth = () => {
         } else if (data.user) {
           // Se for médico, criar registro na tabela doctors
           if (userType === "doctor") {
-            const { error: doctorError } = await (supabase as any)
+            const { error: doctorError } = await supabase
               .from("doctors")
               .insert({
                 user_id: data.user.id,
                 crm: crm.trim(),
+                crm_state: "PR", // Valor padrão, pode ser customizado
                 specialty: specialty.trim(),
-                full_name: fullName.trim()
+                full_name: fullName.trim(),
+                email: email,
+                is_active: false // Requer aprovação do admin
               });
 
             if (doctorError) {
@@ -164,11 +167,23 @@ export const Auth = () => {
               .from("user_roles")
               .insert({
                 user_id: data.user.id,
-                role: "doctor" as any
+                role: "doctor"
               });
 
             if (roleError) {
               console.error("Erro ao criar role de médico:", roleError);
+            }
+          } else {
+            // Para pacientes, criar role padrão
+            const { error: roleError } = await supabase
+              .from("user_roles")
+              .insert({
+                user_id: data.user.id,
+                role: "patient"
+              });
+
+            if (roleError) {
+              console.error("Erro ao criar role de paciente:", roleError);
             }
           }
 

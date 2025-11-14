@@ -171,6 +171,62 @@ export type Database = {
           },
         ]
       }
+      doctors: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          crm: string
+          crm_state: string
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          organization_id: string | null
+          phone: string | null
+          specialty: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          crm: string
+          crm_state: string
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          specialty: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          crm?: string
+          crm_state?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          specialty?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           created_at: string
@@ -750,6 +806,284 @@ export type Database = {
           },
         ]
       }
+      patient_diagnoses: {
+        Row: {
+          created_at: string | null
+          diagnosis: string
+          diagnosis_date: string
+          doctor_id: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          diagnosis: string
+          diagnosis_date?: string
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          diagnosis?: string
+          diagnosis_date?: string
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_diagnoses_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_diagnoses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_events: {
+        Row: {
+          created_at: string | null
+          description: string
+          event_date: string | null
+          event_type: string
+          id: string
+          patient_id: string
+          recorded_by: string | null
+          severity: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          event_date?: string | null
+          event_type: string
+          id?: string
+          patient_id: string
+          recorded_by?: string | null
+          severity?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          event_date?: string | null
+          event_type?: string
+          id?: string
+          patient_id?: string
+          recorded_by?: string | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_events_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_events_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_vital_signs: {
+        Row: {
+          blood_pressure_diastolic: number | null
+          blood_pressure_systolic: number | null
+          created_at: string | null
+          heart_rate: number | null
+          id: string
+          measured_by: string | null
+          measurement_date: string | null
+          notes: string | null
+          oxygen_saturation: number | null
+          patient_id: string
+          respiratory_rate: number | null
+          temperature: number | null
+        }
+        Insert: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          measured_by?: string | null
+          measurement_date?: string | null
+          notes?: string | null
+          oxygen_saturation?: number | null
+          patient_id: string
+          respiratory_rate?: number | null
+          temperature?: number | null
+        }
+        Update: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          measured_by?: string | null
+          measurement_date?: string | null
+          notes?: string | null
+          oxygen_saturation?: number | null
+          patient_id?: string
+          respiratory_rate?: number | null
+          temperature?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_vital_signs_measured_by_fkey"
+            columns: ["measured_by"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_vital_signs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          allergies: string[] | null
+          avatar_url: string | null
+          bed_number: string | null
+          birth_date: string | null
+          cpf: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          organization_id: string | null
+          phone: string | null
+          registry_number: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          allergies?: string[] | null
+          avatar_url?: string | null
+          bed_number?: string | null
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          registry_number?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          allergies?: string[] | null
+          avatar_url?: string | null
+          bed_number?: string | null
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          registry_number?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patients_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          dosage: string
+          end_date: string | null
+          frequency: string
+          id: string
+          instructions: string | null
+          is_active: boolean | null
+          medication_name: string
+          patient_id: string
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          dosage: string
+          end_date?: string | null
+          frequency: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          medication_name: string
+          patient_id: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          dosage?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          is_active?: boolean | null
+          medication_name?: string
+          patient_id?: string
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1167,6 +1501,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_doctor: { Args: { _user_id: string }; Returns: boolean }
       is_org_admin: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -1182,7 +1517,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "hospital_admin" | "patient"
+      app_role: "super_admin" | "hospital_admin" | "patient" | "doctor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1310,7 +1645,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "hospital_admin", "patient"],
+      app_role: ["super_admin", "hospital_admin", "patient", "doctor"],
     },
   },
 } as const

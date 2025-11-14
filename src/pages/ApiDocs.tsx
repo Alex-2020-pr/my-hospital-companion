@@ -82,11 +82,12 @@ export const ApiDocs = () => {
 
         {/* Endpoints */}
         <Tabs defaultValue="medications" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
             <TabsTrigger value="medications">Medicamentos</TabsTrigger>
             <TabsTrigger value="appointments">Consultas</TabsTrigger>
             <TabsTrigger value="exams">Exames</TabsTrigger>
             <TabsTrigger value="documents">Documentos</TabsTrigger>
+            <TabsTrigger value="doctors">Médicos</TabsTrigger>
           </TabsList>
 
           {/* Medicamentos */}
@@ -273,8 +274,274 @@ export const ApiDocs = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+              </TabsContent>
+
+              {/* Tab Médicos - Nova seção de documentação */}
+              <TabsContent value="doctors">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Integração de Médicos</CardTitle>
+                      <Badge variant="secondary">Sistema Médico</Badge>
+                    </div>
+                    <CardDescription>
+                      APIs para sincronização de dados médicos e prontuários
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    
+                    {/* Endpoint: Visualizar Pacientes */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>GET</Badge>
+                          <code className="text-sm">/doctor/patients</code>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Lista todos os pacientes da organização do médico
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-medium mb-2">Headers Necessários:</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`Authorization: Bearer {JWT_TOKEN}
+Content-Type: application/json`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Resposta de Sucesso (200):</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "patients": [
+    {
+      "id": "uuid",
+      "full_name": "João Silva",
+      "registry_number": "12345",
+      "bed_number": "101-A",
+      "birth_date": "1980-05-15",
+      "allergies": ["Penicilina", "Dipirona"],
+      "phone": "(45) 99999-9999",
+      "email": "joao@email.com"
+    }
+  ]
+}`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4"></div>
+
+                    {/* Endpoint: Visualizar Prontuário */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>GET</Badge>
+                          <code className="text-sm">/doctor/patient/:patientId</code>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Retorna prontuário completo do paciente incluindo sinais vitais, medicamentos, exames e documentos
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Resposta de Sucesso (200):</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "patient": {
+    "id": "uuid",
+    "full_name": "João Silva",
+    "registry_number": "12345",
+    "birth_date": "1980-05-15",
+    "allergies": ["Penicilina"]
+  },
+  "vital_signs": [
+    {
+      "measurement_date": "2025-01-15T10:30:00Z",
+      "blood_pressure_systolic": 120,
+      "blood_pressure_diastolic": 80,
+      "heart_rate": 72,
+      "temperature": 36.5,
+      "oxygen_saturation": 98,
+      "notes": "Paciente estável"
+    }
+  ],
+  "medications": [
+    {
+      "name": "Losartana 50mg",
+      "dosage": "1 comprimido",
+      "frequency": "1x ao dia",
+      "is_active": true
+    }
+  ],
+  "exams": [
+    {
+      "name": "Hemograma Completo",
+      "exam_date": "2025-01-10",
+      "status": "completed",
+      "result_summary": "Valores dentro da normalidade"
+    }
+  ],
+  "documents": [
+    {
+      "title": "Laudo Cardiológico",
+      "type": "Laudo",
+      "document_date": "2025-01-05",
+      "file_url": "https://..."
+    }
+  ]
+}`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4"></div>
+
+                    {/* Endpoint: Registrar Sinais Vitais */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>POST</Badge>
+                          <code className="text-sm">/doctor/vital-signs</code>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Registra novos sinais vitais para um paciente
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Corpo da Requisição:</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "patient_id": "uuid-do-paciente",
+  "blood_pressure_systolic": 130,
+  "blood_pressure_diastolic": 85,
+  "heart_rate": 78,
+  "temperature": 36.8,
+  "respiratory_rate": 16,
+  "oxygen_saturation": 97,
+  "notes": "Observações adicionais"
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Resposta de Sucesso (201):</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "success": true,
+  "message": "Sinais vitais registrados com sucesso",
+  "vital_sign_id": "uuid"
+}`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4"></div>
+
+                    {/* Endpoint: Registrar Diagnóstico */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>POST</Badge>
+                          <code className="text-sm">/doctor/diagnosis</code>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Registra um novo diagnóstico para o paciente
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Corpo da Requisição:</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "patient_id": "uuid-do-paciente",
+  "diagnosis": "Hipertensão Arterial Sistêmica",
+  "diagnosis_date": "2025-01-15",
+  "notes": "Paciente apresenta pressão elevada. Prescrever anti-hipertensivo."
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Resposta de Sucesso (201):</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "success": true,
+  "message": "Diagnóstico registrado com sucesso",
+  "diagnosis_id": "uuid"
+}`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4"></div>
+
+                    {/* Endpoint: Registrar Prescrição */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge>POST</Badge>
+                          <code className="text-sm">/doctor/prescription</code>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Cria uma nova prescrição médica para o paciente
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Corpo da Requisição:</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "patient_id": "uuid-do-paciente",
+  "medication_name": "Losartana Potássica",
+  "dosage": "50mg",
+  "frequency": "1x ao dia pela manhã",
+  "start_date": "2025-01-15",
+  "end_date": "2025-04-15",
+  "instructions": "Tomar em jejum com água"
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Resposta de Sucesso (201):</p>
+                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "success": true,
+  "message": "Prescrição criada com sucesso",
+  "prescription_id": "uuid"
+}`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    {/* Observações Importantes */}
+                    <Card className="bg-primary/5 border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base">🔒 Autenticação e Permissões</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm space-y-2">
+                        <p>
+                          <strong>Autenticação:</strong> Todas as rotas requerem JWT token válido no header Authorization
+                        </p>
+                        <p>
+                          <strong>Permissões:</strong> Médicos só podem acessar dados de pacientes da mesma organização
+                        </p>
+                        <p>
+                          <strong>RLS:</strong> Row-Level Security garante isolamento de dados entre organizações
+                        </p>
+                        <p>
+                          <strong>Logs:</strong> Todas as operações são registradas para auditoria LGPD
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
         {/* Códigos de Resposta */}
         <Card>
