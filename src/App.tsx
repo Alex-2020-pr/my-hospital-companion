@@ -34,6 +34,8 @@ import { AdminStorageManagement } from "./pages/AdminStorageManagement";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import PatientRecord from "./pages/PatientRecord";
 import AdminDoctors from "./pages/AdminDoctors";
+import { DoctorPatients } from "./pages/DoctorPatients";
+import { DoctorPatientDetail } from "./pages/DoctorPatientDetail";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +74,9 @@ const App = () => (
           <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
           <Route path="/paciente/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
           <Route path="/hospital/messaging" element={<ProtectedRoute><HospitalMessaging /></ProtectedRoute>} />
+          <Route path="/medico-dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
+          <Route path="/doctor/patients" element={<ProtectedRoute><DoctorPatients /></ProtectedRoute>} />
+          <Route path="/doctor/patient/:patientId" element={<ProtectedRoute><DoctorPatientDetail /></ProtectedRoute>} />
           <Route path="/health-chat" element={<ProtectedRoute><HealthChat /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
