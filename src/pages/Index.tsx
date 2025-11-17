@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOrganizationBySlug } from "@/hooks/useOrganizationBySlug";
-import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,7 +11,7 @@ const Index = () => {
   const { organization, loading: orgLoading } = useOrganizationBySlug();
 
   useEffect(() => {
-    const redirectUser = async () => {
+    const redirectUser = () => {
       // Se ainda está carregando, aguardar
       if (authLoading || orgLoading || rolesLoading) return;
 
@@ -22,29 +21,16 @@ const Index = () => {
         return;
       }
 
-      // Verificar se é médico (verificar na tabela doctors)
-      const { data: doctorData } = await supabase
-        .from('doctors')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .single();
-
-      if (doctorData) {
-        navigate("/doctor/patients");
-        return;
-      }
-
-      // Verificar role no sistema
+      // Verificar roles com ordem de prioridade
       const userRoles = roles.map(r => r.role);
       
-      // Médico com role 'doctor' mas sem cadastro ativo na tabela doctors
-      if (userRoles.includes('doctor')) {
-        navigate("/doctor/patients");
-      } else if (userRoles.includes('super_admin')) {
+      // Prioridade: super_admin > hospital_admin > doctor > patient
+      if (userRoles.includes('super_admin')) {
         navigate("/admin");
       } else if (userRoles.includes('hospital_admin')) {
         navigate("/hospital");
+      } else if (userRoles.includes('doctor')) {
+        navigate("/doctor/patients");
       } else {
         // Paciente ou role padrão
         navigate("/dashboard");
