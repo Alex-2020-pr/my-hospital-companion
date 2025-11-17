@@ -38,7 +38,10 @@ const Index = () => {
       // Verificar role no sistema
       const userRoles = roles.map(r => r.role);
       
-      if (userRoles.includes('super_admin')) {
+      // Médico com role 'doctor' mas sem cadastro ativo na tabela doctors
+      if (userRoles.includes('doctor')) {
+        navigate("/doctor/patients");
+      } else if (userRoles.includes('super_admin')) {
         navigate("/admin");
       } else if (userRoles.includes('hospital_admin')) {
         navigate("/hospital");
