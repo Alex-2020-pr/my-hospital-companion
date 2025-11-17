@@ -8,7 +8,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Users, Send, Mail, MessageSquare, BarChart3, HardDrive, Building2, Phone, MessageCircle } from "lucide-react";
+import { Users, Send, Mail, MessageSquare, BarChart3, HardDrive, Building2, Phone, MessageCircle, Stethoscope } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,6 +39,7 @@ interface DashboardStats {
   totalStorageUsed: number;
   totalStorageLimit: number;
   activePatients: number;
+  totalDoctors: number;
 }
 
 export const HospitalPanel = () => {
@@ -56,7 +57,8 @@ export const HospitalPanel = () => {
     totalPatients: 0,
     totalStorageUsed: 0,
     totalStorageLimit: 0,
-    activePatients: 0
+    activePatients: 0,
+    totalDoctors: 0
   });
   const [organizationData, setOrganizationData] = useState<any>(null);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -79,6 +81,15 @@ export const HospitalPanel = () => {
         const patientsArray = patientsData || [];
         setPatients(patientsArray);
 
+        // Buscar médicos da organização
+        const { data: doctorsData, error: doctorsError } = await supabase
+          .from('doctors')
+          .select('id')
+          .eq('organization_id', organizationId)
+          .eq('is_active', true);
+
+        if (doctorsError) throw doctorsError;
+
         // Calcular estatísticas
         const totalStorage = patientsArray.reduce((sum, p) => sum + p.storage_used_bytes, 0);
         const totalLimit = patientsArray.reduce((sum, p) => sum + p.storage_limit_bytes, 0);
@@ -88,7 +99,8 @@ export const HospitalPanel = () => {
           totalPatients: patientsArray.length,
           totalStorageUsed: totalStorage,
           totalStorageLimit: totalLimit,
-          activePatients: active
+          activePatients: active,
+          totalDoctors: doctorsData?.length || 0
         });
 
         // Buscar dados da organização
@@ -214,6 +226,19 @@ export const HospitalPanel = () => {
                   <div className="text-2xl font-bold">{stats.totalPatients}</div>
                   <p className="text-xs text-muted-foreground">
                     {stats.activePatients} ativos
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Médicos Cadastrados</CardTitle>
+                  <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalDoctors}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Equipe médica ativa
                   </p>
                 </CardContent>
               </Card>
