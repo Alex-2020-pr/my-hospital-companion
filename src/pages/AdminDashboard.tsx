@@ -12,6 +12,7 @@ interface DashboardStats {
   totalOrganizations: number;
   totalDocuments: number;
   totalStorageUsed: number;
+  totalDoctors: number;
   usersByOrganization: { name: string; count: number }[];
   storageByUser: { name: string; email: string; storage: number }[];
 }
@@ -24,6 +25,7 @@ export const AdminDashboard = () => {
     totalOrganizations: 0,
     totalDocuments: 0,
     totalStorageUsed: 0,
+    totalDoctors: 0,
     usersByOrganization: [],
     storageByUser: []
   });
@@ -32,10 +34,11 @@ export const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [profilesRes, orgsRes, docsRes] = await Promise.all([
+        const [profilesRes, orgsRes, docsRes, doctorsRes] = await Promise.all([
           supabase.from('profiles').select('id, organization_id, storage_used_bytes, full_name, email', { count: 'exact' }),
           supabase.from('organizations').select('id', { count: 'exact' }),
-          supabase.from('documents').select('id', { count: 'exact' })
+          supabase.from('documents').select('id', { count: 'exact' }),
+          supabase.from('doctors').select('id', { count: 'exact' }).eq('is_active', true)
         ]);
 
         const { data: orgData } = await supabase
@@ -75,6 +78,7 @@ export const AdminDashboard = () => {
           totalOrganizations: orgsRes.count || 0,
           totalDocuments: docsRes.count || 0,
           totalStorageUsed: totalStorage,
+          totalDoctors: doctorsRes.count || 0,
           usersByOrganization: Object.entries(orgCounts || {}).map(([name, count]) => ({
             name,
             count: count as number
@@ -173,6 +177,17 @@ export const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{loading ? '...' : stats.totalOrganizations}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Médicos</CardTitle>
+              <Stethoscope className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{loading ? '...' : stats.totalDoctors}</div>
+              <p className="text-xs text-muted-foreground mt-1">Médicos ativos cadastrados</p>
             </CardContent>
           </Card>
 
