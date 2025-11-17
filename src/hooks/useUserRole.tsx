@@ -60,6 +60,7 @@ export const useUserRole = () => {
   const isSuperAdmin = hasRole('super_admin');
   const isHospitalAdmin = hasRole('hospital_admin');
   const isPatient = hasRole('patient');
+  const isDoctor = hasRole('doctor');
 
   return {
     roles,
@@ -67,6 +68,7 @@ export const useUserRole = () => {
     hasRole,
     isSuperAdmin,
     isHospitalAdmin,
-    isPatient
+    isPatient,
+    isDoctor
   };
 };
