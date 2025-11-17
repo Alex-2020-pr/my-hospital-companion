@@ -42,7 +42,7 @@ export const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     userId: '',
-    role: 'patient' as 'super_admin' | 'hospital_admin' | 'patient',
+    role: 'patient' as 'super_admin' | 'hospital_admin' | 'patient' | 'doctor',
     organization_id: ''
   });
 
@@ -170,7 +170,7 @@ export const AdminUsers = () => {
         role: formData.role
       };
 
-      if (formData.role === 'hospital_admin' && formData.organization_id) {
+      if ((formData.role === 'hospital_admin' || formData.role === 'doctor') && formData.organization_id) {
         roleData.organization_id = formData.organization_id;
       }
 
@@ -229,6 +229,8 @@ export const AdminUsers = () => {
         return <Badge className="bg-purple-500">Super Admin</Badge>;
       case 'hospital_admin':
         return <Badge className="bg-blue-500">Admin Hospital</Badge>;
+      case 'doctor':
+        return <Badge className="bg-green-500">Médico</Badge>;
       case 'patient':
         return <Badge variant="secondary">Paciente</Badge>;
       default:
@@ -356,11 +358,12 @@ export const AdminUsers = () => {
                   <SelectContent>
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                     <SelectItem value="hospital_admin">Admin Hospital</SelectItem>
+                    <SelectItem value="doctor">Médico</SelectItem>
                     <SelectItem value="patient">Paciente</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {formData.role === 'hospital_admin' && (
+              {(formData.role === 'hospital_admin' || formData.role === 'doctor') && (
                 <div>
                   <Label htmlFor="organization">Organização</Label>
                   <Select
