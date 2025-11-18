@@ -194,28 +194,28 @@ export default function DoctorDashboard() {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col gap-2 hover:bg-primary/5 hover:border-primary"
+                  className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
                 >
                   <Video className="h-6 w-6" />
                   <span className="text-xs">Teleconsulta</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col gap-2 hover:bg-primary/5 hover:border-primary"
+                  className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
                 >
                   <Pill className="h-6 w-6" />
                   <span className="text-xs">Prescrever</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col gap-2 hover:bg-primary/5 hover:border-primary"
+                  className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
                 >
                   <FileText className="h-6 w-6" />
                   <span className="text-xs">Novo Laudo</span>
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="h-20 flex-col gap-2 hover:bg-primary/5 hover:border-primary"
+                  className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
                 >
                   <MessageSquare className="h-6 w-6" />
                   <span className="text-xs">Chat Equipe</span>
