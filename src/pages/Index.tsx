@@ -13,25 +13,34 @@ const Index = () => {
   useEffect(() => {
     const redirectUser = () => {
       // Se ainda está carregando, aguardar
-      if (authLoading || orgLoading || rolesLoading) return;
+      if (authLoading || orgLoading || rolesLoading) {
+        console.log('Index: ainda carregando...', { authLoading, orgLoading, rolesLoading });
+        return;
+      }
 
       // Se usuário não autenticado, redirecionar para login
       if (!user) {
+        console.log('Index: sem usuário, indo para /auth');
         navigate("/auth");
         return;
       }
 
       // Verificar roles com ordem de prioridade
       const userRoles = roles.map(r => r.role);
+      console.log('Index: roles do usuário:', userRoles);
       
       // Prioridade: super_admin > hospital_admin > doctor > patient
       if (userRoles.includes('super_admin')) {
+        console.log('Index: redirecionando para /admin');
         navigate("/admin");
       } else if (userRoles.includes('hospital_admin')) {
+        console.log('Index: redirecionando para /hospital');
         navigate("/hospital");
       } else if (userRoles.includes('doctor')) {
+        console.log('Index: redirecionando para /doctor/patients');
         navigate("/doctor/patients");
       } else {
+        console.log('Index: redirecionando para /dashboard (padrão)');
         // Paciente ou role padrão
         navigate("/dashboard");
       }
