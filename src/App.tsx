@@ -13,6 +13,7 @@ import { Profile } from "./pages/Profile";
 import { VitalSigns } from "./pages/VitalSigns";
 import { Medications } from "./pages/Medications";
 import { Telemedicine } from "./pages/Telemedicine";
+import Index from "./pages/Index";
 import IntegrationConsents from "./pages/IntegrationConsents";
 import { Auth } from "./pages/Auth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -49,7 +50,7 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/setup" element={<AdminSetup />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/consultas" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
           <Route path="/exames" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
           <Route path="/documentos" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
