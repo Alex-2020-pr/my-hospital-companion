@@ -50,21 +50,28 @@ export const DoctorPatients = () => {
     try {
       setLoading(true);
       
-      // Buscar doctor_id do usuário atual
+      // Buscar usuário atual
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: doctorData } = await supabase
-        .from('doctors')
-        .select('organization_id')
+      // Buscar organização a partir do papel de MÉDICO
+      const { data: doctorRole, error: roleError } = await supabase
+        .from('user_roles')
+        .select('organization_id, role')
         .eq('user_id', user.id)
-        .single();
+        .eq('role', 'doctor')
+        .maybeSingle();
 
-      if (!doctorData) {
+      if (roleError) {
+        console.error('Erro ao buscar role de médico:', roleError);
+      }
+
+      if (!doctorRole || !doctorRole.organization_id) {
+        console.log('DoctorPatients: role de médico não encontrada ou sem organização', doctorRole);
         toast({
           variant: "destructive",
           title: "Erro",
-          description: "Perfil médico não encontrado"
+          description: "Perfil médico não encontrado ou sem organização vinculada"
         });
         return;
       }
@@ -73,7 +80,7 @@ export const DoctorPatients = () => {
       const { data, error } = await supabase
         .from('patients')
         .select('*')
-        .eq('organization_id', doctorData.organization_id)
+        .eq('organization_id', doctorRole.organization_id)
         .eq('is_active', true)
         .order('full_name');
 
