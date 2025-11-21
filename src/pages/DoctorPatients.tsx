@@ -21,11 +21,71 @@ interface Patient {
   allergies: string[];
 }
 
+// Pacientes de exemplo para demonstração
+const EXAMPLE_PATIENTS: Patient[] = [
+  {
+    id: 'ex-1',
+    full_name: 'Maria Silva Santos',
+    cpf: '123.456.789-00',
+    phone: '(11) 98765-4321',
+    email: 'maria.santos@email.com',
+    birth_date: '1965-03-15',
+    bed_number: '101-A',
+    registry_number: 'P-2024-001',
+    allergies: ['Penicilina', 'Dipirona']
+  },
+  {
+    id: 'ex-2',
+    full_name: 'João Carlos Oliveira',
+    cpf: '987.654.321-00',
+    phone: '(11) 97654-3210',
+    email: 'joao.oliveira@email.com',
+    birth_date: '1978-07-22',
+    bed_number: '102-B',
+    registry_number: 'P-2024-002',
+    allergies: ['Látex']
+  },
+  {
+    id: 'ex-3',
+    full_name: 'Ana Paula Costa',
+    cpf: '456.789.123-00',
+    phone: '(11) 96543-2109',
+    email: 'ana.costa@email.com',
+    birth_date: '1990-11-08',
+    bed_number: '103-A',
+    registry_number: 'P-2024-003',
+    allergies: []
+  },
+  {
+    id: 'ex-4',
+    full_name: 'Pedro Henrique Souza',
+    cpf: '321.654.987-00',
+    phone: '(11) 95432-1098',
+    email: 'pedro.souza@email.com',
+    birth_date: '1955-05-30',
+    bed_number: '104-B',
+    registry_number: 'P-2024-004',
+    allergies: ['Contraste iodado', 'AAS']
+  },
+  {
+    id: 'ex-5',
+    full_name: 'Carla Fernandes Lima',
+    cpf: '654.321.987-00',
+    phone: '(11) 94321-0987',
+    email: 'carla.lima@email.com',
+    birth_date: '1982-09-18',
+    bed_number: '105-A',
+    registry_number: 'P-2024-005',
+    allergies: ['Morfina']
+  }
+];
+
 export const DoctorPatients = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showExamples, setShowExamples] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -85,14 +145,25 @@ export const DoctorPatients = () => {
         .order('full_name');
 
       if (error) throw error;
-      setPatients(data || []);
-      setFilteredPatients(data || []);
+      
+      // Se não houver pacientes reais, mostrar exemplos
+      if (!data || data.length === 0) {
+        setShowExamples(true);
+        setPatients(EXAMPLE_PATIENTS);
+        setFilteredPatients(EXAMPLE_PATIENTS);
+      } else {
+        setPatients(data);
+        setFilteredPatients(data);
+      }
     } catch (error) {
       console.error('Erro ao buscar pacientes:', error);
+      // Em caso de erro, mostrar exemplos
+      setShowExamples(true);
+      setPatients(EXAMPLE_PATIENTS);
+      setFilteredPatients(EXAMPLE_PATIENTS);
       toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os pacientes"
+        title: "Modo Demonstração",
+        description: "Exibindo pacientes de exemplo"
       });
     } finally {
       setLoading(false);
@@ -117,7 +188,14 @@ export const DoctorPatients = () => {
         {/* Header com busca */}
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Pacientes</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Lista de Pacientes</CardTitle>
+              {showExamples && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  Dados de Exemplo
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="relative">
@@ -196,7 +274,16 @@ export const DoctorPatients = () => {
                     </div>
                     
                     <Button
-                      onClick={() => navigate(`/doctor/patient/${patient.id}`)}
+                      onClick={() => {
+                        if (showExamples) {
+                          toast({
+                            title: "Modo Demonstração",
+                            description: "Esta é uma visualização de exemplo. Conecte pacientes reais para acessar prontuários."
+                          });
+                        } else {
+                          navigate(`/doctor/patient/${patient.id}`);
+                        }
+                      }}
                       variant="outline"
                     >
                       Ver Prontuário
