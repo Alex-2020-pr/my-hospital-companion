@@ -1,8 +1,9 @@
 import { Home, Calendar, FileText, MessageCircle, User, Stethoscope, Pill, Video, Shield } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 
-const navigationItems = [
+const baseNavigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/' },
   { id: 'appointments', label: 'Consultas', icon: Calendar, path: '/consultas' },
   { id: 'exams', label: 'Exames', icon: Stethoscope, path: '/exames' },
@@ -13,6 +14,14 @@ const navigationItems = [
 export const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isDoctor } = useUserRole();
+
+  const navigationItems = [
+    ...baseNavigationItems,
+    ...(isDoctor
+      ? [{ id: 'doctor', label: 'Médico', icon: Stethoscope, path: '/doctor/patients' }]
+      : [])
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 pb-safe">
