@@ -56,11 +56,18 @@ const MENU_SECTIONS: MenuSection[] = [
     title: "CLÍNICO",
     items: [
       {
-        id: "painel",
-        label: "Painel",
-        description: "Visão geral do dia",
+        id: "painel-mvp",
+        label: "Dashboard MVP",
+        description: "Painel demonstrativo",
         icon: LayoutDashboard,
         path: "/medico-dashboard"
+      },
+      {
+        id: "pacientes",
+        label: "Meus Pacientes",
+        description: "Lista e prontuários",
+        icon: Users,
+        path: "/doctor/patients"
       },
       {
         id: "agenda",
@@ -68,13 +75,6 @@ const MENU_SECTIONS: MenuSection[] = [
         description: "Consultas e compromissos",
         icon: Calendar,
         notifications: NOTIFICATIONS.agenda
-      },
-      {
-        id: "pacientes",
-        label: "Pacientes",
-        description: "Lista e prontuários",
-        icon: Users,
-        path: "/paciente/p1" // Mock - depois conectar ao banco
       },
       {
         id: "prontuario",
