@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare, Stethoscope } from "lucide-react";
@@ -7,6 +7,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { NotificationBell } from "./NotificationBell";
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { useOrganization } from "@/hooks/useOrganization";
+import { DoctorMenu } from "./DoctorMenu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,8 +24,9 @@ interface LayoutProps {
 
 export const Layout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
-  const { isSuperAdmin, isHospitalAdmin } = useUserRole();
+  const { isSuperAdmin, isHospitalAdmin, isDoctor } = useUserRole();
   const { organization } = useOrganization();
+  const [onDutyMode, setOnDutyMode] = useState(false);
 
   const handleAdminClick = () => {
     if (isSuperAdmin) {
@@ -107,6 +109,9 @@ export const Layout = ({ children, title }: LayoutProps) => {
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
+              {isDoctor && !isSuperAdmin && !isHospitalAdmin && (
+                <DoctorMenu onDutyMode={onDutyMode} onToggleDutyMode={setOnDutyMode} />
+              )}
               {(isSuperAdmin || isHospitalAdmin) && (
                 <Button
                   variant="ghost"
