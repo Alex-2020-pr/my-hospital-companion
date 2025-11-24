@@ -17,6 +17,7 @@ import {
   User,
   Heart
 } from "lucide-react";
+import { DoctorMenu } from "@/components/DoctorMenu";
 
 interface Patient {
   id: string;
@@ -127,6 +128,9 @@ export const DoctorPatientDetail = () => {
   if (loading) {
     return (
       <Layout title="Prontuário do Paciente">
+        <div className="fixed top-4 right-4 z-50">
+          <DoctorMenu onDutyMode={false} onToggleDutyMode={() => {}} />
+        </div>
         <div className="p-4">
           <Card>
             <CardContent className="pt-6 text-center">
@@ -141,6 +145,9 @@ export const DoctorPatientDetail = () => {
   if (!patient) {
     return (
       <Layout title="Prontuário do Paciente">
+        <div className="fixed top-4 right-4 z-50">
+          <DoctorMenu onDutyMode={false} onToggleDutyMode={() => {}} />
+        </div>
         <div className="p-4">
           <Card>
             <CardContent className="pt-6 text-center">
@@ -154,6 +161,9 @@ export const DoctorPatientDetail = () => {
 
   return (
     <Layout title="Prontuário do Paciente">
+      <div className="fixed top-4 right-4 z-50">
+        <DoctorMenu onDutyMode={false} onToggleDutyMode={() => {}} />
+      </div>
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">

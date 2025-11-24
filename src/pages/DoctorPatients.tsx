@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Search, UserCircle, Phone, Mail, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DoctorMenu } from "@/components/DoctorMenu";
 
 interface Patient {
   id: string;
@@ -184,6 +185,9 @@ export const DoctorPatients = () => {
 
   return (
     <Layout title="Meus Pacientes">
+      <div className="fixed top-4 right-4 z-50">
+        <DoctorMenu onDutyMode={false} onToggleDutyMode={() => {}} />
+      </div>
       <div className="p-4 space-y-6">
         {/* Header com busca */}
         <Card>
