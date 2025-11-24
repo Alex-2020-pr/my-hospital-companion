@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DoctorMenu } from "@/components/DoctorMenu";
 import { 
   Video, 
   FileText, 
@@ -71,10 +70,6 @@ export default function DoctorDashboard() {
         {/* Topbar com informações do médico */}
         <div className="bg-primary text-primary-foreground p-4 mb-4">
           <div className="flex items-center justify-between gap-3">
-            <DoctorMenu 
-              onDutyMode={onDuty} 
-              onToggleDutyMode={setOnDuty}
-            />
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <Avatar className="h-12 w-12 border-2 border-primary-foreground">
                 <AvatarImage src={DOCTOR_DATA.avatar || undefined} />
