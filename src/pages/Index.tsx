@@ -42,8 +42,8 @@ const Index = () => {
         console.log('Index: redirecionando para /hospital');
         navigate("/hospital");
       } else if (hasDoctor && !hasPatient) {
-        console.log('Index: redirecionando para /doctor/patients (apenas médico)');
-        navigate("/doctor/patients");
+        console.log('Index: redirecionando para /medico-dashboard (apenas médico)');
+        navigate("/medico-dashboard");
       } else {
         console.log('Index: redirecionando para /dashboard (padrão/paciente)');
         // Paciente ou role padrão (inclui médico + paciente)
