@@ -1,8 +1,8 @@
-// Firebase Messaging Service Worker v6.0 - CONSOLIDADO + PWA
-console.log('[SW] Service Worker v6.0 carregando...');
+// Firebase Messaging Service Worker v7.0 - FIX DUPLICATAS
+console.log('[SW] Service Worker v7.0 carregando...');
 
 // ===== CACHE E PWA =====
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const CACHE_NAME = `am2-cache-${CACHE_VERSION}`;
 
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
@@ -27,64 +27,9 @@ console.log('[SW] Firebase inicializado');
 const messaging = firebase.messaging();
 console.log('[SW] Messaging configurado, aguardando mensagens...');
 
-// ⚡ MÉTODO 1: Evento PUSH NATIVO (funciona com app fechado)
-self.addEventListener('push', (event) => {
-  console.log('[SW] 🔥 PUSH EVENT recebido!', event);
-  
-  let data = {};
-  let notificationTitle = 'Nova Notificação';
-  let notificationBody = '';
-  
-  try {
-    if (event.data) {
-      data = event.data.json();
-      console.log('[SW] 📦 Dados do push:', JSON.stringify(data, null, 2));
-      
-      // FCM envia os dados em diferentes formatos dependendo da plataforma
-      notificationTitle = data.notification?.title || data.data?.title || data.title || 'Nova Notificação';
-      notificationBody = data.notification?.body || data.data?.body || data.body || '';
-    }
-  } catch (e) {
-    console.error('[SW] ❌ Erro ao processar dados do push:', e);
-    // Se falhar ao parsear, tenta pegar os dados raw
-    notificationTitle = 'Nova Mensagem';
-    notificationBody = event.data ? event.data.text() : 'Você recebeu uma nova notificação';
-  }
-  
-  const notificationOptions = {
-    body: notificationBody,
-    icon: data.notification?.icon || data.icon || '/favicon.png',
-    badge: '/favicon.png',
-    tag: 'am2-push-' + Date.now(),
-    requireInteraction: true,
-    silent: false,
-    vibrate: [300, 100, 300, 100, 300],
-    timestamp: Date.now(),
-    renotify: true,
-    sticky: true,
-    dir: 'ltr',
-    lang: 'pt-BR',
-    data: {
-      url: '/',
-      timestamp: Date.now(),
-      ...data
-    },
-    actions: [
-      { action: 'open', title: '✅ Abrir' },
-      { action: 'close', title: '❌ Fechar' }
-    ]
-  };
-
-  console.log('[SW] 📢 Exibindo notificação via PUSH EVENT:', notificationTitle, notificationOptions);
-  
-  event.waitUntil(
-    self.registration.showNotification(notificationTitle, notificationOptions)
-  );
-});
-
-// ⚡ MÉTODO 2: onBackgroundMessage do Firebase (backup)
+// ⚡ Handler do Firebase para notificações em background
 messaging.onBackgroundMessage((payload) => {
-  console.log('[SW] ✅ Mensagem recebida via onBackgroundMessage:', JSON.stringify(payload, null, 2));
+  console.log('[SW] ✅ Mensagem recebida:', JSON.stringify(payload, null, 2));
 
   const notificationTitle = payload.notification?.title || payload.data?.title || 'Nova Notificação';
   const notificationBody = payload.notification?.body || payload.data?.body || '';
@@ -93,40 +38,28 @@ messaging.onBackgroundMessage((payload) => {
     body: notificationBody,
     icon: payload.notification?.icon || payload.data?.icon || '/favicon.png',
     badge: '/favicon.png',
-    tag: 'am2-fcm-' + Date.now(),
+    tag: 'am2-notification', // Tag fixa para evitar duplicatas
     requireInteraction: true,
     silent: false,
     vibrate: [300, 100, 300, 100, 300],
     timestamp: Date.now(),
     renotify: true,
-    sticky: true,
-    dir: 'ltr',
-    lang: 'pt-BR',
     data: {
       url: '/',
       timestamp: Date.now(),
       ...payload.data
-    },
-    actions: [
-      { action: 'open', title: '✅ Abrir' },
-      { action: 'close', title: '❌ Fechar' }
-    ]
+    }
   };
 
-  console.log('[SW] 📢 Exibindo notificação via FCM:', notificationTitle, notificationOptions);
+  console.log('[SW] 📢 Exibindo notificação:', notificationTitle);
   
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] 🖱️ Notificação clicada:', event.action);
+  console.log('[SW] 🖱️ Notificação clicada');
   event.notification.close();
-
-  if (event.action === 'close') {
-    console.log('[SW] Notificação fechada pelo usuário');
-    return;
-  }
 
   // Abrir ou focar na janela do app
   event.waitUntil(
