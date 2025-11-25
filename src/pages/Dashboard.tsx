@@ -278,7 +278,7 @@ export const Dashboard = () => {
   ];
 
   return (
-    <Layout>
+    <Layout title="Início">
       <div className="p-4 space-y-6">
         <StorageAlert />
         
