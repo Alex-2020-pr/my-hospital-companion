@@ -84,6 +84,82 @@ export const Layout = ({ children, title }: LayoutProps) => {
         ...(secondaryColor && { '--secondary': secondaryColor }),
       } as React.CSSProperties}
     >
+      {/* Admin controls - sempre visíveis para super admin e hospital admin */}
+      {(isSuperAdmin || isHospitalAdmin) && (
+        <div className="fixed top-2 right-2 z-50 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleAdminClick}
+            className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-lg"
+          >
+            <Shield className="h-5 w-5" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="bg-primary/90 hover:bg-primary text-primary-foreground shadow-lg"
+              >
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {isHospitalAdmin && (
+                <>
+                  <DropdownMenuItem onClick={() => navigate('/hospital')}>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    <span>Hospital</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              {isSuperAdmin && (
+                <>
+                  <DropdownMenuItem onClick={() => navigate('/admin/users')}>
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Usuários</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    <span>Organizações</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
+                    <Handshake className="mr-2 h-4 w-4" />
+                    <span>Parceiros</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/api-docs')}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>API Docs</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/token-generator')}>
+                    <Key className="mr-2 h-4 w-4" />
+                    <span>Gerar Tokens</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>Notificações Push</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/medico-dashboard')}>
+                    <Stethoscope className="mr-2 h-4 w-4" />
+                    <span>Dashboard Médico (MVP)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/paciente/p1')}>
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>Ficha do Paciente (MVP)</span>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       {title && (
         <header 
           className="px-4 py-4 shadow-sm"
@@ -111,80 +187,6 @@ export const Layout = ({ children, title }: LayoutProps) => {
               <NotificationBell />
               {isDoctor && !isSuperAdmin && !isHospitalAdmin && (
                 <DoctorMenu onDutyMode={onDutyMode} onToggleDutyMode={setOnDutyMode} />
-              )}
-              {(isSuperAdmin || isHospitalAdmin) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleAdminClick}
-                  className="text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  <Shield className="h-5 w-5" />
-                </Button>
-              )}
-              {(isSuperAdmin || isHospitalAdmin) && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-primary-foreground hover:bg-primary-foreground/10"
-                    >
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {isHospitalAdmin && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/hospital')}>
-                          <Building2 className="mr-2 h-4 w-4" />
-                          <span>Hospital</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
-                    {isSuperAdmin && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/admin/users')}>
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>Usuários</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
-                          <Building2 className="mr-2 h-4 w-4" />
-                          <span>Organizações</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
-                          <Handshake className="mr-2 h-4 w-4" />
-                          <span>Parceiros</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/api-docs')}>
-                          <FileText className="mr-2 h-4 w-4" />
-                          <span>API Docs</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/token-generator')}>
-                          <Key className="mr-2 h-4 w-4" />
-                          <span>Gerar Tokens</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
-                          <Bell className="mr-2 h-4 w-4" />
-                          <span>Notificações Push</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => navigate('/medico-dashboard')}>
-                          <Stethoscope className="mr-2 h-4 w-4" />
-                          <span>Dashboard Médico (MVP)</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/paciente/p1')}>
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>Ficha do Paciente (MVP)</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
               )}
             </div>
           </div>
