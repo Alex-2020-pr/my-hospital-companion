@@ -181,6 +181,7 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean | null
+          on_duty: boolean | null
           organization_id: string | null
           phone: string | null
           specialty: string
@@ -196,6 +197,7 @@ export type Database = {
           full_name: string
           id?: string
           is_active?: boolean | null
+          on_duty?: boolean | null
           organization_id?: string | null
           phone?: string | null
           specialty: string
@@ -211,6 +213,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean | null
+          on_duty?: boolean | null
           organization_id?: string | null
           phone?: string | null
           specialty?: string

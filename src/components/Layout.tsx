@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare, Stethoscope } from "lucide-react";
@@ -8,6 +8,8 @@ import { NotificationBell } from "./NotificationBell";
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { useOrganization } from "@/hooks/useOrganization";
 import { DoctorMenu } from "./DoctorMenu";
+import { useDoctorDutyMode } from "@/hooks/useDoctorDutyMode";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +28,7 @@ export const Layout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
   const { isSuperAdmin, isHospitalAdmin, isDoctor } = useUserRole();
   const { organization } = useOrganization();
-  const [onDutyMode, setOnDutyMode] = useState(false);
+  const { onDutyMode } = useDoctorDutyMode();
 
   const handleAdminClick = () => {
     if (isSuperAdmin) {
@@ -181,12 +183,22 @@ export const Layout = ({ children, title }: LayoutProps) => {
                   className="h-8 object-contain"
                 />
               )}
-              <h1 className="text-xl font-semibold">{title}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-semibold">{title}</h1>
+                {isDoctor && onDutyMode && (
+                  <Badge 
+                    variant="outline" 
+                    className="bg-green-500/20 text-green-100 border-green-400/50 font-semibold animate-pulse"
+                  >
+                    PLANTÃO
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
               {isDoctor && !isSuperAdmin && !isHospitalAdmin && (
-                <DoctorMenu onDutyMode={onDutyMode} onToggleDutyMode={setOnDutyMode} />
+                <DoctorMenu />
               )}
             </div>
           </div>

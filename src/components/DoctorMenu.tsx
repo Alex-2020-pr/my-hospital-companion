@@ -29,6 +29,7 @@ import {
   Stethoscope
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useDoctorDutyMode } from "@/hooks/useDoctorDutyMode";
 
 // DADOS DE EXEMPLO - notificações por funcionalidade
 const NOTIFICATIONS = {
@@ -164,14 +165,12 @@ const MENU_SECTIONS: MenuSection[] = [
   }
 ];
 
-interface DoctorMenuProps {
-  onDutyMode: boolean;
-  onToggleDutyMode: (value: boolean) => void;
-}
+interface DoctorMenuProps {}
 
-export const DoctorMenu = ({ onDutyMode, onToggleDutyMode }: DoctorMenuProps) => {
+export const DoctorMenu = ({}: DoctorMenuProps) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { onDutyMode, loading, toggleDutyMode } = useDoctorDutyMode();
 
   const handleItemClick = (item: MenuItem) => {
     if (item.path) {
@@ -204,15 +203,22 @@ export const DoctorMenu = ({ onDutyMode, onToggleDutyMode }: DoctorMenuProps) =>
         </SheetHeader>
 
         {/* Modo Plantão Toggle */}
-        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
+        <div className={`mb-6 p-4 rounded-lg border ${
+          onDutyMode 
+            ? 'bg-green-500/10 border-green-500/30' 
+            : 'bg-primary/5 border-primary/20'
+        }`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-sm">Modo Plantão</p>
-              <p className="text-xs text-muted-foreground">Ativar status de disponibilidade</p>
+              <p className="text-xs text-muted-foreground">
+                {onDutyMode ? 'Você está de plantão' : 'Ativar status de disponibilidade'}
+              </p>
             </div>
             <Switch
               checked={onDutyMode}
-              onCheckedChange={onToggleDutyMode}
+              onCheckedChange={toggleDutyMode}
+              disabled={loading}
               className="data-[state=checked]:bg-green-500"
             />
           </div>
