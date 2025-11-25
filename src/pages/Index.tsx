@@ -34,19 +34,17 @@ const Index = () => {
       const hasDoctor = userRoles.includes('doctor');
       const hasPatient = userRoles.includes('patient');
       
-      // Prioridade: super_admin > hospital_admin > doctor-only > paciente/geral
-      if (hasSuperAdmin) {
-        console.log('Index: redirecionando para /admin');
-        navigate("/admin");
-      } else if (hasHospitalAdmin) {
+      // Prioridade: hospital_admin > doctor-only > paciente/geral
+      // Super admin vai para dashboard para ver exemplos
+      if (hasHospitalAdmin && !hasSuperAdmin) {
         console.log('Index: redirecionando para /hospital');
         navigate("/hospital");
-      } else if (hasDoctor && !hasPatient) {
+      } else if (hasDoctor && !hasPatient && !hasSuperAdmin) {
         console.log('Index: redirecionando para /medico-dashboard (apenas médico)');
         navigate("/medico-dashboard");
       } else {
-        console.log('Index: redirecionando para /dashboard (padrão/paciente)');
-        // Paciente ou role padrão (inclui médico + paciente)
+        console.log('Index: redirecionando para /dashboard (padrão/paciente/super admin)');
+        // Paciente, role padrão ou super admin (para ver exemplos)
         navigate("/dashboard");
       }
     };

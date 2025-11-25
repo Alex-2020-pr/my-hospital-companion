@@ -70,6 +70,13 @@ const MENU_SECTIONS: MenuSection[] = [
         path: "/doctor/patients"
       },
       {
+        id: "ficha-exemplo",
+        label: "Ficha do Paciente",
+        description: "Exemplo de prontuário",
+        icon: FileText,
+        path: "/paciente/p1"
+      },
+      {
         id: "agenda",
         label: "Agenda",
         description: "Consultas e compromissos",
