@@ -126,9 +126,6 @@ NODE_ENV=production
 # Instalar dependências
 npm install
 
-# Executar migrações do banco
-npm run migrate
-
 # Compilar para produção
 npm run build
 
@@ -138,6 +135,8 @@ npm install -g serve
 # Executar
 serve -s dist -l 8080
 ```
+
+> **Nota Importante**: Este projeto usa Lovable Cloud (baseado em Supabase) e o banco de dados já está configurado na nuvem. As migrações são aplicadas automaticamente - não é necessário executar comandos de migração localmente.
 
 ### 7. Configurar como Serviço Windows
 
@@ -238,15 +237,14 @@ EOF
 # Instalar dependências
 npm install
 
-# Executar migrações
-npm run migrate
-
 # Compilar
 npm run build
 
 # Instalar serve globalmente
 sudo npm install -g serve
 ```
+
+> **Nota Importante**: Este projeto usa Lovable Cloud (baseado em Supabase) e o banco de dados já está configurado na nuvem. As migrações são aplicadas automaticamente - não é necessário executar comandos de migração localmente.
 
 ### 8. Configurar como Serviço Systemd
 
