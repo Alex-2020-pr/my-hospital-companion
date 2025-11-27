@@ -198,6 +198,10 @@ export const Layout = ({ children, title }: LayoutProps) => {
                             <Users className="mr-2 h-4 w-4" />
                             <span>Ficha do Paciente (MVP)</span>
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate('/nursing')}>
+                            <Stethoscope className="mr-2 h-4 w-4" />
+                            <span>Enfermagem MVP</span>
+                          </DropdownMenuItem>
                         </>
                       )}
                     </DropdownMenuContent>
