@@ -119,80 +119,127 @@ export default function NursingPatientHistory() {
 
   return (
     <Layout title={`Histórico - ${patient.full_name}`}>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/nursing')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{patient.full_name}</h1>
-            <p className="text-muted-foreground">
-              Leito: {patient.bed_number} | Prontuário: {patient.registry_number}
-            </p>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white pb-20">
+        {/* Header */}
+        <div className="bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg mb-4">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/nursing')}
+              className="text-white hover:bg-white/20"
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold">{patient.full_name}</h1>
+              <p className="text-blue-100 text-sm">
+                Leito {patient.bed_number} • {patient.registry_number}
+              </p>
+              {patient.allergies && patient.allergies.length > 0 && (
+                <div className="flex gap-1 mt-2">
+                  {patient.allergies.map((allergy, idx) => (
+                    <Badge key={idx} variant="destructive" className="text-xs">
+                      ⚠️ {allergy}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
+        <div className="px-4 space-y-4">
+        
         <Tabs defaultValue="vitals" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="vitals">
-              <Activity className="h-4 w-4 mr-2" />
-              Sinais Vitais
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-white shadow-md rounded-2xl">
+            <TabsTrigger value="vitals" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-xl py-3">
+              <Activity className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Sinais Vitais</span>
             </TabsTrigger>
-            <TabsTrigger value="evolutions">
-              <FileText className="h-4 w-4 mr-2" />
-              Evoluções
+            <TabsTrigger value="evolutions" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-xl py-3">
+              <FileText className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Evoluções</span>
             </TabsTrigger>
-            <TabsTrigger value="procedures">
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Procedimentos
+            <TabsTrigger value="procedures" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-xl py-3">
+              <ClipboardList className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Procedimentos</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="vitals" className="space-y-6">
+          <TabsContent value="vitals" className="space-y-4">
             {vitalSigns.length > 0 && (
-              <Card className="p-6">
-                <h3 className="font-semibold mb-4">Gráfico de Sinais Vitais</h3>
-                <ResponsiveContainer width="100%" height={300}>
+              <Card className="p-5 shadow-lg">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Gráfico de Sinais Vitais</h3>
+                <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={prepareChartData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="temp" stroke="#ef4444" name="Temp (°C)" />
-                    <Line type="monotone" dataKey="fc" stroke="#3b82f6" name="FC (bpm)" />
-                    <Line type="monotone" dataKey="spo2" stroke="#10b981" name="SpO2 (%)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Line type="monotone" dataKey="temp" stroke="#ef4444" strokeWidth={3} name="Temp" dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="fc" stroke="#3b82f6" strokeWidth={3} name="FC" dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="spo2" stroke="#10b981" strokeWidth={3} name="SpO2" dot={{ r: 4 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </Card>
             )}
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Histórico de Registros</h3>
+            <Card className="p-5 shadow-lg">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Histórico de Registros</h3>
               <div className="space-y-3">
                 {vitalSigns.map((vital) => (
-                  <div key={vital.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">
-                        {new Date(vital.measurement_date).toLocaleString('pt-BR')}
+                  <div key={vital.id} className="border-2 border-gray-100 rounded-xl p-4 bg-white">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-bold text-gray-700">
+                        {new Date(vital.measurement_date).toLocaleString('pt-BR', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
                       </span>
                       {vital.is_abnormal && (
-                        <Badge variant="destructive">Anormal</Badge>
+                        <Badge variant="destructive" className="text-xs">⚠️ Anormal</Badge>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                      {vital.temperature && <p>Temp: {vital.temperature}°C</p>}
-                      {vital.blood_pressure_systolic && (
-                        <p>PA: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic} mmHg</p>
+                    <div className="grid grid-cols-2 gap-3 text-sm font-medium">
+                      {vital.temperature && (
+                        <div className="bg-red-50 p-2 rounded-lg">
+                          <p className="text-xs text-red-600">Temperatura</p>
+                          <p className="text-lg text-red-700">{vital.temperature}°C</p>
+                        </div>
                       )}
-                      {vital.heart_rate && <p>FC: {vital.heart_rate} bpm</p>}
-                      {vital.oxygen_saturation && <p>SpO2: {vital.oxygen_saturation}%</p>}
-                      {vital.pain_scale !== null && <p>Dor: {vital.pain_scale}/10</p>}
+                      {vital.blood_pressure_systolic && (
+                        <div className="bg-blue-50 p-2 rounded-lg">
+                          <p className="text-xs text-blue-600">Pressão</p>
+                          <p className="text-lg text-blue-700">{vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic}</p>
+                        </div>
+                      )}
+                      {vital.heart_rate && (
+                        <div className="bg-purple-50 p-2 rounded-lg">
+                          <p className="text-xs text-purple-600">FC</p>
+                          <p className="text-lg text-purple-700">{vital.heart_rate} bpm</p>
+                        </div>
+                      )}
+                      {vital.oxygen_saturation && (
+                        <div className="bg-green-50 p-2 rounded-lg">
+                          <p className="text-xs text-green-600">SpO2</p>
+                          <p className="text-lg text-green-700">{vital.oxygen_saturation}%</p>
+                        </div>
+                      )}
+                      {vital.pain_scale !== null && (
+                        <div className="bg-orange-50 p-2 rounded-lg">
+                          <p className="text-xs text-orange-600">Dor</p>
+                          <p className="text-lg text-orange-700">{vital.pain_scale}/10</p>
+                        </div>
+                      )}
                     </div>
                     {vital.notes && (
-                      <p className="text-sm text-muted-foreground mt-2">{vital.notes}</p>
+                      <p className="text-sm text-gray-600 mt-3 p-2 bg-gray-50 rounded-lg">{vital.notes}</p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-gray-500 mt-2">
                       Por: {vital.doctors?.full_name}
                     </p>
                   </div>
@@ -262,6 +309,7 @@ export default function NursingPatientHistory() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </Layout>
   );

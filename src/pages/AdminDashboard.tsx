@@ -156,6 +156,10 @@ export const AdminDashboard = () => {
               <Stethoscope className="h-6 w-6 mb-2" />
               <span className="text-sm">Médicos</span>
             </Button>
+            <Button onClick={() => navigate('/nursing')} variant="outline" className="h-auto py-4 flex-col border-primary/50 hover:border-primary">
+              <Activity className="h-6 w-6 mb-2 text-primary" />
+              <span className="text-sm text-primary font-medium">MVP Enfermagem</span>
+            </Button>
           </div>
         </div>
         
