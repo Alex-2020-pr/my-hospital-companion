@@ -37,6 +37,11 @@ import PatientRecord from "./pages/PatientRecord";
 import AdminDoctors from "./pages/AdminDoctors";
 import { DoctorPatients } from "./pages/DoctorPatients";
 import { DoctorPatientDetail } from "./pages/DoctorPatientDetail";
+import NursingDashboard from "./pages/NursingDashboard";
+import NursingVitalSigns from "./pages/NursingVitalSigns";
+import NursingEvolution from "./pages/NursingEvolution";
+import NursingProcedures from "./pages/NursingProcedures";
+import NursingPatientHistory from "./pages/NursingPatientHistory";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +85,11 @@ const App = () => (
           <Route path="/doctor/patients" element={<ProtectedRoute><DoctorPatients /></ProtectedRoute>} />
           <Route path="/doctor/patient/:patientId" element={<ProtectedRoute><DoctorPatientDetail /></ProtectedRoute>} />
           <Route path="/health-chat" element={<ProtectedRoute><HealthChat /></ProtectedRoute>} />
+          <Route path="/nursing" element={<ProtectedRoute><NursingDashboard /></ProtectedRoute>} />
+          <Route path="/nursing/vital-signs" element={<ProtectedRoute><NursingVitalSigns /></ProtectedRoute>} />
+          <Route path="/nursing/evolution" element={<ProtectedRoute><NursingEvolution /></ProtectedRoute>} />
+          <Route path="/nursing/procedures" element={<ProtectedRoute><NursingProcedures /></ProtectedRoute>} />
+          <Route path="/nursing/patient/:patientId" element={<ProtectedRoute><NursingPatientHistory /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

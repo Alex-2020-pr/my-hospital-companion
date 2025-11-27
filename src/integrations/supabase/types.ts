@@ -551,6 +551,258 @@ export type Database = {
           },
         ]
       }
+      nursing_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          message: string
+          patient_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message: string
+          patient_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message?: string
+          patient_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_alerts_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nursing_evolutions: {
+        Row: {
+          adl_evaluation: Json | null
+          ai_suggestions: string | null
+          assessment: string | null
+          created_at: string | null
+          evolution_date: string
+          evolution_type: string
+          free_text: string | null
+          id: string
+          mobility_evaluation: Json | null
+          nurse_id: string
+          objective_data: string | null
+          pain_evaluation: Json | null
+          patient_id: string
+          plan: string | null
+          subjective_data: string | null
+          updated_at: string | null
+          wounds_evaluation: Json | null
+        }
+        Insert: {
+          adl_evaluation?: Json | null
+          ai_suggestions?: string | null
+          assessment?: string | null
+          created_at?: string | null
+          evolution_date?: string
+          evolution_type: string
+          free_text?: string | null
+          id?: string
+          mobility_evaluation?: Json | null
+          nurse_id: string
+          objective_data?: string | null
+          pain_evaluation?: Json | null
+          patient_id: string
+          plan?: string | null
+          subjective_data?: string | null
+          updated_at?: string | null
+          wounds_evaluation?: Json | null
+        }
+        Update: {
+          adl_evaluation?: Json | null
+          ai_suggestions?: string | null
+          assessment?: string | null
+          created_at?: string | null
+          evolution_date?: string
+          evolution_type?: string
+          free_text?: string | null
+          id?: string
+          mobility_evaluation?: Json | null
+          nurse_id?: string
+          objective_data?: string | null
+          pain_evaluation?: Json | null
+          patient_id?: string
+          plan?: string | null
+          subjective_data?: string | null
+          updated_at?: string | null
+          wounds_evaluation?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_evolutions_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_evolutions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nursing_procedures: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          digital_signature: string | null
+          id: string
+          location: string | null
+          nurse_id: string
+          observations: string | null
+          patient_id: string
+          procedure_date: string
+          procedure_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          digital_signature?: string | null
+          id?: string
+          location?: string | null
+          nurse_id: string
+          observations?: string | null
+          patient_id: string
+          procedure_date?: string
+          procedure_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          digital_signature?: string | null
+          id?: string
+          location?: string | null
+          nurse_id?: string
+          observations?: string | null
+          patient_id?: string
+          procedure_date?: string
+          procedure_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_procedures_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_procedures_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nursing_vital_signs: {
+        Row: {
+          blood_pressure_diastolic: number | null
+          blood_pressure_systolic: number | null
+          created_at: string | null
+          heart_rate: number | null
+          id: string
+          is_abnormal: boolean | null
+          measurement_date: string
+          notes: string | null
+          nurse_id: string
+          oxygen_saturation: number | null
+          pain_scale: number | null
+          patient_id: string
+          respiratory_rate: number | null
+          temperature: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          is_abnormal?: boolean | null
+          measurement_date?: string
+          notes?: string | null
+          nurse_id: string
+          oxygen_saturation?: number | null
+          pain_scale?: number | null
+          patient_id: string
+          respiratory_rate?: number | null
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          blood_pressure_diastolic?: number | null
+          blood_pressure_systolic?: number | null
+          created_at?: string | null
+          heart_rate?: number | null
+          id?: string
+          is_abnormal?: boolean | null
+          measurement_date?: string
+          notes?: string | null
+          nurse_id?: string
+          oxygen_saturation?: number | null
+          pain_scale?: number | null
+          patient_id?: string
+          respiratory_rate?: number | null
+          temperature?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_vital_signs_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_vital_signs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operational_costs: {
         Row: {
           created_at: string | null
@@ -1520,7 +1772,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "hospital_admin" | "patient" | "doctor"
+      app_role:
+        | "super_admin"
+        | "hospital_admin"
+        | "patient"
+        | "doctor"
+        | "nurse"
+        | "nursing_tech"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1648,7 +1906,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "hospital_admin", "patient", "doctor"],
+      app_role: [
+        "super_admin",
+        "hospital_admin",
+        "patient",
+        "doctor",
+        "nurse",
+        "nursing_tech",
+      ],
     },
   },
 } as const

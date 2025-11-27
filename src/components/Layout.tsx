@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Shield, MoreVertical, Users, Building2, Handshake, FileText, Key, Bell, MessageSquare, Stethoscope } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useNurseRole } from "@/hooks/useNurseRole";
 import { NotificationBell } from "./NotificationBell";
 import { PushNotificationPrompt } from './PushNotificationPrompt';
 import { useOrganization } from "@/hooks/useOrganization";
 import { DoctorMenu } from "./DoctorMenu";
+import { NursingMenu } from "./NursingMenu";
 import { useDoctorDutyMode } from "@/hooks/useDoctorDutyMode";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,6 +29,7 @@ interface LayoutProps {
 export const Layout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
   const { isSuperAdmin, isHospitalAdmin, isDoctor } = useUserRole();
+  const { isNurse } = useNurseRole();
   const { organization } = useOrganization();
   const { onDutyMode } = useDoctorDutyMode();
 
@@ -123,6 +126,9 @@ export const Layout = ({ children, title }: LayoutProps) => {
               <NotificationBell />
               {isDoctor && (
                 <DoctorMenu />
+              )}
+              {isNurse && (
+                <NursingMenu />
               )}
               {(isSuperAdmin || isHospitalAdmin) && (
                 <>
