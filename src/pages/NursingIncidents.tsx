@@ -115,6 +115,7 @@ export default function NursingIncidents() {
             resolved: true
           }
         ]);
+        setReporterName('demo-nurse-id');
         return;
       }
       
