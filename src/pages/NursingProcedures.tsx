@@ -35,7 +35,7 @@ const PROCEDURE_TYPES = [
 export default function NursingProcedures() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isNurse } = useNurseRole();
+  const { isNurse, loading: nurseLoading } = useNurseRole();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [nurseId, setNurseId] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -50,13 +50,15 @@ export default function NursingProcedures() {
   });
 
   useEffect(() => {
+    if (nurseLoading) return;
+    
     if (!isNurse) {
       toast.error('Acesso negado');
       navigate('/dashboard');
       return;
     }
     fetchData();
-  }, [user, isNurse, navigate]);
+  }, [user, isNurse, nurseLoading, navigate]);
 
   const fetchData = async () => {
     try {
