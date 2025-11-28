@@ -42,7 +42,7 @@ export const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState({
     userId: '',
-    role: 'patient' as 'super_admin' | 'hospital_admin' | 'patient' | 'doctor',
+    role: 'patient' as 'super_admin' | 'hospital_admin' | 'patient' | 'doctor' | 'nurse' | 'nursing_tech',
     organization_id: ''
   });
 
@@ -170,7 +170,7 @@ export const AdminUsers = () => {
         role: formData.role
       };
 
-      if ((formData.role === 'hospital_admin' || formData.role === 'doctor') && formData.organization_id) {
+      if ((formData.role === 'hospital_admin' || formData.role === 'doctor' || formData.role === 'nurse' || formData.role === 'nursing_tech') && formData.organization_id) {
         roleData.organization_id = formData.organization_id;
       }
 
@@ -231,6 +231,10 @@ export const AdminUsers = () => {
         return <Badge className="bg-blue-500">Admin Hospital</Badge>;
       case 'doctor':
         return <Badge className="bg-green-500">Médico</Badge>;
+      case 'nurse':
+        return <Badge className="bg-teal-500">Enfermeiro</Badge>;
+      case 'nursing_tech':
+        return <Badge className="bg-cyan-500">Téc. Enfermagem</Badge>;
       case 'patient':
         return <Badge variant="secondary">Paciente</Badge>;
       default:
@@ -359,11 +363,13 @@ export const AdminUsers = () => {
                     <SelectItem value="super_admin">Super Admin</SelectItem>
                     <SelectItem value="hospital_admin">Admin Hospital</SelectItem>
                     <SelectItem value="doctor">Médico</SelectItem>
+                    <SelectItem value="nurse">Enfermeiro</SelectItem>
+                    <SelectItem value="nursing_tech">Técnico de Enfermagem</SelectItem>
                     <SelectItem value="patient">Paciente</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              {(formData.role === 'hospital_admin' || formData.role === 'doctor') && (
+              {(formData.role === 'hospital_admin' || formData.role === 'doctor' || formData.role === 'nurse' || formData.role === 'nursing_tech') && (
                 <div>
                   <Label htmlFor="organization">Organização</Label>
                   <Select

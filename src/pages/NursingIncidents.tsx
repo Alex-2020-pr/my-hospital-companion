@@ -54,7 +54,7 @@ const SEVERITY_LEVELS = [
 export default function NursingIncidents() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isNurse } = useNurseRole();
+  const { isNurse, loading: nurseLoading } = useNurseRole();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [reporterName, setReporterName] = useState('');
@@ -70,13 +70,15 @@ export default function NursingIncidents() {
   });
 
   useEffect(() => {
+    if (nurseLoading) return;
+    
     if (!isNurse) {
       toast.error('Acesso negado');
       navigate('/dashboard');
       return;
     }
     fetchData();
-  }, [user, isNurse, navigate]);
+  }, [user, isNurse, nurseLoading, navigate]);
 
   const fetchData = async () => {
     try {
