@@ -18,9 +18,9 @@ const NursingHistoryMobile = () => {
   });
 
   const vitalHistory = [
-    { date: "28/11/2024", time: "14:00", temp: "36.8", bp: "120/80", hr: "75", spo2: "98" },
-    { date: "28/11/2024", time: "10:00", temp: "36.5", bp: "118/78", hr: "72", spo2: "99" },
-    { date: "27/11/2024", time: "18:00", temp: "37.2", bp: "125/82", hr: "78", spo2: "97" },
+    { date: "28/11/2024", time: "14:00", temp: "36.7", bp: "120/80", hr: "78", spo2: "98" },
+    { date: "28/11/2024", time: "10:00", temp: "36.5", bp: "118/78", hr: "75", spo2: "99" },
+    { date: "27/11/2024", time: "18:00", temp: "37.2", bp: "125/82", hr: "80", spo2: "97" },
     { date: "27/11/2024", time: "14:00", temp: "36.9", bp: "122/80", hr: "76", spo2: "98" }
   ];
 
@@ -30,21 +30,28 @@ const NursingHistoryMobile = () => {
       time: "14:30",
       type: "Evolução Diária",
       nurse: "Enf. Maria Silva",
-      summary: "Paciente em bom estado geral, ferida operatória limpa e seca..."
+      summary: "Paciente consciente, orientado, sem queixas. Ferida operatória limpa e seca."
+    },
+    {
+      date: "28/11/2024",
+      time: "10:00",
+      type: "Procedimento",
+      nurse: "Enf. João Santos",
+      summary: "Curativo simples realizado às 10h. Ferida em bom aspecto."
     },
     {
       date: "27/11/2024",
       time: "18:15",
-      type: "Evolução Diária",
-      nurse: "Enf. João Santos",
-      summary: "Aceitou dieta leve, deambulando com auxílio, sem queixas..."
+      type: "Intercorrência",
+      nurse: "Enf. Ana Costa",
+      summary: "Dor 7/10 às 14h. Administrado analgésico conforme prescrição."
     },
     {
       date: "27/11/2024",
-      time: "10:00",
+      time: "08:00",
       type: "Admissão",
       nurse: "Enf. Maria Silva",
-      summary: "Paciente admitido proveniente do centro cirúrgico..."
+      summary: "Paciente admitido proveniente do centro cirúrgico. Consciente e orientado."
     }
   ];
 
