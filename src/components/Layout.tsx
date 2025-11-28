@@ -29,9 +29,12 @@ interface LayoutProps {
 export const Layout = ({ children, title }: LayoutProps) => {
   const navigate = useNavigate();
   const { isSuperAdmin, isHospitalAdmin, isDoctor } = useUserRole();
-  const { isNurse } = useNurseRole();
+  const { isNurse, isNurseOnly, isTechOnly } = useNurseRole();
   const { organization } = useOrganization();
   const { onDutyMode } = useDoctorDutyMode();
+  
+  // Se é APENAS enfermeiro/técnico, não mostrar menus de admin/doctor
+  const isOnlyNursing = (isNurseOnly || isTechOnly) && !isSuperAdmin && !isHospitalAdmin && !isDoctor;
 
   const handleAdminClick = () => {
     if (isSuperAdmin) {
@@ -124,88 +127,93 @@ export const Layout = ({ children, title }: LayoutProps) => {
             </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
-              {isDoctor && (
-                <DoctorMenu />
-              )}
-              {isNurse && (
-                <NursingMenu />
-              )}
-              {(isSuperAdmin || isHospitalAdmin) && (
+              
+              {/* Menu de Enfermagem - sempre visível para enfermeiros */}
+              {isNurse && <NursingMenu />}
+              
+              {/* Menus adicionais apenas se NÃO for exclusivamente enfermagem */}
+              {!isOnlyNursing && (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleAdminClick}
-                    className="text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <Shield className="h-5 w-5" />
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  {isDoctor && <DoctorMenu />}
+                  
+                  {(isSuperAdmin || isHospitalAdmin) && (
+                    <>
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={handleAdminClick}
                         className="text-primary-foreground hover:bg-primary-foreground/10"
                       >
-                        <MoreVertical className="h-5 w-5" />
+                        <Shield className="h-5 w-5" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 bg-background z-50">
-                      <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {isHospitalAdmin && (
-                        <>
-                          <DropdownMenuItem onClick={() => navigate('/hospital')}>
-                            <Building2 className="mr-2 h-4 w-4" />
-                            <span>Hospital</span>
-                          </DropdownMenuItem>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary-foreground hover:bg-primary-foreground/10"
+                          >
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56 bg-background z-50">
+                          <DropdownMenuLabel>Acesso Rápido Admin</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                        </>
-                      )}
-                      {isSuperAdmin && (
-                        <>
-                          <DropdownMenuItem onClick={() => navigate('/admin/users')}>
-                            <Users className="mr-2 h-4 w-4" />
-                            <span>Usuários</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
-                            <Building2 className="mr-2 h-4 w-4" />
-                            <span>Organizações</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
-                            <Handshake className="mr-2 h-4 w-4" />
-                            <span>Parceiros</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => navigate('/api-docs')}>
-                            <FileText className="mr-2 h-4 w-4" />
-                            <span>API Docs</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/token-generator')}>
-                            <Key className="mr-2 h-4 w-4" />
-                            <span>Gerar Tokens</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
-                            <Bell className="mr-2 h-4 w-4" />
-                            <span>Notificações Push</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => navigate('/medico-dashboard')}>
-                            <Stethoscope className="mr-2 h-4 w-4" />
-                            <span>Dashboard Médico (MVP)</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/paciente/p1')}>
-                            <Users className="mr-2 h-4 w-4" />
-                            <span>Ficha do Paciente (MVP)</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => navigate('/nursing')}>
-                            <Stethoscope className="mr-2 h-4 w-4" />
-                            <span>Enfermagem MVP</span>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          {isHospitalAdmin && (
+                            <>
+                              <DropdownMenuItem onClick={() => navigate('/hospital')}>
+                                <Building2 className="mr-2 h-4 w-4" />
+                                <span>Hospital</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
+                          {isSuperAdmin && (
+                            <>
+                              <DropdownMenuItem onClick={() => navigate('/admin/users')}>
+                                <Users className="mr-2 h-4 w-4" />
+                                <span>Usuários</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/admin/organizations')}>
+                                <Building2 className="mr-2 h-4 w-4" />
+                                <span>Organizações</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/admin/partners')}>
+                                <Handshake className="mr-2 h-4 w-4" />
+                                <span>Parceiros</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => navigate('/api-docs')}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>API Docs</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/token-generator')}>
+                                <Key className="mr-2 h-4 w-4" />
+                                <span>Gerar Tokens</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/admin/push-notifications')}>
+                                <Bell className="mr-2 h-4 w-4" />
+                                <span>Notificações Push</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => navigate('/medico-dashboard')}>
+                                <Stethoscope className="mr-2 h-4 w-4" />
+                                <span>Dashboard Médico (MVP)</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/paciente/p1')}>
+                                <Users className="mr-2 h-4 w-4" />
+                                <span>Ficha do Paciente (MVP)</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate('/nursing')}>
+                                <Stethoscope className="mr-2 h-4 w-4" />
+                                <span>Enfermagem MVP</span>
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
                 </>
               )}
             </div>

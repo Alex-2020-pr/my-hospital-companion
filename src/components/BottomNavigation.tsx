@@ -1,7 +1,8 @@
-import { Home, Calendar, FileText, MessageCircle, User, Stethoscope, Pill, Video, Shield } from "lucide-react";
+import { Home, Calendar, FileText, MessageCircle, User, Stethoscope, Pill, Video, Shield, Activity } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useNurseRole } from "@/hooks/useNurseRole";
 
 const baseNavigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/' },
@@ -15,11 +16,15 @@ export const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
+  const { isNurse } = useNurseRole();
 
   const navigationItems = [
     ...baseNavigationItems,
     ...(isDoctor
       ? [{ id: 'doctor', label: 'Médico', icon: Stethoscope, path: '/doctor/patients' }]
+      : []),
+    ...(isNurse
+      ? [{ id: 'nursing', label: 'Enfermagem', icon: Activity, path: '/nursing' }]
       : [])
   ];
 
