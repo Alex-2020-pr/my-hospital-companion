@@ -82,12 +82,13 @@ export const ApiDocs = () => {
 
         {/* Endpoints */}
         <Tabs defaultValue="medications" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
             <TabsTrigger value="medications">Medicamentos</TabsTrigger>
             <TabsTrigger value="appointments">Consultas</TabsTrigger>
             <TabsTrigger value="exams">Exames</TabsTrigger>
             <TabsTrigger value="documents">Documentos</TabsTrigger>
             <TabsTrigger value="doctors">Médicos</TabsTrigger>
+            <TabsTrigger value="nursing">Enfermagem</TabsTrigger>
           </TabsList>
 
           {/* Medicamentos */}
@@ -540,8 +541,281 @@ Content-Type: application/json`}
 
                   </CardContent>
                 </Card>
-              </TabsContent>
-            </Tabs>
+          </TabsContent>
+
+          {/* Tab Enfermagem - Nova seção */}
+          <TabsContent value="nursing">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Módulo de Enfermagem</CardTitle>
+                  <Badge variant="secondary">Sistema de Enfermagem</Badge>
+                </div>
+                <CardDescription>
+                  APIs para sincronização de dados de enfermagem e registros clínicos
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* Endpoint: Sincronizar Pacientes */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge>POST</Badge>
+                      <code className="text-sm">/api/patients</code>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Cria ou atualiza paciente (sincronização do ERP)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Exemplo de Requisição:</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`curl -X POST ${baseUrl}/api/patients \\
+  -H "Authorization: Bearer org_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "erp_patient_id": "ERP123456",
+    "full_name": "João da Silva",
+    "cpf": "12345678900",
+    "birth_date": "1980-05-15",
+    "gender": "M",
+    "bed_number": "203",
+    "registry_number": "12345",
+    "allergies": ["Penicilina"],
+    "phone": "(11) 98765-4321",
+    "email": "joao@email.com"
+  }'`}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Resposta de Sucesso (200):</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`{
+  "success": true,
+  "message": "Paciente sincronizado com sucesso",
+  "patient_id": "uuid"
+}`}
+                    </pre>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Endpoint: Registrar Sinais Vitais */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge>POST</Badge>
+                      <code className="text-sm">/api/vital-signs</code>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Registra sinais vitais do paciente
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Exemplo de Requisição:</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`curl -X POST ${baseUrl}/api/vital-signs \\
+  -H "Authorization: Bearer org_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "patient_erp_id": "ERP123456",
+    "nurse_erp_id": "NURSE001",
+    "temperature": 36.5,
+    "blood_pressure_systolic": 120,
+    "blood_pressure_diastolic": 80,
+    "heart_rate": 75,
+    "respiratory_rate": 16,
+    "oxygen_saturation": 98,
+    "pain_scale": 2,
+    "notes": "Paciente em bom estado geral",
+    "sector": "UTI"
+  }'`}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Campos Obrigatórios:</p>
+                    <ul className="text-sm space-y-1 list-disc list-inside">
+                      <li><code>patient_erp_id</code> - ID do paciente no ERP</li>
+                      <li><code>nurse_erp_id</code> - ID do enfermeiro no ERP</li>
+                      <li>Pelo menos um sinal vital deve ser informado</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Endpoint: Registrar Procedimentos */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge>POST</Badge>
+                      <code className="text-sm">/api/procedures</code>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Registra procedimento de enfermagem
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Exemplo de Requisição:</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`curl -X POST ${baseUrl}/api/procedures \\
+  -H "Authorization: Bearer org_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "patient_erp_id": "ERP123456",
+    "nurse_erp_id": "NURSE001",
+    "procedure_type": "curativo",
+    "description": "Curativo em ferida operatória",
+    "location": "Abdômen",
+    "observations": "Ferida limpa, sem sinais de infecção",
+    "sector": "Clínica Cirúrgica"
+  }'`}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Tipos de Procedimentos:</p>
+                    <ul className="text-sm space-y-1 list-disc list-inside">
+                      <li><code>medication</code> - Administração de medicação</li>
+                      <li><code>curativo</code> - Curativos</li>
+                      <li><code>higiene</code> - Higiene e conforto</li>
+                      <li><code>sonda</code> - Sondagem</li>
+                      <li><code>aspiracao</code> - Aspiração</li>
+                      <li><code>coleta</code> - Coleta de exames</li>
+                      <li><code>outros</code> - Outros procedimentos</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Endpoint: Registrar Incidentes */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge>POST</Badge>
+                      <code className="text-sm">/api/incidents</code>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Registra incidente/intercorrência
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Exemplo de Requisição:</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`curl -X POST ${baseUrl}/api/incidents \\
+  -H "Authorization: Bearer org_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "patient_erp_id": "ERP123456",
+    "nurse_erp_id": "NURSE001",
+    "incident_type": "medication_error",
+    "severity": "medium",
+    "description": "Medicação administrada com 30 minutos de atraso",
+    "actions_taken": "Comunicado ao médico, paciente monitorado",
+    "sector": "Enfermaria A"
+  }'`}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Níveis de Severidade:</p>
+                    <ul className="text-sm space-y-1 list-disc list-inside">
+                      <li><code>low</code> - Baixo (sem dano ao paciente)</li>
+                      <li><code>medium</code> - Médio (dano mínimo, sem sequelas)</li>
+                      <li><code>high</code> - Alto (dano moderado, possíveis sequelas)</li>
+                      <li><code>critical</code> - Crítico (dano grave ou morte)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Endpoint: Registrar Evoluções */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge>POST</Badge>
+                      <code className="text-sm">/api/nursing-reports</code>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Registra evolução de enfermagem (método SOAP)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Exemplo de Requisição:</p>
+                    <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
+{`curl -X POST ${baseUrl}/api/nursing-reports \\
+  -H "Authorization: Bearer org_token_aqui" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "patient_erp_id": "ERP123456",
+    "nurse_erp_id": "NURSE001",
+    "evolution_type": "daily",
+    "subjective_data": "Paciente relata dor leve no local da incisão",
+    "objective_data": "PA 120/80, FC 75, Tax 36.5°C, ferida limpa e seca",
+    "assessment": "Paciente em recuperação pós-operatória estável",
+    "plan": "Manter curativos, controlar sinais vitais 6/6h",
+    "sector": "Clínica Cirúrgica"
+  }'`}
+                    </pre>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Tipos de Evolução:</p>
+                    <ul className="text-sm space-y-1 list-disc list-inside">
+                      <li><code>admission</code> - Admissão</li>
+                      <li><code>daily</code> - Evolução diária</li>
+                      <li><code>discharge</code> - Alta</li>
+                      <li><code>intercurrence</code> - Intercorrência</li>
+                      <li><code>transfer</code> - Transferência</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Sincronização */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3">Fluxo de Sincronização</h3>
+                  </div>
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+                    <p className="text-sm font-medium text-blue-900">1. ERP → App (Pacientes)</p>
+                    <p className="text-xs text-blue-700">
+                      O ERP envia os dados dos pacientes para o app via POST /api/patients
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg space-y-2">
+                    <p className="text-sm font-medium text-green-900">2. App → Registros Clínicos</p>
+                    <p className="text-xs text-green-700">
+                      Enfermeiros registram sinais vitais, procedimentos, evoluções e incidentes no app
+                    </p>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg space-y-2">
+                    <p className="text-sm font-medium text-purple-900">3. App → ERP (Sincronização)</p>
+                    <p className="text-xs text-purple-700">
+                      Dados clínicos são sincronizados de volta para o ERP periodicamente (a cada 5-10 min)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t pt-6"></div>
+
+                {/* Link para documentação completa */}
+                <div className="bg-muted p-4 rounded-lg">
+                  <p className="text-sm font-medium mb-2">📄 Documentação Completa</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Para informações detalhadas sobre modelos JSON, webhooks e exemplos de integração, consulte:
+                  </p>
+                  <code className="text-xs bg-background px-2 py-1 rounded">
+                    NURSING_API_DOCUMENTATION.md
+                  </code>
+                </div>
+
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {/* Códigos de Resposta */}
         <Card>

@@ -32,13 +32,17 @@ const Index = () => {
       const hasSuperAdmin = userRoles.includes('super_admin');
       const hasHospitalAdmin = userRoles.includes('hospital_admin');
       const hasDoctor = userRoles.includes('doctor');
+      const hasNurse = userRoles.includes('nurse') || userRoles.includes('nursing_tech');
       const hasPatient = userRoles.includes('patient');
       
-      // Prioridade: hospital_admin > doctor-only > paciente/geral
+      // Prioridade: hospital_admin > nurse-only > doctor-only > paciente/geral
       // Super admin vai para dashboard para ver exemplos
       if (hasHospitalAdmin && !hasSuperAdmin) {
         console.log('Index: redirecionando para /hospital');
         navigate("/hospital");
+      } else if (hasNurse && !hasPatient && !hasDoctor && !hasSuperAdmin) {
+        console.log('Index: redirecionando para /nursing/dashboard-mobile (apenas enfermeiro)');
+        navigate("/nursing/dashboard-mobile");
       } else if (hasDoctor && !hasPatient && !hasSuperAdmin) {
         console.log('Index: redirecionando para /medico-dashboard (apenas médico)');
         navigate("/medico-dashboard");
