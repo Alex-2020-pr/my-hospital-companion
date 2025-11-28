@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, Heart, FileText, Clock, AlertCircle, ChevronRight } from "lucide-react";
+import { Activity, Heart, FileText, Clock, AlertCircle, ChevronRight, Users, Clipboard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,19 +61,22 @@ const NursingDashboardMobile = () => {
       <div className="p-4 grid grid-cols-3 gap-3">
         <Card className="bg-card">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-primary mb-1">12</div>
+            <Users className="h-6 w-6 text-primary mx-auto mb-2" />
+            <div className="text-2xl font-bold text-primary mb-1">12</div>
             <div className="text-xs text-muted-foreground">Pacientes</div>
           </CardContent>
         </Card>
         <Card className="bg-card">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-orange-500 mb-1">{activeAlerts.length}</div>
+            <AlertCircle className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-orange-500 mb-1">{activeAlerts.length}</div>
             <div className="text-xs text-muted-foreground">Alertas</div>
           </CardContent>
         </Card>
         <Card className="bg-card">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-1">8</div>
+            <Clipboard className="h-6 w-6 text-green-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-green-600 mb-1">8</div>
             <div className="text-xs text-muted-foreground">Procedimentos</div>
           </CardContent>
         </Card>
