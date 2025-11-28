@@ -178,12 +178,15 @@ export type Database = {
           crm: string
           crm_state: string
           email: string | null
+          erp_user_id: string | null
           full_name: string
           id: string
           is_active: boolean | null
           on_duty: boolean | null
           organization_id: string | null
           phone: string | null
+          position: string | null
+          registration_number: string | null
           specialty: string
           updated_at: string | null
           user_id: string
@@ -194,12 +197,15 @@ export type Database = {
           crm: string
           crm_state: string
           email?: string | null
+          erp_user_id?: string | null
           full_name: string
           id?: string
           is_active?: boolean | null
           on_duty?: boolean | null
           organization_id?: string | null
           phone?: string | null
+          position?: string | null
+          registration_number?: string | null
           specialty: string
           updated_at?: string | null
           user_id: string
@@ -210,12 +216,15 @@ export type Database = {
           crm?: string
           crm_state?: string
           email?: string | null
+          erp_user_id?: string | null
           full_name?: string
           id?: string
           is_active?: boolean | null
           on_duty?: boolean | null
           organization_id?: string | null
           phone?: string | null
+          position?: string | null
+          registration_number?: string | null
           specialty?: string
           updated_at?: string | null
           user_id?: string
@@ -276,6 +285,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_api_logs: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          error_message: string | null
+          id: string
+          method: string
+          organization_id: string | null
+          request_body: Json | null
+          response_body: Json | null
+          response_status: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          method: string
+          organization_id?: string | null
+          request_body?: Json | null
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          method?: string
+          organization_id?: string | null
+          request_body?: Json | null
+          response_body?: Json | null
+          response_status?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_api_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -608,10 +661,12 @@ export type Database = {
           ai_suggestions: string | null
           assessment: string | null
           created_at: string | null
+          erp_id: string | null
           evolution_date: string
           evolution_type: string
           free_text: string | null
           id: string
+          last_sync_at: string | null
           mobility_evaluation: Json | null
           nurse_id: string
           objective_data: string | null
@@ -628,10 +683,12 @@ export type Database = {
           ai_suggestions?: string | null
           assessment?: string | null
           created_at?: string | null
+          erp_id?: string | null
           evolution_date?: string
           evolution_type: string
           free_text?: string | null
           id?: string
+          last_sync_at?: string | null
           mobility_evaluation?: Json | null
           nurse_id: string
           objective_data?: string | null
@@ -648,10 +705,12 @@ export type Database = {
           ai_suggestions?: string | null
           assessment?: string | null
           created_at?: string | null
+          erp_id?: string | null
           evolution_date?: string
           evolution_type?: string
           free_text?: string | null
           id?: string
+          last_sync_at?: string | null
           mobility_evaluation?: Json | null
           nurse_id?: string
           objective_data?: string | null
@@ -685,9 +744,11 @@ export type Database = {
           actions_taken: string | null
           created_at: string | null
           description: string
+          erp_id: string | null
           id: string
           incident_date: string
           incident_type: string
+          last_sync_at: string | null
           patient_id: string
           reported_by: string
           resolved: boolean | null
@@ -700,9 +761,11 @@ export type Database = {
           actions_taken?: string | null
           created_at?: string | null
           description: string
+          erp_id?: string | null
           id?: string
           incident_date?: string
           incident_type: string
+          last_sync_at?: string | null
           patient_id: string
           reported_by: string
           resolved?: boolean | null
@@ -715,9 +778,11 @@ export type Database = {
           actions_taken?: string | null
           created_at?: string | null
           description?: string
+          erp_id?: string | null
           id?: string
           incident_date?: string
           incident_type?: string
+          last_sync_at?: string | null
           patient_id?: string
           reported_by?: string
           resolved?: boolean | null
@@ -748,7 +813,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           digital_signature: string | null
+          erp_id: string | null
           id: string
+          last_sync_at: string | null
           location: string | null
           nurse_id: string
           observations: string | null
@@ -762,7 +829,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           digital_signature?: string | null
+          erp_id?: string | null
           id?: string
+          last_sync_at?: string | null
           location?: string | null
           nurse_id: string
           observations?: string | null
@@ -776,7 +845,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           digital_signature?: string | null
+          erp_id?: string | null
           id?: string
+          last_sync_at?: string | null
           location?: string | null
           nurse_id?: string
           observations?: string | null
@@ -808,6 +879,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           email: string | null
+          erp_user_id: string | null
           full_name: string
           id: string
           is_active: boolean | null
@@ -822,6 +894,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          erp_user_id?: string | null
           full_name: string
           id?: string
           is_active?: boolean | null
@@ -836,6 +909,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          erp_user_id?: string | null
           full_name?: string
           id?: string
           is_active?: boolean | null
@@ -861,9 +935,11 @@ export type Database = {
           blood_pressure_diastolic: number | null
           blood_pressure_systolic: number | null
           created_at: string | null
+          erp_id: string | null
           heart_rate: number | null
           id: string
           is_abnormal: boolean | null
+          last_sync_at: string | null
           measurement_date: string
           notes: string | null
           nurse_id: string
@@ -879,9 +955,11 @@ export type Database = {
           blood_pressure_diastolic?: number | null
           blood_pressure_systolic?: number | null
           created_at?: string | null
+          erp_id?: string | null
           heart_rate?: number | null
           id?: string
           is_abnormal?: boolean | null
+          last_sync_at?: string | null
           measurement_date?: string
           notes?: string | null
           nurse_id: string
@@ -897,9 +975,11 @@ export type Database = {
           blood_pressure_diastolic?: number | null
           blood_pressure_systolic?: number | null
           created_at?: string | null
+          erp_id?: string | null
           heart_rate?: number | null
           id?: string
           is_abnormal?: boolean | null
+          last_sync_at?: string | null
           measurement_date?: string
           notes?: string | null
           nurse_id?: string
@@ -1344,6 +1424,7 @@ export type Database = {
       }
       patients: {
         Row: {
+          age: number | null
           allergies: string[] | null
           avatar_url: string | null
           bed_number: string | null
@@ -1351,9 +1432,12 @@ export type Database = {
           cpf: string | null
           created_at: string | null
           email: string | null
+          erp_patient_id: string | null
           full_name: string
+          gender: string | null
           id: string
           is_active: boolean | null
+          last_sync_at: string | null
           organization_id: string | null
           phone: string | null
           registry_number: string | null
@@ -1361,6 +1445,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          age?: number | null
           allergies?: string[] | null
           avatar_url?: string | null
           bed_number?: string | null
@@ -1368,9 +1453,12 @@ export type Database = {
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          erp_patient_id?: string | null
           full_name: string
+          gender?: string | null
           id?: string
           is_active?: boolean | null
+          last_sync_at?: string | null
           organization_id?: string | null
           phone?: string | null
           registry_number?: string | null
@@ -1378,6 +1466,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          age?: number | null
           allergies?: string[] | null
           avatar_url?: string | null
           bed_number?: string | null
@@ -1385,9 +1474,12 @@ export type Database = {
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          erp_patient_id?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
           is_active?: boolean | null
+          last_sync_at?: string | null
           organization_id?: string | null
           phone?: string | null
           registry_number?: string | null
