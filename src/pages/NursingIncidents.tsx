@@ -86,7 +86,38 @@ export default function NursingIncidents() {
         .eq('user_id', user?.id)
         .single();
 
-      if (!nurseData) return;
+      if (!nurseData) {
+        // Dados de exemplo para demonstração
+        setPatients([
+          { id: 'demo-1', full_name: 'João da Silva', bed_number: '203' },
+          { id: 'demo-2', full_name: 'Maria Santos', bed_number: '205' },
+          { id: 'demo-3', full_name: 'Carlos Oliveira', bed_number: '208' }
+        ]);
+        setIncidents([
+          {
+            id: 'demo-inc-1',
+            patient_id: 'demo-1',
+            patient_name: 'João da Silva',
+            incident_type: 'Queda',
+            severity: 'medium',
+            description: 'Paciente levantou sozinho durante a noite e sofreu queda ao lado do leito. Não apresentou lesões visíveis.',
+            incident_date: new Date().toISOString(),
+            resolved: false
+          },
+          {
+            id: 'demo-inc-2',
+            patient_id: 'demo-2',
+            patient_name: 'Maria Santos',
+            incident_type: 'Perda de acesso venoso',
+            severity: 'low',
+            description: 'Perda de acesso venoso periférico em MSE. Novo acesso puncionado em MSE.',
+            incident_date: new Date(Date.now() - 86400000).toISOString(),
+            resolved: true
+          }
+        ]);
+        return;
+      }
+      
       setReporterName(nurseData.id);
 
       const { data: patientsData } = await supabase
