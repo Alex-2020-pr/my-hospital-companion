@@ -618,6 +618,7 @@ export type Database = {
           pain_evaluation: Json | null
           patient_id: string
           plan: string | null
+          sector: string | null
           subjective_data: string | null
           updated_at: string | null
           wounds_evaluation: Json | null
@@ -637,6 +638,7 @@ export type Database = {
           pain_evaluation?: Json | null
           patient_id: string
           plan?: string | null
+          sector?: string | null
           subjective_data?: string | null
           updated_at?: string | null
           wounds_evaluation?: Json | null
@@ -656,6 +658,7 @@ export type Database = {
           pain_evaluation?: Json | null
           patient_id?: string
           plan?: string | null
+          sector?: string | null
           subjective_data?: string | null
           updated_at?: string | null
           wounds_evaluation?: Json | null
@@ -677,6 +680,69 @@ export type Database = {
           },
         ]
       }
+      nursing_incidents: {
+        Row: {
+          actions_taken: string | null
+          created_at: string | null
+          description: string
+          id: string
+          incident_date: string
+          incident_type: string
+          patient_id: string
+          reported_by: string
+          resolved: boolean | null
+          resolved_at: string | null
+          sector: string | null
+          severity: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions_taken?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          incident_date?: string
+          incident_type: string
+          patient_id: string
+          reported_by: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          sector?: string | null
+          severity: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions_taken?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_type?: string
+          patient_id?: string
+          reported_by?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          sector?: string | null
+          severity?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_incidents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nursing_incidents_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nursing_procedures: {
         Row: {
           created_at: string | null
@@ -689,6 +755,7 @@ export type Database = {
           patient_id: string
           procedure_date: string
           procedure_type: string
+          sector: string | null
           updated_at: string | null
         }
         Insert: {
@@ -702,6 +769,7 @@ export type Database = {
           patient_id: string
           procedure_date?: string
           procedure_type: string
+          sector?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -715,6 +783,7 @@ export type Database = {
           patient_id?: string
           procedure_date?: string
           procedure_type?: string
+          sector?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -734,6 +803,59 @@ export type Database = {
           },
         ]
       }
+      nursing_technicians: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          organization_id: string | null
+          phone: string | null
+          registration_number: string
+          sector: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          registration_number: string
+          sector?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string | null
+          phone?: string | null
+          registration_number?: string
+          sector?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nursing_technicians_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nursing_vital_signs: {
         Row: {
           blood_pressure_diastolic: number | null
@@ -749,6 +871,7 @@ export type Database = {
           pain_scale: number | null
           patient_id: string
           respiratory_rate: number | null
+          sector: string | null
           temperature: number | null
           updated_at: string | null
         }
@@ -766,6 +889,7 @@ export type Database = {
           pain_scale?: number | null
           patient_id: string
           respiratory_rate?: number | null
+          sector?: string | null
           temperature?: number | null
           updated_at?: string | null
         }
@@ -783,6 +907,7 @@ export type Database = {
           pain_scale?: number | null
           patient_id?: string
           respiratory_rate?: number | null
+          sector?: string | null
           temperature?: number | null
           updated_at?: string | null
         }
