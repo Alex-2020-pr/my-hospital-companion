@@ -43,6 +43,7 @@ import NursingVitalSigns from "./pages/NursingVitalSigns";
 import NursingVitalSignsMobile from "./pages/NursingVitalSignsMobile";
 import NursingEvolution from "./pages/NursingEvolution";
 import NursingProcedures from "./pages/NursingProcedures";
+import NursingIncidents from "./pages/NursingIncidents";
 import NursingPatientHistory from "./pages/NursingPatientHistory";
 
 const queryClient = new QueryClient();
@@ -91,6 +92,7 @@ const App = () => (
           <Route path="/nursing/vital-signs" element={<ProtectedRoute><NursingVitalSignsMobile /></ProtectedRoute>} />
           <Route path="/nursing/evolution" element={<ProtectedRoute><NursingEvolution /></ProtectedRoute>} />
           <Route path="/nursing/procedures" element={<ProtectedRoute><NursingProcedures /></ProtectedRoute>} />
+          <Route path="/nursing/incidents" element={<ProtectedRoute><NursingIncidents /></ProtectedRoute>} />
           <Route path="/nursing/patient/:patientId" element={<ProtectedRoute><NursingPatientHistory /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
