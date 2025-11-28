@@ -197,7 +197,7 @@ export default function NursingDashboard() {
         {/* Ações Rápidas */}
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4">Ações Rápidas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Button 
               size="lg" 
               className="h-auto py-4 flex flex-col gap-2"
@@ -223,6 +223,15 @@ export default function NursingDashboard() {
             >
               <ClipboardList className="h-6 w-6" />
               <span>Registrar Procedimento</span>
+            </Button>
+            <Button 
+              size="lg" 
+              variant="destructive"
+              className="h-auto py-4 flex flex-col gap-2"
+              onClick={() => navigate('/nursing/incidents')}
+            >
+              <AlertCircle className="h-6 w-6" />
+              <span>Registrar Intercorrência</span>
             </Button>
           </div>
         </Card>
