@@ -1,9 +1,10 @@
 import { useUserRole } from './useUserRole';
 
 export const useNurseRole = () => {
-  const { roles, loading } = useUserRole();
+  const { roles, loading, isSuperAdmin } = useUserRole();
   
-  const isNurse = roles.some(r => r.role === 'nurse' || r.role === 'nursing_tech');
+  // Super admin pode acessar tudo, incluindo módulo de enfermagem
+  const isNurse = isSuperAdmin || roles.some(r => r.role === 'nurse' || r.role === 'nursing_tech');
   const isNurseOnly = roles.some(r => r.role === 'nurse');
   const isTechOnly = roles.some(r => r.role === 'nursing_tech');
   
@@ -11,6 +12,7 @@ export const useNurseRole = () => {
     isNurse,
     isNurseOnly,
     isTechOnly,
+    isSuperAdmin,
     loading
   };
 };
