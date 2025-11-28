@@ -3,9 +3,13 @@ import { Activity, Heart, FileText, Clock, AlertCircle, ChevronRight } from "luc
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { NursingAlertBadge } from "@/components/NursingAlertBadge";
+import { NursingAlertCard } from "@/components/NursingAlertCard";
+import { useNursingAlerts } from "@/hooks/useNursingAlerts";
 
 const NursingDashboardMobile = () => {
   const navigate = useNavigate();
+  const { activeAlerts, resolveAlert } = useNursingAlerts();
 
   const patients = [
     {
@@ -34,17 +38,23 @@ const NursingDashboardMobile = () => {
     }
   ];
 
-  const alerts = [
-    { id: 1, patient: "João da Silva", message: "Dor 7/10 às 14h", severity: "medium" },
-    { id: 2, patient: "Maria Santos", message: "PA elevada", severity: "medium" }
-  ];
-
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 shadow-lg">
-        <h1 className="text-2xl font-bold mb-1">Enfermagem</h1>
-        <p className="text-sm opacity-90">Dashboard</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-1">Enfermagem</h1>
+            <p className="text-sm opacity-90">Dashboard</p>
+          </div>
+          <div className="text-primary-foreground">
+            <NursingAlertBadge 
+              alerts={activeAlerts} 
+              onResolve={resolveAlert}
+              onView={(id) => navigate('/nursing/history-mobile')}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
@@ -57,7 +67,7 @@ const NursingDashboardMobile = () => {
         </Card>
         <Card className="bg-card">
           <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-orange-500 mb-1">2</div>
+            <div className="text-3xl font-bold text-orange-500 mb-1">{activeAlerts.length}</div>
             <div className="text-xs text-muted-foreground">Alertas</div>
           </CardContent>
         </Card>
@@ -93,23 +103,20 @@ const NursingDashboardMobile = () => {
       </div>
 
       {/* Alerts */}
-      {alerts.length > 0 && (
+      {activeAlerts.length > 0 && (
         <div className="px-4 mb-6">
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-orange-500" />
             Alertas Ativos
           </h2>
-          <div className="space-y-2">
-            {alerts.map((alert) => (
-              <Card key={alert.id} className="bg-orange-50 border-orange-200">
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{alert.patient}</div>
-                    <div className="text-xs text-muted-foreground">{alert.message}</div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </CardContent>
-              </Card>
+          <div className="space-y-3">
+            {activeAlerts.slice(0, 2).map((alert) => (
+              <NursingAlertCard
+                key={alert.id}
+                alert={alert}
+                onResolve={resolveAlert}
+                onView={(id) => navigate('/nursing/history-mobile')}
+              />
             ))}
           </div>
         </div>
