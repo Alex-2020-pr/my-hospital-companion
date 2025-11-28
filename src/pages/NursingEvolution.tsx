@@ -84,6 +84,7 @@ export default function NursingEvolution() {
           { id: 'demo-2', full_name: 'Maria Santos', bed_number: '205' },
           { id: 'demo-3', full_name: 'Carlos Oliveira', bed_number: '208' }
         ]);
+        setNurseId('demo-nurse-id');
         return;
       }
       

@@ -59,7 +59,13 @@ export default function NursingVitalSigns() {
         .single();
 
       if (!nurseData) {
-        toast.error('Enfermeiro não encontrado');
+        // Dados de exemplo para demonstração
+        setPatients([
+          { id: 'demo-1', full_name: 'João da Silva', bed_number: '203' },
+          { id: 'demo-2', full_name: 'Maria Santos', bed_number: '205' },
+          { id: 'demo-3', full_name: 'Carlos Oliveira', bed_number: '208' }
+        ]);
+        setNurseId('demo-nurse-id');
         return;
       }
 
