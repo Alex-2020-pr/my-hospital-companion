@@ -36,24 +36,7 @@ export function NursingMenu() {
         <DropdownMenuItem asChild>
           <Link to="/nursing/dashboard-mobile" className="flex items-center cursor-pointer">
             <Users className="h-4 w-4 mr-2" />
-            Home - Dashboard Mobile
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
-          Dashboards
-        </DropdownMenuLabel>
-        <DropdownMenuItem asChild>
-          <Link to="/nursing" className="flex items-center cursor-pointer">
-            <Users className="h-4 w-4 mr-2" />
-            Dashboard de Plantão
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/nursing/dashboard-mobile" className="flex items-center cursor-pointer">
-            <Smartphone className="h-4 w-4 mr-2" />
-            Dashboard Mobile
+            Home
           </Link>
         </DropdownMenuItem>
         
@@ -68,21 +51,9 @@ export function NursingMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/nursing/vital-signs-mobile" className="flex items-center cursor-pointer">
-            <Activity className="h-4 w-4 mr-2" />
-            Sinais Vitais (Mobile)
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link to="/nursing/evolution" className="flex items-center cursor-pointer">
             <FileText className="h-4 w-4 mr-2" />
             Evolução de Enfermagem
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/nursing/evolution-mobile" className="flex items-center cursor-pointer">
-            <FileText className="h-4 w-4 mr-2" />
-            Evolução (Mobile)
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -103,9 +74,9 @@ export function NursingMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/nursing/history-mobile" className="flex items-center cursor-pointer">
-            <History className="h-4 w-4 mr-2" />
-            Histórico do Paciente
+          <Link to="/nursing" className="flex items-center cursor-pointer">
+            <ClipboardList className="h-4 w-4 mr-2" />
+            Dashboard de Plantão
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
