@@ -12,7 +12,7 @@ const NursingDashboardMobile = () => {
       id: 1,
       name: "João da Silva",
       bed: "203",
-      lastVitals: "120/80 mmHg",
+      lastVitals: "120/80 mmHg • FC 78 • SpO2 98%",
       status: "stable",
       time: "10:30"
     },
@@ -20,7 +20,7 @@ const NursingDashboardMobile = () => {
       id: 2,
       name: "Maria Santos",
       bed: "205",
-      lastVitals: "135/90 mmHg",
+      lastVitals: "135/90 mmHg • FC 82 • SpO2 96%",
       status: "attention",
       time: "09:15"
     },
@@ -28,15 +28,15 @@ const NursingDashboardMobile = () => {
       id: 3,
       name: "Carlos Oliveira",
       bed: "208",
-      lastVitals: "115/75 mmHg",
+      lastVitals: "115/75 mmHg • FC 72 • SpO2 99%",
       status: "stable",
       time: "11:00"
     }
   ];
 
   const alerts = [
-    { id: 1, patient: "Maria Santos", message: "PA elevada", severity: "medium" },
-    { id: 2, patient: "João da Silva", message: "Horário de medicação", severity: "low" }
+    { id: 1, patient: "João da Silva", message: "Dor 7/10 às 14h", severity: "medium" },
+    { id: 2, patient: "Maria Santos", message: "PA elevada", severity: "medium" }
   ];
 
   return (

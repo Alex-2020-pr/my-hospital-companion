@@ -18,12 +18,12 @@ const NursingVitalSignsMobile = () => {
   });
 
   const [vitals, setVitals] = useState({
-    temperature: "",
-    systolic: "",
-    diastolic: "",
-    heartRate: "",
-    respiratory: "",
-    saturation: ""
+    temperature: "36.7",
+    systolic: "120",
+    diastolic: "80",
+    heartRate: "78",
+    respiratory: "16",
+    saturation: "98"
   });
 
   const handleSave = () => {

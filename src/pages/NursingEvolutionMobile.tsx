@@ -25,11 +25,11 @@ const NursingEvolutionMobile = () => {
   });
 
   const [evolution, setEvolution] = useState({
-    type: "",
-    subjective: "",
-    objective: "",
-    assessment: "",
-    plan: ""
+    type: "daily",
+    subjective: "Paciente sem queixas no momento.",
+    objective: "Temp 36.7°C, PA 120/80 mmHg, FC 78 bpm, SpO2 98%. Ferida limpa e seca.",
+    assessment: "Paciente consciente, orientado, sem queixas. Evolução satisfatória.",
+    plan: "Manter cuidados, controlar sinais vitais 6/6h, curativo conforme rotina."
   });
 
   const handleSave = () => {
