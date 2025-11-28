@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { NursingAlertBadge } from "@/components/NursingAlertBadge";
 import { NursingAlertCard } from "@/components/NursingAlertCard";
 import { useNursingAlerts } from "@/hooks/useNursingAlerts";
+import { NursingMenu } from "@/components/NursingMenu";
 
 const NursingDashboardMobile = () => {
   const navigate = useNavigate();
@@ -47,12 +48,13 @@ const NursingDashboardMobile = () => {
             <h1 className="text-2xl font-bold mb-1">Enfermagem</h1>
             <p className="text-sm opacity-90">Dashboard</p>
           </div>
-          <div className="text-primary-foreground">
+          <div className="flex items-center gap-2 text-primary-foreground">
             <NursingAlertBadge 
               alerts={activeAlerts} 
               onResolve={resolveAlert}
               onView={(id) => navigate('/nursing/history-mobile')}
             />
+            <NursingMenu />
           </div>
         </div>
       </div>

@@ -33,6 +33,14 @@ export function NursingMenu() {
         <DropdownMenuLabel>Módulo de Enfermagem</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
+        <DropdownMenuItem asChild>
+          <Link to="/nursing/dashboard-mobile" className="flex items-center cursor-pointer">
+            <Users className="h-4 w-4 mr-2" />
+            Home - Dashboard Mobile
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">
           Dashboards
         </DropdownMenuLabel>
