@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { Search, UserCircle, Phone, Mail, MapPin } from "lucide-react";
+import { Search, UserCircle, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Patient {
@@ -185,6 +185,19 @@ export const DoctorPatients = () => {
   return (
     <Layout title="Meus Pacientes">
       <div className="p-4 space-y-6">
+        {/* Back button */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/medico-dashboard')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Meus Pacientes</h1>
+            <p className="text-muted-foreground">
+              Selecione um paciente para ver o prontuário
+            </p>
+          </div>
+        </div>
+
         {/* Header com busca */}
         <Card>
           <CardHeader>

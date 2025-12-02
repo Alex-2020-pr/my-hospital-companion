@@ -2,59 +2,59 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useOrganizationBySlug } from "@/hooks/useOrganizationBySlug";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { roles, loading: rolesLoading } = useUserRole();
-  const { organization, loading: orgLoading } = useOrganizationBySlug();
+  const { roles, loading: rolesLoading, isSuperAdmin } = useUserRole();
 
   useEffect(() => {
     const redirectUser = () => {
-      // Se ainda está carregando, aguardar
-      if (authLoading || orgLoading || rolesLoading) {
-        console.log('Index: ainda carregando...', { authLoading, orgLoading, rolesLoading });
-        return;
-      }
+      if (authLoading || rolesLoading) return;
 
-      // Se usuário não autenticado, redirecionar para login
       if (!user) {
-        console.log('Index: sem usuário, indo para /auth');
         navigate("/auth");
         return;
       }
 
-      // Verificar roles com ordem de prioridade
       const userRoles = roles.map(r => r.role);
-      console.log('Index: roles do usuário:', userRoles);
-
-      const hasSuperAdmin = userRoles.includes('super_admin');
-      const hasHospitalAdmin = userRoles.includes('hospital_admin');
+      const hasPatient = userRoles.includes('patient');
       const hasDoctor = userRoles.includes('doctor');
       const hasNurse = userRoles.includes('nurse') || userRoles.includes('nursing_tech');
-      const hasPatient = userRoles.includes('patient');
-      
-      // Prioridade: hospital_admin > nurse-only > doctor-only > paciente/geral
-      // Super admin vai para dashboard para ver exemplos
-      if (hasHospitalAdmin && !hasSuperAdmin) {
-        console.log('Index: redirecionando para /hospital');
+      const hasHospitalAdmin = userRoles.includes('hospital_admin');
+
+      // Super admin always goes to portal selection
+      if (isSuperAdmin) {
+        navigate("/portal");
+        return;
+      }
+
+      // Count how many distinct portal types the user has access to
+      const portalCount = [hasPatient, hasDoctor, hasNurse, hasHospitalAdmin].filter(Boolean).length;
+
+      // If user has multiple roles, show portal selection
+      if (portalCount > 1) {
+        navigate("/portal");
+        return;
+      }
+
+      // Single role - redirect directly to appropriate portal
+      if (hasHospitalAdmin) {
         navigate("/hospital");
-      } else if (hasNurse && !hasPatient && !hasDoctor && !hasSuperAdmin) {
-        console.log('Index: redirecionando para /nursing/dashboard-mobile (apenas enfermeiro)');
+      } else if (hasNurse) {
         navigate("/nursing/dashboard-mobile");
-      } else if (hasDoctor && !hasPatient && !hasSuperAdmin) {
-        console.log('Index: redirecionando para /medico-dashboard (apenas médico)');
+      } else if (hasDoctor) {
         navigate("/medico-dashboard");
-      } else {
-        console.log('Index: redirecionando para /dashboard (padrão/paciente/super admin)');
-        // Paciente, role padrão ou super admin (para ver exemplos)
+      } else if (hasPatient) {
         navigate("/dashboard");
+      } else {
+        // No recognized role - show portal selection (will show no access message)
+        navigate("/portal");
       }
     };
 
     redirectUser();
-  }, [user, authLoading, orgLoading, rolesLoading, roles, navigate]);
+  }, [user, authLoading, rolesLoading, roles, isSuperAdmin, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

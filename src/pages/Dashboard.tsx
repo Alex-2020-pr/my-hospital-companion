@@ -17,7 +17,8 @@ import {
   Activity,
   Pill,
   Video,
-  MessageSquare
+  MessageSquare,
+  Home
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/medical-hero.jpg";
@@ -459,6 +460,18 @@ export const Dashboard = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Botão para voltar ao Portal */}
+        <div className="text-center py-4">
+          <Button 
+            variant="ghost" 
+            className="text-muted-foreground"
+            onClick={() => navigate('/portal')}
+          >
+            <Home className="h-4 w-4 mr-2" />
+            Voltar ao Portal
+          </Button>
+        </div>
       </div>
     </Layout>
   );

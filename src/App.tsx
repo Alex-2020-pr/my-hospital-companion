@@ -17,6 +17,7 @@ import Index from "./pages/Index";
 import IntegrationConsents from "./pages/IntegrationConsents";
 import { Auth } from "./pages/Auth";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { ApiDocs } from "./pages/ApiDocs";
 import { TokenGenerator } from "./pages/TokenGenerator";
@@ -47,6 +48,7 @@ import NursingIncidents from "./pages/NursingIncidents";
 import NursingEvolutionMobile from "./pages/NursingEvolutionMobile";
 import NursingHistoryMobile from "./pages/NursingHistoryMobile";
 import NursingPatientHistory from "./pages/NursingPatientHistory";
+import PortalSelection from "./pages/PortalSelection";
 
 const queryClient = new QueryClient();
 
@@ -58,49 +60,199 @@ const App = () => (
       <UpdateNotification />
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/setup" element={<AdminSetup />} />
+          
+          {/* Portal Selection */}
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/consultas" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
-          <Route path="/exames" element={<ProtectedRoute><Exams /></ProtectedRoute>} />
-          <Route path="/documentos" element={<ProtectedRoute><Documents /></ProtectedRoute>} />
-          <Route path="/contato" element={<ProtectedRoute><Communication /></ProtectedRoute>} />
+          <Route path="/portal" element={<ProtectedRoute><PortalSelection /></ProtectedRoute>} />
+          
+          {/* Patient Portal Routes */}
+          <Route path="/dashboard" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Dashboard />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/consultas" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Appointments />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/exames" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Exams />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/documentos" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Documents />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/contato" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Communication />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/sinais-vitais" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <VitalSigns />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/medicamentos" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Medications />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/telemedicina" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <Telemedicine />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/integracoes" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <IntegrationConsents />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/health-chat" element={
+            <RoleProtectedRoute allowedRoles={['patient']}>
+              <HealthChat />
+            </RoleProtectedRoute>
+          } />
+          
+          {/* Doctor Portal Routes */}
+          <Route path="/medico-dashboard" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorDashboard />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/doctor/patients" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorPatients />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/doctor/patient/:patientId" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorPatientDetail />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/paciente/:id" element={
+            <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'nursing_tech']}>
+              <PatientRecord />
+            </RoleProtectedRoute>
+          } />
+          
+          {/* Nursing Portal Routes */}
+          <Route path="/nursing" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingDashboardMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/dashboard-mobile" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingDashboardMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/vital-signs" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingVitalSignsMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/vital-signs-mobile" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingVitalSignsMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/evolution" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingEvolution />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/evolution-mobile" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingEvolutionMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/procedures" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingProcedures />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/incidents" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingIncidents />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/history-mobile" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingHistoryMobile />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/patient/:patientId" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingPatientHistory />
+            </RoleProtectedRoute>
+          } />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={
+            <RoleProtectedRoute allowedRoles={['super_admin', 'hospital_admin']}>
+              <AdminDashboard />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <RoleProtectedRoute allowedRoles={['super_admin', 'hospital_admin']}>
+              <AdminUsers />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/organizations" element={
+            <RoleProtectedRoute allowedRoles={['super_admin']}>
+              <AdminOrganizations />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/partners" element={
+            <RoleProtectedRoute allowedRoles={['super_admin']}>
+              <AdminPartners />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/push-notifications" element={
+            <RoleProtectedRoute allowedRoles={['super_admin']}>
+              <AdminPushNotifications />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/costs" element={
+            <RoleProtectedRoute allowedRoles={['super_admin']}>
+              <AdminCosts />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/storage" element={
+            <RoleProtectedRoute allowedRoles={['super_admin']}>
+              <AdminStorageManagement />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/admin/doctors" element={
+            <RoleProtectedRoute allowedRoles={['super_admin', 'hospital_admin']}>
+              <AdminDoctors />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/hospital" element={
+            <RoleProtectedRoute allowedRoles={['hospital_admin']}>
+              <HospitalPanel />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/hospital/messaging" element={
+            <RoleProtectedRoute allowedRoles={['hospital_admin']}>
+              <HospitalMessaging />
+            </RoleProtectedRoute>
+          } />
+          
+          {/* Shared Routes (require authentication but no specific role) */}
           <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/sinais-vitais" element={<ProtectedRoute><VitalSigns /></ProtectedRoute>} />
-          <Route path="/medicamentos" element={<ProtectedRoute><Medications /></ProtectedRoute>} />
-          <Route path="/telemedicina" element={<ProtectedRoute><Telemedicine /></ProtectedRoute>} />
-          <Route path="/integracoes" element={<ProtectedRoute><IntegrationConsents /></ProtectedRoute>} />
           <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
           <Route path="/token-generator" element={<ProtectedRoute><TokenGenerator /></ProtectedRoute>} />
           <Route path="/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
-          <Route path="/medico-dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
-          <Route path="/admin/organizations" element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>} />
-          <Route path="/admin/partners" element={<ProtectedRoute><AdminPartners /></ProtectedRoute>} />
-          <Route path="/admin/push-notifications" element={<ProtectedRoute><AdminPushNotifications /></ProtectedRoute>} />
-          <Route path="/admin/costs" element={<ProtectedRoute><AdminCosts /></ProtectedRoute>} />
-          <Route path="/admin/storage" element={<ProtectedRoute><AdminStorageManagement /></ProtectedRoute>} />
-          <Route path="/admin/doctors" element={<ProtectedRoute><AdminDoctors /></ProtectedRoute>} />
-          <Route path="/hospital" element={<ProtectedRoute><HospitalPanel /></ProtectedRoute>} />
-          <Route path="/paciente/:id" element={<ProtectedRoute><PatientRecord /></ProtectedRoute>} />
-          <Route path="/hospital/messaging" element={<ProtectedRoute><HospitalMessaging /></ProtectedRoute>} />
-          <Route path="/medico-dashboard" element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
-          <Route path="/doctor/patients" element={<ProtectedRoute><DoctorPatients /></ProtectedRoute>} />
-          <Route path="/doctor/patient/:patientId" element={<ProtectedRoute><DoctorPatientDetail /></ProtectedRoute>} />
-          <Route path="/health-chat" element={<ProtectedRoute><HealthChat /></ProtectedRoute>} />
-          <Route path="/nursing" element={<ProtectedRoute><NursingDashboardMobile /></ProtectedRoute>} />
-          <Route path="/nursing/vital-signs" element={<ProtectedRoute><NursingVitalSignsMobile /></ProtectedRoute>} />
-          <Route path="/nursing/evolution" element={<ProtectedRoute><NursingEvolution /></ProtectedRoute>} />
-          <Route path="/nursing/procedures" element={<ProtectedRoute><NursingProcedures /></ProtectedRoute>} />
-            <Route path="/nursing/incidents" element={<ProtectedRoute><NursingIncidents /></ProtectedRoute>} />
-            <Route path="/nursing/dashboard-mobile" element={<ProtectedRoute><NursingDashboardMobile /></ProtectedRoute>} />
-            <Route path="/nursing/vital-signs-mobile" element={<ProtectedRoute><NursingVitalSignsMobile /></ProtectedRoute>} />
-            <Route path="/nursing/evolution-mobile" element={<ProtectedRoute><NursingEvolutionMobile /></ProtectedRoute>} />
-            <Route path="/nursing/history-mobile" element={<ProtectedRoute><NursingHistoryMobile /></ProtectedRoute>} />
-          <Route path="/nursing/patient/:patientId" element={<ProtectedRoute><NursingPatientHistory /></ProtectedRoute>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

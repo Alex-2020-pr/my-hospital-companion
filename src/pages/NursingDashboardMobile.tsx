@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, Heart, FileText, Clock, AlertCircle, ChevronRight, Users, Clipboard } from "lucide-react";
+import { Activity, Heart, FileText, Clock, AlertCircle, ChevronRight, Users, Clipboard, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -163,6 +163,18 @@ const NursingDashboardMobile = () => {
             </Card>
           ))}
         </div>
+      </div>
+
+      {/* Botão para voltar ao Portal */}
+      <div className="text-center py-6 px-4">
+        <Button 
+          variant="ghost" 
+          className="text-muted-foreground"
+          onClick={() => navigate('/portal')}
+        >
+          <Home className="h-4 w-4 mr-2" />
+          Voltar ao Portal
+        </Button>
       </div>
     </div>
   );
