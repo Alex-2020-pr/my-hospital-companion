@@ -40,7 +40,14 @@ export const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // Redirect based on selected portal
+      const selectedPortal = localStorage.getItem('selectedPortal');
+      if (selectedPortal) {
+        localStorage.removeItem('selectedPortal');
+        navigate('/'); // Index will handle the redirect based on roles
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
