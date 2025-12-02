@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,9 @@ import {
   AlertCircle, 
   Clock,
   MapPin,
-  TrendingUp
+  TrendingUp,
+  Users,
+  Home
 } from "lucide-react";
 
 // DADOS DE EXEMPLO (não conectados ao banco)
@@ -54,6 +57,7 @@ const ALERTAS_CLINICOS = [
 ];
 
 export default function DoctorDashboard() {
+  const navigate = useNavigate();
   const [onDuty, setOnDuty] = useState(DOCTOR_DATA.onDuty);
 
   const getPriorityColor = (priority: string) => {
@@ -216,6 +220,14 @@ export default function DoctorDashboard() {
               <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
+                  className="h-20 flex-col gap-2 hover:bg-primary hover:text-primary-foreground"
+                  onClick={() => navigate('/doctor/patients')}
+                >
+                  <Users className="h-6 w-6" />
+                  <span className="text-xs">Meus Pacientes</span>
+                </Button>
+                <Button 
+                  variant="outline" 
                   className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
                 >
                   <Video className="h-6 w-6" />
@@ -235,16 +247,21 @@ export default function DoctorDashboard() {
                   <FileText className="h-6 w-6" />
                   <span className="text-xs">Novo Laudo</span>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="h-20 flex-col gap-2 hover:bg-green-500 hover:text-white hover:border-green-500"
-                >
-                  <MessageSquare className="h-6 w-6" />
-                  <span className="text-xs">Chat Equipe</span>
-                </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Botão para voltar ao Portal */}
+          <div className="text-center pt-4">
+            <Button 
+              variant="ghost" 
+              className="text-muted-foreground"
+              onClick={() => navigate('/portal')}
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Voltar ao Portal
+            </Button>
+          </div>
         </div>
       </div>
     </Layout>
