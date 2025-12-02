@@ -49,6 +49,7 @@ import NursingEvolutionMobile from "./pages/NursingEvolutionMobile";
 import NursingHistoryMobile from "./pages/NursingHistoryMobile";
 import NursingPatientHistory from "./pages/NursingPatientHistory";
 import PortalSelection from "./pages/PortalSelection";
+import LandingPortal from "./pages/LandingPortal";
 
 const queryClient = new QueryClient();
 
@@ -61,10 +62,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
+          <Route path="/welcome" element={<LandingPortal />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/setup" element={<AdminSetup />} />
           
-          {/* Portal Selection */}
+          {/* Portal Selection (after login) */}
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/portal" element={<ProtectedRoute><PortalSelection /></ProtectedRoute>} />
           

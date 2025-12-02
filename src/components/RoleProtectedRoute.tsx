@@ -23,7 +23,7 @@ export const RoleProtectedRoute = ({
     if (authLoading || rolesLoading) return;
 
     if (!user) {
-      navigate("/auth");
+      navigate("/welcome");
       return;
     }
 
