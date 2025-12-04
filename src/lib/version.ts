@@ -3,8 +3,8 @@ import { formatBrazilDate, nowInBrazil } from './timezone';
 // Auto-generated build version
 // IMPORTANTE: Usar sempre horário de Brasília (America/Sao_Paulo)
 export const BUILD_VERSION = {
-  date: '2025-02-04',
-  time: '02:30',
+  date: '2025-12-04',
+  time: '10:30',
   timezone: 'America/Sao_Paulo (Brasília)',
   version: '1.0.1'
 };
