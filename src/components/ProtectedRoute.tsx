@@ -8,7 +8,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/welcome");
+      navigate("/");
     }
   }, [user, loading, navigate]);
 

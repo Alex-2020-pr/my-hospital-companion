@@ -15,7 +15,7 @@ const Index = () => {
 
       if (!user) {
         // Not logged in - go to landing portal selection
-        navigate("/welcome");
+        navigate("/");
         return;
       }
 

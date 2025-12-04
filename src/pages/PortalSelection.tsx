@@ -24,7 +24,7 @@ const PortalSelection = () => {
   }
 
   if (!user) {
-    navigate("/welcome");
+    navigate("/");
     return null;
   }
 
