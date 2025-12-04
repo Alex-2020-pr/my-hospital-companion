@@ -1,14 +1,33 @@
-import { Home, Calendar, FileText, MessageCircle, User, Stethoscope, Pill, Video, Shield, Activity } from "lucide-react";
+import { Home, Calendar, FileText, User, Stethoscope, Pill, Activity, Users, ClipboardList, Heart } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNurseRole } from "@/hooks/useNurseRole";
 
-const baseNavigationItems = [
+// Navegação para Pacientes
+const patientNavigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/' },
   { id: 'appointments', label: 'Consultas', icon: Calendar, path: '/consultas' },
   { id: 'exams', label: 'Exames', icon: Stethoscope, path: '/exames' },
-  { id: 'documents', label: 'Documentos', icon: FileText, path: '/documentos' },
+  { id: 'medications', label: 'Medicações', icon: Pill, path: '/medicamentos' },
+  { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
+];
+
+// Navegação para Médicos
+const doctorNavigationItems = [
+  { id: 'home', label: 'Início', icon: Home, path: '/medico-dashboard' },
+  { id: 'patients', label: 'Pacientes', icon: Users, path: '/doctor/patients' },
+  { id: 'appointments', label: 'Agenda', icon: Calendar, path: '/consultas' },
+  { id: 'exams', label: 'Exames', icon: ClipboardList, path: '/exames' },
+  { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
+];
+
+// Navegação para Enfermagem
+const nursingNavigationItems = [
+  { id: 'home', label: 'Início', icon: Home, path: '/nursing/dashboard-mobile' },
+  { id: 'patients', label: 'Pacientes', icon: Users, path: '/nursing' },
+  { id: 'vitals', label: 'Sinais Vitais', icon: Heart, path: '/nursing/vital-signs-mobile' },
+  { id: 'evolution', label: 'Evolução', icon: FileText, path: '/nursing/evolution-mobile' },
   { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
 ];
 
@@ -18,21 +37,35 @@ export const BottomNavigation = () => {
   const { isDoctor } = useUserRole();
   const { isNurse } = useNurseRole();
 
-  const navigationItems = [
-    ...baseNavigationItems,
-    ...(isDoctor
-      ? [{ id: 'doctor', label: 'Médico', icon: Stethoscope, path: '/doctor/patients' }]
-      : []),
-    ...(isNurse
-      ? [{ id: 'nursing', label: 'Enfermagem', icon: Activity, path: '/nursing' }]
-      : [])
-  ];
+  // Determinar qual conjunto de navegação usar baseado no role
+  let navigationItems = patientNavigationItems;
+  
+  if (isDoctor) {
+    navigationItems = doctorNavigationItems;
+  } else if (isNurse) {
+    navigationItems = nursingNavigationItems;
+  }
+
+  // Verificar se estamos em uma rota específica de médico ou enfermagem
+  const isDoctorRoute = location.pathname.startsWith('/doctor') || 
+                        location.pathname.startsWith('/medico') || 
+                        location.pathname.startsWith('/paciente/');
+  const isNursingRoute = location.pathname.startsWith('/nursing');
+
+  // Ajustar navegação baseado na rota atual
+  if (isDoctorRoute && !isNurse) {
+    navigationItems = doctorNavigationItems;
+  } else if (isNursingRoute) {
+    navigationItems = nursingNavigationItems;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 pb-safe">
       <div className="flex items-center justify-around px-2 py-2">
         {navigationItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          // Verificar se a rota está ativa (considerando sub-rotas)
+          const isActive = location.pathname === item.path || 
+                          (item.path !== '/' && location.pathname.startsWith(item.path));
           const Icon = item.icon;
           
           return (

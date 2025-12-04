@@ -26,16 +26,27 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Stethoscope
+  Stethoscope,
+  ClipboardList,
+  UserCheck,
+  HeartPulse,
+  Brain,
+  Clipboard,
+  Phone,
+  History,
+  FolderOpen,
+  HelpCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDoctorDutyMode } from "@/hooks/useDoctorDutyMode";
 
 // DADOS DE EXEMPLO - notificações por funcionalidade
 const NOTIFICATIONS = {
-  agenda: 2,
-  chat: 1,
-  alertas: 3
+  agenda: 3,
+  chat: 2,
+  alertas: 5,
+  prescricoes: 1,
+  interconsultas: 2
 };
 
 interface MenuItem {
@@ -45,6 +56,7 @@ interface MenuItem {
   icon: any;
   path?: string;
   notifications?: number;
+  isNew?: boolean;
 }
 
 interface MenuSection {
@@ -54,53 +66,69 @@ interface MenuSection {
 
 const MENU_SECTIONS: MenuSection[] = [
   {
-    title: "CLÍNICO",
+    title: "ATENDIMENTO",
     items: [
       {
-        id: "painel-mvp",
-        label: "Dashboard MVP",
-        description: "Painel demonstrativo",
+        id: "painel",
+        label: "Dashboard",
+        description: "Visão geral do plantão",
         icon: LayoutDashboard,
         path: "/medico-dashboard"
       },
       {
         id: "pacientes",
         label: "Meus Pacientes",
-        description: "Lista e prontuários",
+        description: "Lista de pacientes internados",
         icon: Users,
         path: "/doctor/patients"
-      },
-      {
-        id: "ficha-exemplo",
-        label: "Ficha do Paciente",
-        description: "Exemplo de prontuário",
-        icon: FileText,
-        path: "/paciente/p1"
       },
       {
         id: "agenda",
         label: "Agenda",
         description: "Consultas e compromissos",
         icon: Calendar,
-        notifications: NOTIFICATIONS.agenda
+        notifications: NOTIFICATIONS.agenda,
+        path: "/consultas"
       },
       {
-        id: "prontuario",
-        label: "Prontuário",
-        description: "Registro médico completo",
-        icon: FileText
-      },
+        id: "ficha-exemplo",
+        label: "Prontuário Eletrônico",
+        description: "Exemplo de ficha completa",
+        icon: FileText,
+        path: "/paciente/exemplo-1"
+      }
+    ]
+  },
+  {
+    title: "PRESCRIÇÃO E EXAMES",
+    items: [
       {
         id: "prescricao",
         label: "Prescrição Digital",
         description: "Receitas e medicamentos",
-        icon: Pill
+        icon: Pill,
+        notifications: NOTIFICATIONS.prescricoes
       },
       {
         id: "exames",
-        label: "Exames/Imagens (PACS)",
-        description: "Resultados e diagnósticos",
-        icon: Image
+        label: "Solicitação de Exames",
+        description: "Pedir exames laboratoriais e imagem",
+        icon: ClipboardList,
+        path: "/exames"
+      },
+      {
+        id: "pacs",
+        label: "Visualizador PACS",
+        description: "Imagens e laudos",
+        icon: Image,
+        isNew: true
+      },
+      {
+        id: "resultados",
+        label: "Resultados",
+        description: "Exames e laudos disponíveis",
+        icon: FolderOpen,
+        path: "/exames"
       }
     ]
   },
@@ -111,21 +139,35 @@ const MENU_SECTIONS: MenuSection[] = [
         id: "teleconsulta",
         label: "Teleconsulta",
         description: "Atendimento por vídeo",
-        icon: Video
+        icon: Video,
+        path: "/telemedicina"
+      },
+      {
+        id: "interconsulta",
+        label: "Interconsultas",
+        description: "Solicitações entre especialidades",
+        icon: UserCheck,
+        notifications: NOTIFICATIONS.interconsultas
       },
       {
         id: "chat",
-        label: "Chat Equipe",
-        description: "Mensagens internas",
+        label: "Chat da Equipe",
+        description: "Mensagens com enfermagem e equipe",
         icon: MessageSquare,
         notifications: NOTIFICATIONS.chat
       },
       {
         id: "alertas",
-        label: "Alertas",
-        description: "Notificações clínicas",
+        label: "Alertas Clínicos",
+        description: "Notificações de pacientes críticos",
         icon: Bell,
         notifications: NOTIFICATIONS.alertas
+      },
+      {
+        id: "chamada-enfermagem",
+        label: "Chamar Enfermagem",
+        description: "Solicitar equipe de enfermagem",
+        icon: Phone
       }
     ]
   },
@@ -134,32 +176,52 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       {
         id: "plantoes",
-        label: "Plantões",
-        description: "Escalas e horários",
+        label: "Escala de Plantões",
+        description: "Gerenciar escalas e horários",
         icon: Clock
       },
       {
         id: "protocolos",
-        label: "Protocolos/Guias",
-        description: "Diretrizes clínicas",
+        label: "Protocolos Clínicos",
+        description: "Diretrizes e guidelines",
         icon: BookOpen
       },
       {
+        id: "calculadoras",
+        label: "Calculadoras Médicas",
+        description: "Scores e cálculos clínicos",
+        icon: Brain,
+        isNew: true
+      },
+      {
+        id: "historico",
+        label: "Histórico de Atendimentos",
+        description: "Pacientes atendidos anteriormente",
+        icon: History
+      },
+      {
         id: "relatorios",
-        label: "Relatórios Pessoais",
-        description: "Estatísticas e métricas",
+        label: "Relatórios e Estatísticas",
+        description: "Métricas de produtividade",
         icon: BarChart3
       }
     ]
   },
   {
-    title: "ADMIN",
+    title: "CONFIGURAÇÕES",
     items: [
       {
         id: "configuracoes",
         label: "Configurações",
         description: "Preferências do sistema",
-        icon: Settings
+        icon: Settings,
+        path: "/perfil"
+      },
+      {
+        id: "ajuda",
+        label: "Ajuda e Suporte",
+        description: "Central de ajuda",
+        icon: HelpCircle
       }
     ]
   }
@@ -187,11 +249,18 @@ export const DoctorMenu = ({}: DoctorMenuProps) => {
     navigate("/auth");
   };
 
+  const totalNotifications = Object.values(NOTIFICATIONS).reduce((a, b) => a + b, 0);
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10">
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 relative">
           <Menu className="h-6 w-6" />
+          {totalNotifications > 0 && (
+            <span className="absolute -top-1 -right-1 h-5 w-5 bg-destructive rounded-full text-xs flex items-center justify-center text-destructive-foreground">
+              {totalNotifications > 9 ? '9+' : totalNotifications}
+            </span>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-80 overflow-y-auto bg-background">
@@ -206,14 +275,21 @@ export const DoctorMenu = ({}: DoctorMenuProps) => {
         <div className={`mb-6 p-4 rounded-lg border ${
           onDutyMode 
             ? 'bg-green-500/10 border-green-500/30' 
-            : 'bg-primary/5 border-primary/20'
+            : 'bg-muted/50 border-border'
         }`}>
           <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-sm">Modo Plantão</p>
-              <p className="text-xs text-muted-foreground">
-                {onDutyMode ? 'Você está de plantão' : 'Ativar status de disponibilidade'}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                onDutyMode ? 'bg-green-500/20' : 'bg-muted'
+              }`}>
+                <HeartPulse className={`h-5 w-5 ${onDutyMode ? 'text-green-500' : 'text-muted-foreground'}`} />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">Modo Plantão</p>
+                <p className="text-xs text-muted-foreground">
+                  {onDutyMode ? 'Você está de plantão' : 'Ativar disponibilidade'}
+                </p>
+              </div>
             </div>
             <Switch
               checked={onDutyMode}
@@ -229,7 +305,7 @@ export const DoctorMenu = ({}: DoctorMenuProps) => {
           {MENU_SECTIONS.map((section, sectionIndex) => (
             <div key={section.title}>
               {sectionIndex > 0 && <Separator className="mb-4" />}
-              <h3 className="text-xs font-semibold text-muted-foreground mb-3 px-2">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-3 px-2 tracking-wider">
                 {section.title}
               </h3>
               <div className="space-y-1">
@@ -249,6 +325,11 @@ export const DoctorMenu = ({}: DoctorMenuProps) => {
                           <p className="font-medium text-sm truncate">
                             {item.label}
                           </p>
+                          {item.isNew && (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary">
+                              Novo
+                            </Badge>
+                          )}
                           {item.notifications && item.notifications > 0 && (
                             <Badge 
                               variant="destructive" 
