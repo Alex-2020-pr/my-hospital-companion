@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import am2Logo from "@/assets/am2-logo.jpg";
 import am2LogoCompleto from "@/assets/am2-logo-completo-512.png";
@@ -292,7 +292,16 @@ export const Auth = () => {
       
       <div className="w-full max-w-md space-y-6 relative z-10">
         <Card className="w-full backdrop-blur-sm bg-card/95 shadow-2xl border-0">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-1 text-center relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-2 top-2 text-muted-foreground hover:text-foreground"
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Voltar
+          </Button>
           <div className="flex justify-center mb-2">
             <img 
               src={organization?.logo_url || am2LogoCompleto} 
