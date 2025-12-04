@@ -61,13 +61,14 @@ const App = () => (
       <UpdateNotification />
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Routes - Landing page is portal selection */}
+          <Route path="/" element={<LandingPortal />} />
           <Route path="/welcome" element={<LandingPortal />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/setup" element={<AdminSetup />} />
           
-          {/* Portal Selection (after login) */}
-          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          {/* Portal Selection (for logged users with multiple roles) */}
+          <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/portal" element={<ProtectedRoute><PortalSelection /></ProtectedRoute>} />
           
           {/* Patient Portal Routes */}
