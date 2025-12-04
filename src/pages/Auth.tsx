@@ -18,23 +18,41 @@ import { getFormattedVersion } from "@/lib/version";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useOrganizationBySlug } from "@/hooks/useOrganizationBySlug";
 
-// Mapeamento de portais para títulos e descrições
-const portalConfig: Record<string, { title: string; description: string }> = {
+// Mapeamento de portais para títulos, descrições e cores
+const portalConfig: Record<string, { 
+  title: string; 
+  description: string; 
+  gradient: string;
+  accentColor: string;
+  iconBg: string;
+}> = {
   patient: { 
     title: "Portal do Paciente", 
-    description: "Acesse seus dados médicos de forma segura" 
+    description: "Acesse seus dados médicos de forma segura",
+    gradient: "from-sky-500/20 via-cyan-400/10 to-teal-500/20",
+    accentColor: "text-sky-600",
+    iconBg: "bg-gradient-to-br from-sky-500 to-cyan-600"
   },
   doctor: { 
     title: "Portal Médico", 
-    description: "Acesse o painel de gestão de pacientes" 
+    description: "Acesse o painel de gestão de pacientes",
+    gradient: "from-emerald-500/20 via-green-400/10 to-teal-500/20",
+    accentColor: "text-emerald-600",
+    iconBg: "bg-gradient-to-br from-emerald-500 to-green-600"
   },
   nursing: { 
     title: "Portal de Enfermagem", 
-    description: "Acesse o painel de cuidados de enfermagem" 
+    description: "Acesse o painel de cuidados de enfermagem",
+    gradient: "from-orange-500/20 via-amber-400/10 to-yellow-500/20",
+    accentColor: "text-orange-600",
+    iconBg: "bg-gradient-to-br from-orange-500 to-amber-600"
   },
   admin: { 
     title: "Portal Administrativo", 
-    description: "Acesse o painel de administração" 
+    description: "Acesse o painel de administração",
+    gradient: "from-violet-500/20 via-purple-400/10 to-indigo-500/20",
+    accentColor: "text-violet-600",
+    iconBg: "bg-gradient-to-br from-violet-500 to-purple-600"
   }
 };
 
@@ -263,11 +281,17 @@ export const Auth = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center p-4"
+      className={`min-h-screen bg-gradient-to-br ${currentPortal.gradient} flex items-center justify-center p-4 transition-all duration-500`}
       style={orgStyle}
     >
-      <div className="w-full max-w-md space-y-6">
-        <Card className="w-full">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 ${currentPortal.iconBg} rounded-full opacity-20 blur-3xl`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 ${currentPortal.iconBg} rounded-full opacity-20 blur-3xl`} />
+      </div>
+      
+      <div className="w-full max-w-md space-y-6 relative z-10">
+        <Card className="w-full backdrop-blur-sm bg-card/95 shadow-2xl border-0">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
             <img 
@@ -276,10 +300,10 @@ export const Auth = () => {
               className="h-28 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className={`text-2xl font-bold ${currentPortal.accentColor}`}>
             {organization?.name || currentPortal.title}
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             {currentPortal.description}
           </CardDescription>
         </CardHeader>
