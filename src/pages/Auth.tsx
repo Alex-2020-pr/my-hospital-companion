@@ -18,6 +18,26 @@ import { getFormattedVersion } from "@/lib/version";
 import { useOrganization } from "@/hooks/useOrganization";
 import { useOrganizationBySlug } from "@/hooks/useOrganizationBySlug";
 
+// Mapeamento de portais para títulos e descrições
+const portalConfig: Record<string, { title: string; description: string }> = {
+  patient: { 
+    title: "Portal do Paciente", 
+    description: "Acesse seus dados médicos de forma segura" 
+  },
+  doctor: { 
+    title: "Portal Médico", 
+    description: "Acesse o painel de gestão de pacientes" 
+  },
+  nursing: { 
+    title: "Portal de Enfermagem", 
+    description: "Acesse o painel de cuidados de enfermagem" 
+  },
+  admin: { 
+    title: "Portal Administrativo", 
+    description: "Acesse o painel de administração" 
+  }
+};
+
 export const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -37,6 +57,10 @@ export const Auth = () => {
   
   // Priorizar organização por slug (URL) sobre organização do usuário
   const organization = slugOrg || userOrg;
+  
+  // Obter portal selecionado do localStorage
+  const selectedPortal = localStorage.getItem('selectedPortal') || 'patient';
+  const currentPortal = portalConfig[selectedPortal] || portalConfig.patient;
 
   useEffect(() => {
     if (user) {
@@ -253,10 +277,10 @@ export const Auth = () => {
             />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {organization?.name || "Portal do Paciente"}
+            {organization?.name || currentPortal.title}
           </CardTitle>
           <CardDescription>
-            Acesse seus dados médicos de forma segura
+            {currentPortal.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
