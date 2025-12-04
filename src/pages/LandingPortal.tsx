@@ -55,16 +55,17 @@ const LandingPortal = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {portals.map((portal) => {
+          {portals.map((portal, index) => {
             const Icon = portal.icon;
             return (
               <Card 
                 key={portal.id}
-                className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-2 hover:border-primary/50"
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-2 hover:border-primary/50 opacity-0 animate-fade-in"
+                style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'forwards' }}
                 onClick={() => handleSelectPortal(portal.id)}
               >
                 <CardHeader className="text-center space-y-4">
-                  <div className={`p-4 rounded-full ${portal.color} text-white mx-auto`}>
+                  <div className={`p-4 rounded-full ${portal.color} text-white mx-auto transition-transform duration-300 group-hover:scale-110`}>
                     <Icon className="h-8 w-8" />
                   </div>
                   <div>
