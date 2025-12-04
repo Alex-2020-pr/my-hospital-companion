@@ -287,16 +287,7 @@ export const DoctorPatients = () => {
                     </div>
                     
                     <Button
-                      onClick={() => {
-                        if (showExamples) {
-                          toast({
-                            title: "Modo Demonstração",
-                            description: "Esta é uma visualização de exemplo. Conecte pacientes reais para acessar prontuários."
-                          });
-                        } else {
-                          navigate(`/doctor/patient/${patient.id}`);
-                        }
-                      }}
+                      onClick={() => navigate(`/doctor/patient/${patient.id}`)}
                       variant="outline"
                     >
                       Ver Prontuário

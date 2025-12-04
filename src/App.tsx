@@ -38,6 +38,10 @@ import PatientRecord from "./pages/PatientRecord";
 import AdminDoctors from "./pages/AdminDoctors";
 import { DoctorPatients } from "./pages/DoctorPatients";
 import { DoctorPatientDetail } from "./pages/DoctorPatientDetail";
+import { DoctorSchedule } from "./pages/DoctorSchedule";
+import { DoctorPrescription } from "./pages/DoctorPrescription";
+import { DoctorExamRequest } from "./pages/DoctorExamRequest";
+import { DoctorTelemedicine } from "./pages/DoctorTelemedicine";
 import NursingDashboard from "./pages/NursingDashboard";
 import NursingDashboardMobile from "./pages/NursingDashboardMobile";
 import NursingVitalSigns from "./pages/NursingVitalSigns";
@@ -48,6 +52,9 @@ import NursingIncidents from "./pages/NursingIncidents";
 import NursingEvolutionMobile from "./pages/NursingEvolutionMobile";
 import NursingHistoryMobile from "./pages/NursingHistoryMobile";
 import NursingPatientHistory from "./pages/NursingPatientHistory";
+import { NursingMedications } from "./pages/NursingMedications";
+import { NursingFluidBalance } from "./pages/NursingFluidBalance";
+import { NursingShiftHandover } from "./pages/NursingShiftHandover";
 import PortalSelection from "./pages/PortalSelection";
 import LandingPortal from "./pages/LandingPortal";
 
@@ -139,6 +146,26 @@ const App = () => (
               <DoctorPatientDetail />
             </RoleProtectedRoute>
           } />
+          <Route path="/doctor/schedule" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorSchedule />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/doctor/prescription" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorPrescription />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/doctor/exam-request" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorExamRequest />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/doctor/telemedicine" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <DoctorTelemedicine />
+            </RoleProtectedRoute>
+          } />
           <Route path="/paciente/:id" element={
             <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'nursing_tech']}>
               <PatientRecord />
@@ -194,6 +221,21 @@ const App = () => (
           <Route path="/nursing/patient/:patientId" element={
             <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
               <NursingPatientHistory />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/medications" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingMedications />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/fluid-balance" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingFluidBalance />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/shift-handover" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <NursingShiftHandover />
             </RoleProtectedRoute>
           } />
           
