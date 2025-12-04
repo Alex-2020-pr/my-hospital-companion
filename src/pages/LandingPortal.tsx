@@ -60,12 +60,12 @@ const LandingPortal = () => {
             return (
               <Card 
                 key={portal.id}
-                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-2 hover:border-primary/50 opacity-0 animate-fade-in"
-                style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'forwards' }}
+                className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-2 hover:border-primary/50 animate-fade-in [animation-fill-mode:both]"
+                style={{ animationDelay: `${index * 150}ms` }}
                 onClick={() => handleSelectPortal(portal.id)}
               >
                 <CardHeader className="text-center space-y-4">
-                  <div className={`p-4 rounded-full ${portal.color} text-white mx-auto transition-transform duration-300 group-hover:scale-110`}>
+                  <div className={`p-4 rounded-full ${portal.color} text-white mx-auto transition-transform duration-300 hover:scale-110`}>
                     <Icon className="h-8 w-8" />
                   </div>
                   <div>
