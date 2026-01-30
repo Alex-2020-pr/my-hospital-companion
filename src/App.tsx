@@ -57,6 +57,7 @@ import { NursingFluidBalance } from "./pages/NursingFluidBalance";
 import { NursingShiftHandover } from "./pages/NursingShiftHandover";
 import PortalSelection from "./pages/PortalSelection";
 import LandingPortal from "./pages/LandingPortal";
+import MedicalCalculators from "./pages/MedicalCalculators";
 
 const queryClient = new QueryClient();
 
@@ -166,6 +167,11 @@ const App = () => (
               <DoctorTelemedicine />
             </RoleProtectedRoute>
           } />
+          <Route path="/doctor/calculators" element={
+            <RoleProtectedRoute allowedRoles={['doctor']}>
+              <MedicalCalculators />
+            </RoleProtectedRoute>
+          } />
           <Route path="/paciente/:id" element={
             <RoleProtectedRoute allowedRoles={['doctor', 'nurse', 'nursing_tech']}>
               <PatientRecord />
@@ -236,6 +242,11 @@ const App = () => (
           <Route path="/nursing/shift-handover" element={
             <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
               <NursingShiftHandover />
+            </RoleProtectedRoute>
+          } />
+          <Route path="/nursing/calculators" element={
+            <RoleProtectedRoute allowedRoles={['nurse', 'nursing_tech']}>
+              <MedicalCalculators />
             </RoleProtectedRoute>
           } />
           

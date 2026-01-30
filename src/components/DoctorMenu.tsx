@@ -189,8 +189,9 @@ const MENU_SECTIONS: MenuSection[] = [
       {
         id: "calculadoras",
         label: "Calculadoras Médicas",
-        description: "Scores e cálculos clínicos",
+        description: "Glasgow, Braden, CHA2DS2-VASc",
         icon: Brain,
+        path: "/doctor/calculators",
         isNew: true
       },
       {
