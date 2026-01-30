@@ -1,4 +1,4 @@
-import { Home, Calendar, FileText, User, Stethoscope, Pill, Activity, Users, ClipboardList, Heart } from "lucide-react";
+import { Home, Calendar, FileText, User, Stethoscope, Pill, Users, ClipboardList, Heart } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -6,7 +6,7 @@ import { useNurseRole } from "@/hooks/useNurseRole";
 
 // Navegação para Pacientes
 const patientNavigationItems = [
-  { id: 'home', label: 'Início', icon: Home, path: '/' },
+  { id: 'home', label: 'Início', icon: Home, path: '/dashboard' },
   { id: 'appointments', label: 'Consultas', icon: Calendar, path: '/consultas' },
   { id: 'exams', label: 'Exames', icon: Stethoscope, path: '/exames' },
   { id: 'medications', label: 'Medicações', icon: Pill, path: '/medicamentos' },
@@ -17,8 +17,8 @@ const patientNavigationItems = [
 const doctorNavigationItems = [
   { id: 'home', label: 'Início', icon: Home, path: '/medico-dashboard' },
   { id: 'patients', label: 'Pacientes', icon: Users, path: '/doctor/patients' },
-  { id: 'appointments', label: 'Agenda', icon: Calendar, path: '/consultas' },
-  { id: 'exams', label: 'Exames', icon: ClipboardList, path: '/exames' },
+  { id: 'appointments', label: 'Agenda', icon: Calendar, path: '/doctor/schedule' },
+  { id: 'exams', label: 'Exames', icon: ClipboardList, path: '/doctor/exam-request' },
   { id: 'profile', label: 'Perfil', icon: User, path: '/perfil' }
 ];
 
@@ -34,29 +34,35 @@ const nursingNavigationItems = [
 export const BottomNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isDoctor } = useUserRole();
-  const { isNurse } = useNurseRole();
+  const { isDoctor, isPatient, isSuperAdmin, isHospitalAdmin } = useUserRole();
+  const { isNurse, isNurseOnly, isTechOnly } = useNurseRole();
 
-  // Determinar qual conjunto de navegação usar baseado no role
+  // Determinar se é exclusivamente enfermagem (sem outros roles)
+  const isOnlyNursing = (isNurseOnly || isTechOnly) && !isSuperAdmin && !isHospitalAdmin && !isDoctor && !isPatient;
+  
+  // Determinar se é exclusivamente médico
+  const isOnlyDoctor = isDoctor && !isNurse && !isPatient;
+  
+  // Determinar qual conjunto de navegação usar baseado no role real
   let navigationItems = patientNavigationItems;
   
-  if (isDoctor) {
-    navigationItems = doctorNavigationItems;
-  } else if (isNurse) {
+  // Prioridade: Enfermagem > Médico > Paciente
+  if (isOnlyNursing || (isNurse && location.pathname.startsWith('/nursing'))) {
     navigationItems = nursingNavigationItems;
+  } else if (isOnlyDoctor || (isDoctor && (location.pathname.startsWith('/doctor') || location.pathname.startsWith('/medico') || location.pathname.startsWith('/paciente/')))) {
+    navigationItems = doctorNavigationItems;
+  } else if (isPatient) {
+    navigationItems = patientNavigationItems;
   }
 
-  // Verificar se estamos em uma rota específica de médico ou enfermagem
-  const isDoctorRoute = location.pathname.startsWith('/doctor') || 
-                        location.pathname.startsWith('/medico') || 
-                        location.pathname.startsWith('/paciente/');
-  const isNursingRoute = location.pathname.startsWith('/nursing');
+  // Se está em rota de admin, não mostrar navegação
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/hospital')) {
+    return null;
+  }
 
-  // Ajustar navegação baseado na rota atual
-  if (isDoctorRoute && !isNurse) {
-    navigationItems = doctorNavigationItems;
-  } else if (isNursingRoute) {
-    navigationItems = nursingNavigationItems;
+  // Se está na landing page ou auth, não mostrar navegação
+  if (location.pathname === '/' || location.pathname === '/welcome' || location.pathname === '/auth' || location.pathname === '/portal') {
+    return null;
   }
 
   return (
@@ -65,7 +71,7 @@ export const BottomNavigation = () => {
         {navigationItems.map((item) => {
           // Verificar se a rota está ativa (considerando sub-rotas)
           const isActive = location.pathname === item.path || 
-                          (item.path !== '/' && location.pathname.startsWith(item.path));
+                          (item.path !== '/dashboard' && item.path !== '/medico-dashboard' && item.path !== '/nursing/dashboard-mobile' && location.pathname.startsWith(item.path));
           const Icon = item.icon;
           
           return (
