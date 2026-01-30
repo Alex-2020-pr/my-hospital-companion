@@ -193,8 +193,9 @@ const MENU_SECTIONS: MenuSection[] = [
       {
         id: "escalas",
         label: "Escalas de Avaliação",
-        description: "Braden, Glasgow, etc.",
-        icon: BarChart3
+        description: "Glasgow, Braden, CHA2DS2-VASc",
+        icon: BarChart3,
+        path: "/nursing/calculators"
       }
     ]
   },
