@@ -7,7 +7,7 @@ export const useServiceWorkerUpdate = () => {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     let hasShownUpdate = false;
 
     const checkForUpdate = (reg: ServiceWorkerRegistration) => {
